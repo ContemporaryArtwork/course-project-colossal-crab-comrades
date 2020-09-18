@@ -1,0 +1,23 @@
+services:
+  colossalgame:
+    build:
+      context: C:\Users\jlsan\Source\Repos\UB-CSE\course-project-colossal-crab-comrades\ColossalGame
+      dockerfile: ColossalGame/Dockerfile
+    depends_on:
+    - db
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: https://+:443;http://+:80
+    image: colossalgame
+    links:
+    - db
+    ports:
+    - 80/tcp
+    - 443/tcp
+    volumes:
+    - C:\Users\jlsan\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro
+    - C:\Users\jlsan\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
+  db:
+    container_name: mongo
+    image: mongo
+version: '3.4'
