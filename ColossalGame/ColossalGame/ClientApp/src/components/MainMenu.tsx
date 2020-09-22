@@ -23,7 +23,7 @@ export default class MainMenu extends React.Component {
                         <h1>Pre Alpha CSE 442 Project</h1>
                         <h3>Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner </h3>
                         <a href="#about" className="btn">Log In / Create Account</a>
-                        
+                        <a href="#about" className="btn">Settings</a>
                     </div>
                 </section>
 
