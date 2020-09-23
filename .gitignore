@@ -362,5 +362,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 #bin and obj folders
-ColossalGame/bin/
-ColossalGame/obj/
+/ColossalGame/bin/
+/ColossalGame/obj/
