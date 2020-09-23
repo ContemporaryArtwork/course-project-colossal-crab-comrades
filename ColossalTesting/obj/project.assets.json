@@ -4633,9 +4633,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\jlsan\\Source\\Repos\\UB-CSE\\course-project-colossal-crab-comrades\\ColossalTesting\\ColossalTesting.csproj",
-      "projectName": "ColossalTesting",
-      "projectPath": "C:\\Users\\jlsan\\Source\\Repos\\UB-CSE\\course-project-colossal-crab-comrades\\ColossalTesting\\ColossalTesting.csproj",
+      "projectUniqueName": "C:\\Users\\jlsan\\Source\\Repos\\UB-CSE\\course-project-colossal-crab-comrades\\ColossalTesting\\ColossalUnitTests.csproj",
+      "projectName": "ColossalUnitTests",
+      "projectPath": "C:\\Users\\jlsan\\Source\\Repos\\UB-CSE\\course-project-colossal-crab-comrades\\ColossalTesting\\ColossalUnitTests.csproj",
       "packagesPath": "C:\\Users\\jlsan\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\jlsan\\Source\\Repos\\UB-CSE\\course-project-colossal-crab-comrades\\ColossalTesting\\obj\\",
       "projectStyle": "PackageReference",

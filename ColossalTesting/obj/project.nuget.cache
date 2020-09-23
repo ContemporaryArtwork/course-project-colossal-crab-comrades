@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "sOvnnmWeuktwqnlVhS26Fp9cfdPN8pz4xK4GbGGBJ1P3wIZ3qL4LC4LBrKVHbQByFoNsRUXBnWF6kBLiFBgdXw==",
+  "dgSpecHash": "szAsa3BAaYcRjBzoasvTIC6UbVhmP0/DWQszxVtXHWvFTfJJw2dVTlyiyyyWD9yD5dnMtZ3J2JpKmHYmuJfPKA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\jlsan\\Source\\Repos\\UB-CSE\\course-project-colossal-crab-comrades\\ColossalTesting\\ColossalTesting.csproj",
+  "projectFilePath": "C:\\Users\\jlsan\\Source\\Repos\\UB-CSE\\course-project-colossal-crab-comrades\\ColossalTesting\\ColossalUnitTests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\jlsan\\.nuget\\packages\\microsoft.codecoverage\\16.4.0\\microsoft.codecoverage.16.4.0.nupkg.sha512",
     "C:\\Users\\jlsan\\.nuget\\packages\\microsoft.csharp\\4.0.1\\microsoft.csharp.4.0.1.nupkg.sha512",

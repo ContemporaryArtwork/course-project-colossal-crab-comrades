@@ -9,8 +9,6 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: https://+:443;http://+:80
     image: colossalgame
-    links:
-    - db
     ports:
     - 80/tcp
     - 443/tcp
@@ -20,4 +18,6 @@ services:
   db:
     container_name: mongo
     image: mongo
+    ports:
+    - 27017:27017/tcp
 version: '3.4'

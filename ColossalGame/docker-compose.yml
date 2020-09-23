@@ -6,10 +6,10 @@ services:
     build:
       context: .
       dockerfile: ColossalGame/Dockerfile
-    links:
-        - db
     depends_on: 
         - "db"
   db:
       container_name: mongo
       image: mongo
+      ports:
+        - "27017:27017"
