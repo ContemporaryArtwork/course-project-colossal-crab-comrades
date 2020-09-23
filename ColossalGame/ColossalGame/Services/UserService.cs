@@ -11,12 +11,12 @@ namespace ColossalGame.Services
     {
         private readonly IMongoCollection<User> _users;
 
-        public UserService(IColossalDatabaseSettings settings)
+        public UserService()
         {
-            var client = new MongoClient(settings.ConnectionString);
-            var database = client.GetDatabase(settings.DatabaseName);
+            var client = new MongoClient("mongodb://localhost:27017");
+            var database = client.GetDatabase("Colossal");
 
-            _users = database.GetCollection<User>(settings.CollectionName);
+            _users = database.GetCollection<User>("Users");
         }
 
         public List<User> Get() =>
@@ -41,4 +41,4 @@ namespace ColossalGame.Services
             _users.DeleteOne(user => user.Id == id);
     }
 }
-}
+

@@ -1,4 +1,6 @@
 using System;
+using ColossalGame.Models;
+using ColossalGame.Services;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using NUnit.Framework;
@@ -24,11 +26,13 @@ namespace ColossalServiceTests
                 database.RunCommandAsync((Command<BsonDocument>)"{ping:1}")
                     .Wait();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Assert.Fail("The MongoDB server is not running.");
             }
             
         }
+
+        
     }
 }
