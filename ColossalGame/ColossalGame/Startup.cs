@@ -24,14 +24,17 @@ namespace ColossalGame
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
             // requires using Microsoft.Extensions.Options
-            services.Configure<ColossalDatabaseSettings>(
-                Configuration.GetSection(nameof(ColossalDatabaseSettings)));
+            //services.Configure<ColossalDatabaseSettings>(Configuration.GetSection(nameof(ColossalDatabaseSettings)));
 
-            services.AddSingleton<ColossalDatabaseSettings>(sp =>
-                sp.GetRequiredService<IOptions<ColossalDatabaseSettings>>().Value);
+
+            //services.AddSingleton<ColossalDatabaseSettings>(sp => sp.GetRequiredService<IOptions<ColossalDatabaseSettings>>().Value);
+
 
             services.AddSingleton<UserService>();
+
+            
 
             services.AddControllersWithViews();
 
