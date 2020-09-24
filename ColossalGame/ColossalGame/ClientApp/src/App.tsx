@@ -13,3 +13,4 @@ export default () => (
         <Route exact path='/' component={MainMenu} />
     </body>
 );
+

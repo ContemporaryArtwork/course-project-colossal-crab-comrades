@@ -8,7 +8,7 @@ import SettingsPanel from "../assets/mainMenu/SettingsPanel.png";
 
 export default class MainMenu extends React.Component {
     state = {
-        settingsActivated: false
+
     };
 
     ToggleSettings() {                
@@ -29,8 +29,12 @@ export default class MainMenu extends React.Component {
                     <button className="settingsButton" onClick={this.ToggleSettings}>
                         <img src={SettingsButton} />
                     </button>
-                    <div className="settings"> <img src={SettingsPanel} />  </div>
 
+                    
+                    <div className="settings"> <                        
+                        img src={SettingsPanel} />
+                        <input type="range" min="1" max="100" value="50" className="slider" id="myRange"/>                      
+                        </div>
                     <div className="video-container">                        
                         <video src={BGVideo} loop autoPlay muted />
                     </div>
