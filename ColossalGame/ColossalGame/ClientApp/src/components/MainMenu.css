@@ -87,3 +87,20 @@ h1 {
     left: 0;
     display: none;
 }
+
+.loginButton {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    z-index: 1;
+}
+
+.tempText {
+    z-index: 1;
+    position: fixed;
+    top: 120px;
+    right: 10px;
+    display: none;
+    color: white;
+
+}

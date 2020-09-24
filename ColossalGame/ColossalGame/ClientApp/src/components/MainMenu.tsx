@@ -5,6 +5,7 @@ import MainBackground from "../assets/mainMenu/mainBackground.jpg";
 import BGVideo from "../assets/mainMenu/BGVideo.mp4";
 import SettingsButton from "../assets/mainMenu/Settings Button.png";
 import SettingsPanel from "../assets/mainMenu/SettingsPanel.png";
+import LoginButton from "../assets/mainMenu/GoogleIcon.png";
 
 export default class MainMenu extends React.Component {
     state = {
@@ -19,7 +20,15 @@ export default class MainMenu extends React.Component {
             settingsPanel[0].style.display = "none";
         }       
     }
-        
+
+    SignIn() {
+        var text = document.getElementsByClassName("tempText") as HTMLCollectionOf<HTMLElement>;
+        if (text[0].style.display === "none") {
+            text[0].style.display = "block";
+        } else {
+            text[0].style.display = "none";
+        }
+    }
         
     render() {
         return (
@@ -30,10 +39,11 @@ export default class MainMenu extends React.Component {
                         <img src={SettingsButton} />
                     </button>
 
-                    <button className="settingsButton">
-                        <img src={SettingsButton} />
+                    <button className="loginButton" onClick={this.SignIn}>
+                        <img src={LoginButton} />
                     </button>
 
+                    <div className="tempText"> placeholder text for login screen </div>
 
                     <div className="settings"> <img src={SettingsPanel} />  </div>
 
