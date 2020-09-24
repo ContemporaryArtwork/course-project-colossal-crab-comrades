@@ -23,6 +23,22 @@
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="ClientApp\Signalr\SingalR.js" />
+    <None Remove="ClientApp\src\components\GlobalChat.tsx" />
+    <None Remove="ClientApp\src\store\GlobalChat.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\SignalR\SingalR.js" />
+    <TypeScriptCompile Include="ClientApp\src\components\GlobalChat.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\store\GlobalChat.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ClientApp\Signalr\" />
+  </ItemGroup>
+
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
     <!-- Ensure Node.js is installed -->
     <Exec Command="node --version" ContinueOnError="true">
