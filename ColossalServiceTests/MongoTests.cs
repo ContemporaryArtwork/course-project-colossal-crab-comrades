@@ -33,6 +33,25 @@ namespace ColossalServiceTests
             
         }
 
-        
+        [Test]
+        public void TestMongoServiceAdd()
+        {
+            try
+            {
+                UserService us = new UserService();
+                var x = us.Create(new User{PasswordHash = "test",Username = "test"});
+                var y = us.Get(x.Id);
+                //Console.WriteLine(y.Id);
+                Assert.AreEqual("test",y.Username);
+
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.StackTrace);
+            }
+            
+
+        }
+
     }
 }
