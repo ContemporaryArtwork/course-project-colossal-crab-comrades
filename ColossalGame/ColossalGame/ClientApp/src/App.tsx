@@ -12,5 +12,6 @@ import MainMenu from './components/MainMenu';
 export default () => (
     <body>
         <Route exact path='/' component={MainMenu} />
+        <Route exact path='/globalchat' component={GlobalChat} />
     </body>
 );
