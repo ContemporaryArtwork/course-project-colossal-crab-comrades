@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+  colossalgame:
+    image: ${DOCKER_REGISTRY-}colossalgame
+    build:
+      context: .
+      dockerfile: ColossalGame/Dockerfile
+    depends_on: 
+        - "db"
+  db:
+      container_name: mongo
+      image: mongo
+      restart: always
+      ports:
+        - "27017:27017"

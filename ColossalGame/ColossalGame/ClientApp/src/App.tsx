@@ -7,12 +7,10 @@ import FetchData from './components/FetchData';
 import GlobalChat from './components/GlobalChat';
 
 import './custom.css'
+import MainMenu from './components/MainMenu';
 
 export default () => (
-    <Layout>
-        <Route exact path='/' component={Home} />
-        <Route path='/counter' component={Counter} />
-        <Route path='/fetch-data/:startDateIndex?' component={FetchData} />
-        <Route exact path='/globalchat' component={GlobalChat} />
-    </Layout>
+    <body>
+        <Route exact path='/' component={MainMenu} />
+    </body>
 );
