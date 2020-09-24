@@ -1,3 +1,4 @@
+using ColossalGame.Models.Hubs;
 using ColossalGame.Models;
 using ColossalGame.Services;
 using Microsoft.AspNetCore.Builder;
@@ -43,6 +44,7 @@ namespace ColossalGame
             {
                 configuration.RootPath = "ClientApp/build";
             });
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,6 +72,7 @@ namespace ColossalGame
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
+                endpoints.MapHub<GlobalChatHub>("/hubs/globalchat");
             });
 
             app.UseSpa(spa =>
