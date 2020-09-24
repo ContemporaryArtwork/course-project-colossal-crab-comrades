@@ -368,3 +368,6 @@ ColossalTesting/obj/
 #Ignore temp dirs in ColossalServiceTests
 ColossalServiceTests/bin/
 ColossalServiceTests/obj/
+
+#Remove .suo files
+*.suo
