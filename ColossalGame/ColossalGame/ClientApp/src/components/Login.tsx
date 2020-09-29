@@ -13,13 +13,15 @@ class Login extends React.Component{
                 <h1>This is the login page</h1>
 
                 <div>
+                    <form method="post">
                     <label>Username:</label>
                     <input type="text" placeholder="Enter Username"></input>
                     <br></br>
                     <label>Password:</label>
                     <input type="text" placeholder="Enter Password"></input>
                     <br></br>
-                    <button>Submit</button>
+                        <button type="submit">Submit</button>
+                        </form>
                 </div>
                 <br></br>
                 <div>
