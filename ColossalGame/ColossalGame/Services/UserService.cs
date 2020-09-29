@@ -39,6 +39,28 @@ namespace ColossalGame.Services
 
         public void Remove(string id) =>
             _users.DeleteOne(user => user.Id == id);
+
+        public User GetByUsername(string username)
+        {
+            return _users.Find<User>(user => user.Username == username).FirstOrDefault();
+        }
+
+        public bool UserExistsByUsername(string username)
+        {
+            
+            return _users.Find<User>(user => user.Username == username).FirstOrDefault()!=null;
+        }
+
+        public string generateToken(User userIn)
+        {
+            Guid g = Guid.NewGuid();
+            string guidString = Convert.ToBase64String(g.ToByteArray());
+            userIn.TokenHash = BCrypt.Net.BCrypt.HashPassword(guidString);
+            userIn.TokenAge = DateTime.Now;
+            Update(userIn.Id,userIn);
+            return guidString;
+
+        }
     }
 }
 

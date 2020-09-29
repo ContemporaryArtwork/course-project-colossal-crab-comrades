@@ -10,7 +10,8 @@ services:
         - "db"
   db:
       container_name: mongo
-      image: mongo
-      restart: always
+      image: ${DOCKER_REGISTRY-}mongo
       ports:
         - "27017:27017"
+      volumes:
+            - ./data:/data/db
