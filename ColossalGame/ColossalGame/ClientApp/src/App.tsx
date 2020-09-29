@@ -8,10 +8,11 @@ import GlobalChat from './components/GlobalChat';
 
 import './custom.css'
 import MainMenu from './components/MainMenu';
+import View from './components/View';
 
 export default () => (
     <body>
-        <Route exact path='/' component={MainMenu} />
+        <Route exact path='/' component={View} />
         <Route exact path='/globalchat' component={GlobalChat} />
     </body>
 );

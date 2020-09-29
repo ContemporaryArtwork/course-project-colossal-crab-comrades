@@ -28,10 +28,12 @@
   <ItemGroup>
     <None Remove="ClientApp\Signalr\SingalR.js" />
     <None Remove="ClientApp\src\components\GlobalChat.tsx" />
+    <None Remove="ClientApp\src\components\View.tsx" />
     <None Remove="ClientApp\src\store\GlobalChat.ts" />
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\components\View.tsx" />
     <TypeScriptCompile Include="ClientApp\src\SignalR\SingalR.js" />
     <TypeScriptCompile Include="ClientApp\src\components\GlobalChat.tsx" />
     <TypeScriptCompile Include="ClientApp\src\store\GlobalChat.ts" />
