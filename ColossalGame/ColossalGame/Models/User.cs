@@ -17,5 +17,9 @@ namespace ColossalGame.Models
         public string Username { get; set; }
 
         public string PasswordHash { get; set; }
+
+        public string TokenHash { get; set; }
+
+        public DateTime TokenAge { get; set; }
     }
 }
