@@ -373,4 +373,4 @@ ColossalServiceTests/obj/
 *.suo
 
 #Remove data folder
-ColossalGame/data
+ColossalGame/data/
