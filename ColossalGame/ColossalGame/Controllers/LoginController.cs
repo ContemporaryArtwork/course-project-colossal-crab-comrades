@@ -5,7 +5,14 @@ using System.Threading.Tasks;
 using ColossalGame.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Microsoft.Net.Http;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.Net.Http;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace ColossalGame.Controllers
 {
@@ -23,20 +30,28 @@ namespace ColossalGame.Controllers
             _ls = ls;
         }
 
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "bruh" };
-        }
 
 
         [HttpPost]
-        public string Post(string username, string password)
+        
+        public void post(string username, string password)
         {
-            //verify username and password
 
-            return "post is working";
+            try
+            {
+                Response.Cookies.Append("auth-token", _ls.SignIn(username, password));
+
+            }
+            catch(UserDoesNotExistException e){
+                //Change for later
+                _ls.SignUp(username, password);
+            }
+            
         }
+        
+
+
+       
 
 
     }
