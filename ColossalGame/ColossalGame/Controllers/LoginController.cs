@@ -16,11 +16,11 @@ namespace ColossalGame.Controllers
     
     public class LoginController : ControllerBase
     {
-        private LoginService ls;
+        private readonly LoginService _ls;
 
-        public LoginController()
+        public LoginController(LoginService ls)
         {
-            ls = new LoginService();
+            _ls = ls;
         }
 
         [HttpGet]

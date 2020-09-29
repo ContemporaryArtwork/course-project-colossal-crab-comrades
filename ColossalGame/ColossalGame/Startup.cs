@@ -35,7 +35,8 @@ namespace ColossalGame
 
             services.AddSingleton<UserService>();
 
-            
+            services.AddSingleton<LoginService>();
+
 
             services.AddControllersWithViews();
 
