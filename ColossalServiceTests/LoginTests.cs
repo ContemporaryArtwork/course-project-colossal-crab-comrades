@@ -18,7 +18,7 @@ namespace ColossalServiceTests
         [Test]
         public void TestSignUp()
         {
-            Console.WriteLine(_loginService.DeleteUser("coolAccount","coolpassword"));
+            Console.WriteLine(_loginService.DeleteUser("coolAccount"));
             bool createdSuccessfully = _loginService.SignUp("coolAccount", "coolpassword");
             Assert.True(createdSuccessfully);
             Assert.Throws<UserAlreadyExistsException>((() => _loginService.SignUp("coolAccount","coolpassword")));
@@ -27,20 +27,29 @@ namespace ColossalServiceTests
         [Test]
         public void TestSignIn()
         {
-            Console.WriteLine(_loginService.DeleteUser("coolAccount", "coolpassword"));
-            bool createdSuccessfully = _loginService.SignUp("coolAccount", "coolpassword");
-            string tokenSignIn = _loginService.SignIn("coolAccount", "coolpassword");
+            Console.WriteLine(_loginService.DeleteUser("coolAccount"));
+            Assert.True( _loginService.SignUp("coolAccount", "coolpassword"));
+            Assert.NotNull( _loginService.SignIn("coolAccount", "coolpassword"));
         }
 
         [Test]
         public void TestSignInUserDNE()
         {
+            Guid g = new Guid();
+            string guidString = Convert.ToBase64String(g.ToByteArray());
+            Assert.Throws<UserDoesNotExistException>((() => _loginService.SignIn(guidString, "1234")));
+        }
 
-            Assert.Throws<UserDoesNotExistException>((() => _loginService.SignIn("12345", "1234")));
-            LoginController lc = new LoginController();
+        [Test]
+        public void TestSignInUserNull()
+        {
+            Assert.Throws<UserDoesNotExistException>((() => _loginService.SignIn(null, "1234")));
+        }
 
-            Assert.DoesNotThrow((() => lc.post("1234", "1234")));
-
+        [Test]
+        public void TestSignInPasswordNull()
+        {
+            Assert.Throws<UserDoesNotExistException>((() => _loginService.SignIn("null", null)));
         }
     }
 }

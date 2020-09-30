@@ -374,3 +374,6 @@ ColossalServiceTests/obj/
 
 #Remove data folder
 ColossalGame/data/
+
+#Remove DesignTimeBuild folder
+ColossalGame/.vs/ColossalGame/DesignTimeBuild/
