@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ColossalGame.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Core;
 
@@ -18,6 +19,10 @@ namespace ColossalGame.Services
             var database = client.GetDatabase("Colossal");
 
             _users = database.GetCollection<User>("Users");
+
+            
+            database.RunCommandAsync((Command<BsonDocument>)"{ping:1}")
+                .Wait();
         }
 
         public List<User> Get() =>
@@ -49,7 +54,7 @@ namespace ColossalGame.Services
         public bool UserExistsByUsername(string username)
         {
 
-            return GetByUsername(username) == null;
+            return GetByUsername(username) != null;
         }
 
         public string generateToken(User userIn)

@@ -25,7 +25,7 @@ namespace ColossalGame.Controllers
     {
         private LoginService _ls;
 
-        public LoginController()
+        public LoginController(LoginService ls)
         {
             _ls = new LoginService(new UserService());
         }
@@ -33,19 +33,18 @@ namespace ColossalGame.Controllers
         [HttpGet]
         public string Test()
         {
-            UserService us = new UserService();
-            return  (us.GetByUsername("coolAccount12")==null).ToString();
+            return "test";
         }
 
         [HttpPost]
         public void post(string username, string password)
         {
-            _ls = new LoginService(new UserService());
+            //_ls = new LoginService(new UserService());
             try
             {
-                _ls.SignIn(username, password);
-                //var res = _ls.SignIn(username, password);
-                //Response.Cookies.Append("auth-token", );
+                //_ls.SignIn(username, password);
+                var res = _ls.SignIn(username, password);
+                Response.Cookies.Append("auth-token", res);
 
             }
             catch(UserDoesNotExistException e){
