@@ -6,6 +6,7 @@ import Counter from './components/Counter';
 import FetchData from './components/FetchData';
 import GlobalChat from './components/GlobalChat';
 import Login from './components/Login';
+import Signup from './components/Signup';
 
 import './custom.css'
 import MainMenu from './components/MainMenu';
@@ -15,5 +16,6 @@ export default () => (
         <Route exact path='/' component={MainMenu} />
         <Route exact path='/globalchat' component={GlobalChat} />
         <Route path='/login' component={Login} />
+        <Route path='/signup' component={Signup} />
     </body>
 );
