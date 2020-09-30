@@ -22,11 +22,11 @@ export default class MainMenu extends React.Component {
     }
 
     SignIn() {
-        var text = document.getElementsByClassName("tempText") as HTMLCollectionOf<HTMLElement>;
-        if (text[0].style.display === "none") {
-            text[0].style.display = "block";
+        var log = document.getElementsByClassName("loginPanel") as HTMLCollectionOf<HTMLElement>;
+        if (log[0].style.display === "none") {
+            log[0].style.display = "block";
         } else {
-            text[0].style.display = "none";
+            log[0].style.display = "none";
         }
     }
         
@@ -39,11 +39,23 @@ export default class MainMenu extends React.Component {
                         <img src={SettingsButton} />
                     </button>
 
-                    <button className="loginButton" onClick={this.SignIn}>
+                    <button className="loginOpen" onClick={this.SignIn}>
                         <img src={LoginButton} />
                     </button>
 
-                    <div className="tempText"> placeholder text for login screen </div>
+                    <div className="loginPanel">
+                        <label>Email</label><br></br>
+                        <input
+                            type="text"
+                            placeholder="Email"
+                        ></input><br></br>
+                        <label>Password</label><br></br>
+                        <input
+                            type="text"
+                            placeholder="Password"
+                        ></input><br></br>
+                        <button className="loginButton"> LOGIN </button>
+                    </div>
 
                     <div className="settings"> <img src={SettingsPanel} />  </div>
 
@@ -53,8 +65,10 @@ export default class MainMenu extends React.Component {
 
                     <div className="content">
                         <h1>Pre Alpha CSE 442 Project</h1>
-                        <h3>Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner </h3>                     
+                        <h3>Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner </h3> 
+                        <button className="classSelect"> Select Class </button>
                     </div>
+
                 </section>
             </body>
         );

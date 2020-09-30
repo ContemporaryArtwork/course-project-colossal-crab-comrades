@@ -63,7 +63,7 @@ h1 {
 }
 
 .content{
-
+    position: absolute;
     transform:translate(0%, 30%);
     z-index: 10;
 }
@@ -88,19 +88,45 @@ h1 {
     display: none;
 }
 
-.loginButton {
+.loginOpen {
     position: fixed;
     top: 0px;
     right: 0px;
     z-index: 1;
 }
 
-.tempText {
-    z-index: 1;
-    position: fixed;
-    top: 120px;
-    right: 10px;
+.loginPanel {
+    z-index: 20;
+    margin: 0 auto;
+    width: 30%;
+    height: 60%;
     display: none;
-    color: white;
+    color: black;
+    background-color:white;
+    text-align: center;
+    border: 1px solid black;
+}
 
+label {
+    margin: 0 auto;
+}
+
+input {
+    display: block;
+    margin: 0 auto;
+}
+
+.loginButton {
+    display: block;
+    margin: 0 auto;
+}
+
+.classSelect {
+    z-index: 10;
+    background-color: yellow;
+    display: block;
+    width: 200px;
+    height: 50px;
+    border-radius: 10px;
+    font-weight: bold;
 }
