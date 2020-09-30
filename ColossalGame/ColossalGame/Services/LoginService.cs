@@ -63,6 +63,7 @@ namespace ColossalGame.Services
         /// <returns>A boolean representing whether the token is legitimate</returns>
         public bool VerifyToken(string token, string username)
         {
+            if (string.IsNullOrEmpty(username)) throw new BadUsernameException("Username was null");
             if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
             var returnedUser = _us.GetByUsername(username);
             var ts = DateTime.Now - returnedUser.TokenAge;

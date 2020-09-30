@@ -339,7 +339,7 @@ namespace ColossalServiceTests.Services
                     "badtoken",
                     username);
             }
-            catch (UserDoesNotExistException)
+            catch (BadUsernameException)
             {
                 throws = true;
             }
@@ -350,17 +350,65 @@ namespace ColossalServiceTests.Services
         }
 
         [Test]
-        public void DeleteUser_StateUnderTest_ExpectedBehavior()
+        public void DeleteUser_ValidUsername_ReturnTrue()
+        {
+            // Arrange
+            var service = this.CreateService();
+            var (username, password) = GenerateValidLogin();
+            Assert.True(service.SignUp(username, password));
+
+            // Assert
+            Assert.True(subUserService.UserExistsByUsername(username));
+            Assert.True(service.DeleteUser(username));
+            Assert.False(subUserService.UserExistsByUsername(username));
+            Assert.False(service.DeleteUser(username));
+            
+        }
+
+        [Test]
+        public void DeleteUser_InvalidUsername_ThrowException()
+        {
+            // Arrange
+            var service = this.CreateService();
+            var (username, password) = GenerateValidLogin();
+
+            // Act
+            var res = false;
+            try
+            {
+                service.DeleteUser(
+                    username);
+            }
+            catch (UserDoesNotExistException)
+            {
+                res = true;
+            }
+
+            Assert.True(res);
+            // Assert
+            //Assert.Fail();
+        }
+
+        [Test]
+        public void DeleteUser_NullUsername_ExpectedBehavior()
         {
             // Arrange
             var service = this.CreateService();
             string username = null;
-            string password = null;
 
             // Act
-            var result = service.DeleteUser(
-                username);
+            var res = false;
+            try
+            {
+                service.DeleteUser(
+                    username);
+            }
+            catch (BadUsernameException)
+            {
+                res = true;
+            }
 
+            Assert.True(res);
             // Assert
             //Assert.Fail();
         }
