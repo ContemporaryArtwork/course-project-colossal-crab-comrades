@@ -15,7 +15,7 @@ namespace ColossalGame.Services
 
         public UserService()
         {
-            var client = new MongoClient("mongodb://localhost:27017/");
+            var client = new MongoClient("mongodb://db:27017/");
             var database = client.GetDatabase("Colossal");
 
             _users = database.GetCollection<User>("Users");

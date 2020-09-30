@@ -32,15 +32,6 @@ namespace ColossalServiceTests
             string tokenSignIn = _loginService.SignIn("coolAccount", "coolpassword");
         }
 
-        [Test]
-        public void TestSignInUserDNE()
-        {
-
-            Assert.Throws<UserDoesNotExistException>((() => _loginService.SignIn("12345", "1234")));
-            LoginController lc = new LoginController();
-
-            Assert.DoesNotThrow((() => lc.post("1234", "1234")));
-
-        }
+        
     }
 }
