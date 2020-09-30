@@ -22,13 +22,36 @@ export default class MainMenu extends React.Component {
     }
 
     SignIn() {
-        var text = document.getElementsByClassName("tempText") as HTMLCollectionOf<HTMLElement>;
-        if (text[0].style.display === "none") {
-            text[0].style.display = "block";
+        var log = document.getElementsByClassName("loginPanel") as HTMLCollectionOf<HTMLElement>;
+        if (log[0].style.display === "none") {
+            log[0].style.display = "block";
         } else {
-            text[0].style.display = "none";
+            log[0].style.display = "none";
         }
     }
+
+    SignUp() {
+        var signUp = document.getElementsByClassName("registerPanel") as HTMLCollectionOf<HTMLElement>;
+        var log = document.getElementsByClassName("loginPanel") as HTMLCollectionOf<HTMLElement>;
+        if (signUp[0].style.display === "none") {
+            signUp[0].style.display = "block";
+            log[0].style.display = "none";
+        } else {
+            signUp[0].style.display = "none";
+        }
+    }
+
+    SendData() {
+        var signUp = document.getElementsByClassName("registerPanel") as HTMLCollectionOf<HTMLElement>;
+        var log = document.getElementsByClassName("loginPanel") as HTMLCollectionOf<HTMLElement>;
+        if (signUp[0].style.display === "none") {
+            signUp[0].style.display = "none";
+            log[0].style.display = "none";
+        } else {
+            signUp[0].style.display = "none";
+        }
+    }
+    
         
     render() {
         return (
@@ -39,13 +62,47 @@ export default class MainMenu extends React.Component {
                         <img src={SettingsButton} />
                     </button>
 
-                    <button className="loginButton" onClick={this.SignIn}>
-                        <img src={LoginButton} />
-                    </button>
-
-                    <div className="tempText"> placeholder text for login screen </div>
-
                     <div className="settings"> <img src={SettingsPanel} />  </div>
+
+                    <button className="loginOpen" onClick={this.SignIn}> Login </button>
+
+                    <div className="loginPanel">
+                        <div className="signContainer">
+                            <label>Email</label><br></br>
+                            <input
+                                type="text"
+                                placeholder="Email"
+                            ></input><br></br>
+                            <label>Password</label><br></br>
+                            <input
+                                type="text"
+                                placeholder="Password"
+                            ></input><br></br>
+                            <button className="loginButton" onClick={this.SendData}> LOGIN </button>
+                            <button className="registerButton" onClick={this.SignUp}>Don't have an account? Click here to register</button>
+                        </div>
+                    </div>
+
+                    <div className="registerPanel">
+                        <div className="signContainer">
+                            <label>Email</label><br></br>
+                            <input
+                                type="text"
+                                placeholder="Email"
+                            ></input><br></br>
+                            <label>Password</label><br></br>
+                            <input
+                                type="text"
+                                placeholder="Password"
+                            ></input><br></br>
+                            <label>Confirm Password</label><br></br>
+                            <input
+                                type="text"
+                                placeholder="Repeat Password"
+                            ></input><br></br>
+                            <button className="loginButton" onClick={this.SendData}> REGISTER </button>
+                        </div>
+                    </div>
 
                     <div className="video-container">                        
                         <video src={BGVideo} loop autoPlay muted />
@@ -53,8 +110,10 @@ export default class MainMenu extends React.Component {
 
                     <div className="content">
                         <h1>Pre Alpha CSE 442 Project</h1>
-                        <h3>Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner </h3>                     
+                        <h3>Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner </h3> 
+                        <button className="classSelect"> Select Class </button>
                     </div>
+
                 </section>
             </body>
         );
