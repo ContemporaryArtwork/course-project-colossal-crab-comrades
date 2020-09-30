@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using ColossalGame.Models;
+﻿using ColossalGame.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using MongoDB.Driver.Core.Configuration;
 
 namespace ColossalGame.Services
 {
@@ -13,14 +12,14 @@ namespace ColossalGame.Services
     {
         private readonly IMongoCollection<User> _users;
 
-        public UserService()
+        public UserService(string connectionString = "mongodb://db:27017/")
         {
-            var client = new MongoClient("mongodb://db:27017/");
+            var client = new MongoClient(connectionString);
             var database = client.GetDatabase("Colossal");
 
             _users = database.GetCollection<User>("Users");
 
-            
+
             database.RunCommandAsync((Command<BsonDocument>)"{ping:1}")
                 .Wait();
         }
@@ -59,12 +58,14 @@ namespace ColossalGame.Services
 
         public string generateToken(User userIn)
         {
-            Guid g = Guid.NewGuid();
-            string guidString = Convert.ToBase64String(g.ToByteArray());
-            userIn.TokenHash = BCrypt.Net.BCrypt.HashPassword(guidString);
+            var rand = new Random();
+            var bytes = new byte[32];
+            rand.NextBytes(bytes);
+            string tokenString = Convert.ToBase64String(bytes);
+            userIn.TokenHash = BCrypt.Net.BCrypt.HashPassword(tokenString,4);
             userIn.TokenAge = DateTime.Now;
-            Update(userIn.Id,userIn);
-            return guidString;
+            Update(userIn.Id, userIn);
+            return tokenString;
 
         }
     }

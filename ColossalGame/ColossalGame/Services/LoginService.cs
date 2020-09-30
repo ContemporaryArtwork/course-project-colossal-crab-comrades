@@ -21,11 +21,11 @@ namespace ColossalGame.Services
         /// <returns>The token associated with that user. Be careful, the token only lasts 1 day!</returns>
         public string SignIn(string username, string password)
         {
-            
-            if (username==null||_us.GetByUsername(username)==null) throw new UserDoesNotExistException();
+            if (username==null) throw new BadUsernameException("Username was null");
+            if (_us.GetByUsername(username)==null) throw new UserDoesNotExistException();
             var returnedUser = _us.GetByUsername(username);
 
-            if (BCrypt.Net.BCrypt.Verify(password, returnedUser.PasswordHash))
+            if (password!=null&&BCrypt.Net.BCrypt.Verify(password, returnedUser.PasswordHash))
                 return _us.generateToken(returnedUser);
             else
                 throw new IncorrectPasswordException();
@@ -43,12 +43,14 @@ namespace ColossalGame.Services
         public bool SignUp(string username, string password)
         {
             if (string.IsNullOrEmpty(username)) throw new BadUsernameException();
-            
+            if (string.IsNullOrEmpty(password)) throw new BadPasswordException();
             if (_us.UserExistsByUsername(username)) throw new UserAlreadyExistsException();
+
 
             var insertUser = new User();
             insertUser.Username = username;
-            insertUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password, 15);
+            
+            insertUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password, 12);
             _us.Create(insertUser);
             return true;
         }
@@ -61,6 +63,7 @@ namespace ColossalGame.Services
         /// <returns>A boolean representing whether the token is legitimate</returns>
         public bool VerifyToken(string token, string username)
         {
+            if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
             var returnedUser = _us.GetByUsername(username);
             var ts = DateTime.Now - returnedUser.TokenAge;
             if (ts.TotalDays >= 1) throw new TokenExpiredException();
@@ -71,15 +74,14 @@ namespace ColossalGame.Services
         /// Deletes specified user
         /// </summary>
         /// <param name="username">User's username</param>
-        /// <param name="password">User's password</param>
         /// <returns>A boolean representing whether that user was deleted</returns>
-        public bool DeleteUser(string username, string password)
+        public bool DeleteUser(string username)
         {
             if (!_us.UserExistsByUsername(username))
             {
                 return false;
             }
-            SignIn(username, password);
+            
             User returnedUser = _us.GetByUsername(username);
             _us.Remove(returnedUser.Id);
             return true;
@@ -102,6 +104,26 @@ namespace ColossalGame.Services
         }
 
         protected BadUsernameException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+    }
+
+    [Serializable]
+    public class BadPasswordException : Exception
+    {
+        public BadPasswordException()
+        {
+        }
+
+        public BadPasswordException(string message) : base(message)
+        {
+        }
+
+        public BadPasswordException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected BadPasswordException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }
@@ -191,6 +213,6 @@ namespace ColossalGame.Services
         public bool SignUp(string username, string password);
         public string SignIn(string username, string password);
         public bool VerifyToken(string token, string username);
-        public bool DeleteUser(string username, string password);
+        public bool DeleteUser(string username);
     }
 }
