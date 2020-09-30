@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ColossalGame.Models;
 using MongoDB.Driver;
+using MongoDB.Driver.Core;
 
 namespace ColossalGame.Services
 {
@@ -13,7 +14,7 @@ namespace ColossalGame.Services
 
         public UserService()
         {
-            var client = new MongoClient("mongodb://localhost:27017");
+            var client = new MongoClient("mongodb://localhost:27017/");
             var database = client.GetDatabase("Colossal");
 
             _users = database.GetCollection<User>("Users");
@@ -47,8 +48,8 @@ namespace ColossalGame.Services
 
         public bool UserExistsByUsername(string username)
         {
-            
-            return _users.Find<User>(user => user.Username == username).FirstOrDefault()!=null;
+
+            return GetByUsername(username) == null;
         }
 
         public string generateToken(User userIn)

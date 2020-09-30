@@ -23,23 +23,29 @@ namespace ColossalGame.Controllers
     
     public class LoginController : ControllerBase
     {
-        private readonly LoginService _ls;
+        private LoginService _ls;
 
-        public LoginController(LoginService ls)
+        public LoginController()
         {
-            _ls = ls;
+            _ls = new LoginService(new UserService());
         }
 
-
+        [HttpGet]
+        public string Test()
+        {
+            UserService us = new UserService();
+            return  (us.GetByUsername("coolAccount12")==null).ToString();
+        }
 
         [HttpPost]
-        
         public void post(string username, string password)
         {
-
+            _ls = new LoginService(new UserService());
             try
             {
-                Response.Cookies.Append("auth-token", _ls.SignIn(username, password));
+                _ls.SignIn(username, password);
+                //var res = _ls.SignIn(username, password);
+                //Response.Cookies.Append("auth-token", );
 
             }
             catch(UserDoesNotExistException e){

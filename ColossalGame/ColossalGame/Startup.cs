@@ -1,3 +1,4 @@
+using ColossalGame.Controllers;
 using ColossalGame.Models.Hubs;
 using ColossalGame.Models;
 using ColossalGame.Services;
@@ -37,6 +38,7 @@ namespace ColossalGame
 
             services.AddSingleton<LoginService>();
 
+            services.AddSingleton<LoginController>();
 
             services.AddControllersWithViews();
 
@@ -71,9 +73,9 @@ namespace ColossalGame
             
 
             app.UseAuthentication();
-
+            
             app.UseRouting();
-
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

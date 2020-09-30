@@ -21,19 +21,16 @@ namespace ColossalGame.Services
         /// <returns>The token associated with that user. Be careful, the token only lasts 1 day!</returns>
         public string SignIn(string username, string password)
         {
-            try
-            {
-                var returnedUser = _us.GetByUsername(username);
-                if (returnedUser == null) throw new UserDoesNotExistException();
-                if (BCrypt.Net.BCrypt.Verify(password, returnedUser.PasswordHash))
-                    return _us.generateToken(returnedUser);
-                else
-                    throw new IncorrectPasswordException();
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.StackTrace);
-            }
+            
+            if (username==null||_us.GetByUsername(username)==null) throw new UserDoesNotExistException();
+            var returnedUser = _us.GetByUsername(username);
+
+            if (BCrypt.Net.BCrypt.Verify(password, returnedUser.PasswordHash))
+                return _us.generateToken(returnedUser);
+            else
+                throw new IncorrectPasswordException();
+            
+            
             
         }
 
@@ -45,6 +42,8 @@ namespace ColossalGame.Services
         /// <returns>A boolean representing whether the account was created successfully or not</returns>
         public bool SignUp(string username, string password)
         {
+            if (string.IsNullOrEmpty(username)) throw new BadUsernameException();
+            
             if (_us.UserExistsByUsername(username)) throw new UserAlreadyExistsException();
 
             var insertUser = new User();
@@ -87,9 +86,28 @@ namespace ColossalGame.Services
         }
     }
 
+    [Serializable]
+    public class BadUsernameException : Exception
+    {
+        public BadUsernameException()
+        {
+        }
+
+        public BadUsernameException(string message) : base(message)
+        {
+        }
+
+        public BadUsernameException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected BadUsernameException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+    }
 
     [Serializable]
-    internal class UserDoesNotExistException : Exception
+    public class UserDoesNotExistException : Exception
     {
         public UserDoesNotExistException()
         {
