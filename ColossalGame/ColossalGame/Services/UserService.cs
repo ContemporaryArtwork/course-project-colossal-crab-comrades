@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MongoDB.Driver.Core.Configuration;
 
 namespace ColossalGame.Services
 {
@@ -11,9 +12,9 @@ namespace ColossalGame.Services
     {
         private readonly IMongoCollection<User> _users;
 
-        public UserService()
+        public UserService(string connectionString = "mongodb://db:27017/")
         {
-            var client = new MongoClient("mongodb://db:27017/");
+            var client = new MongoClient(connectionString);
             var database = client.GetDatabase("Colossal");
 
             _users = database.GetCollection<User>("Users");

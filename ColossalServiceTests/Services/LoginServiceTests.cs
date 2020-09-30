@@ -13,7 +13,7 @@ namespace ColossalServiceTests.Services
         [SetUp]
         public void SetUp()
         {
-            this.subUserService = Substitute.For<UserService>();
+            this.subUserService = Substitute.For<UserService>("mongodb://localhost:27017/");
         }
 
         private LoginService CreateService()
