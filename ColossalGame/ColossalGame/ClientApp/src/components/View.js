@@ -25,8 +25,10 @@ var View = /** @class */ (function (_super) {
         return _this;
     }
     View.prototype.render = function () {
-        if (!this.state.inGame) {
-            return (React.createElement("div", null, "yeeheeyee"));
+        if (this.state.inGame) {
+            return (React.createElement("div", null,
+                React.createElement("canvas", { id: "myCanvas", width: "1000", height: "1000", style: { border: '10px solid #FF0800' } }, "Your browser does not support the HTML canvas tag."),
+                React.createElement("script", null, "var c = document.getElementById(\"myCanvas\"); var ctx = c.getContext(\"2d\"); ctx.moveTo(0,0); ctx.lineTo(200,100); ctx.stroke();")));
         }
         else {
             return (React.createElement(MainMenu_1.default, null));
