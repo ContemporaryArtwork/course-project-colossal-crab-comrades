@@ -32,13 +32,6 @@ namespace ColossalGame.Controllers
             _ls = new LoginService(new UserService());
         }
 
-       
-
-        [HttpGet]
-        public string Test()
-        {
-            return "test";
-        }
 
         [HttpPost("/api/login")]
         public string[] login([FromForm] Models.FormModel user)
@@ -51,7 +44,7 @@ namespace ColossalGame.Controllers
                 string password = user.Password;
                 
                 var response = _ls.SignIn(username, password);
-                Response.Cookies.Append("auth-token", res);
+                Response.Cookies.Append("auth-token", response);
 
                 string[] output = new string[]
                     {
