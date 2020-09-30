@@ -32,24 +32,6 @@ namespace ColossalServiceTests
             Assert.NotNull( _loginService.SignIn("coolAccount", "coolpassword"));
         }
 
-        [Test]
-        public void TestSignInUserDNE()
-        {
-            Guid g = new Guid();
-            string guidString = Convert.ToBase64String(g.ToByteArray());
-            Assert.Throws<UserDoesNotExistException>((() => _loginService.SignIn(guidString, "1234")));
-        }
-
-        [Test]
-        public void TestSignInUserNull()
-        {
-            Assert.Throws<UserDoesNotExistException>((() => _loginService.SignIn(null, "1234")));
-        }
-
-        [Test]
-        public void TestSignInPasswordNull()
-        {
-            Assert.Throws<UserDoesNotExistException>((() => _loginService.SignIn("null", null)));
-        }
+        
     }
 }
