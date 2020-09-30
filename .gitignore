@@ -371,3 +371,9 @@ ColossalServiceTests/obj/
 
 #Remove .suo files
 *.suo
+
+#Remove data folder
+ColossalGame/data/
+
+#Remove DesignTimeBuild folder
+ColossalGame/.vs/ColossalGame/DesignTimeBuild/

@@ -1,3 +1,4 @@
+using ColossalGame.Controllers;
 using ColossalGame.Models.Hubs;
 using ColossalGame.Models;
 using ColossalGame.Services;
@@ -25,7 +26,7 @@ namespace ColossalGame
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            
+
             // requires using Microsoft.Extensions.Options
             //services.Configure<ColossalDatabaseSettings>(Configuration.GetSection(nameof(ColossalDatabaseSettings)));
 
@@ -35,7 +36,9 @@ namespace ColossalGame
 
             services.AddSingleton<UserService>();
 
-            
+            services.AddSingleton<LoginService>();
+
+            services.AddSingleton<LoginController>();
 
             services.AddControllersWithViews();
 
@@ -45,6 +48,8 @@ namespace ColossalGame
                 configuration.RootPath = "ClientApp/build";
             });
             services.AddSignalR();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,8 +70,12 @@ namespace ColossalGame
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            app.UseRouting();
+            
 
+            app.UseAuthentication();
+            
+            app.UseRouting();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -84,6 +93,8 @@ namespace ColossalGame
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
+
+            
         }
     }
 }
