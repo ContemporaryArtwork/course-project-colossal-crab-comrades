@@ -38,11 +38,13 @@ namespace ColossalServiceTests
         {
             try
             {
-                UserService us = new UserService();
+                UserService us = new UserService("mongodb://127.0.0.1:27017");
+                
                 var x = us.Create(new User{PasswordHash = "test",Username = "test"});
                 var y = us.Get(x.Id);
                 //Console.WriteLine(y.Id);
                 Assert.AreEqual("test",y.Username);
+                us.Remove(x.Id);
 
             }
             catch (Exception e)
