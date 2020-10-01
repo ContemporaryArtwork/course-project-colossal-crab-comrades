@@ -297,10 +297,7 @@ namespace ColossalServiceTests.Services
         {
             // Arrange
             var service = this.CreateService();
-            var (username, password) = GenerateValidLogin();
-            service.DeleteUser(username);
-            Assert.False(subUserService.UserExistsByUsername(username));
-
+            
 
 
             // Act
@@ -309,9 +306,9 @@ namespace ColossalServiceTests.Services
             {
                 var result = service.VerifyToken(
                     "badtoken",
-                    username);
+                    null);
             }
-            catch (UserDoesNotExistException)
+            catch (BadUsernameException)
             {
                 throws = true;
             }
@@ -326,8 +323,7 @@ namespace ColossalServiceTests.Services
             // Arrange
             var service = this.CreateService();
             var (username, password) = GenerateValidLogin();
-            service.DeleteUser(username);
-            Assert.False(subUserService.UserExistsByUsername(username));
+            service.SignUp(username, password);
 
 
 
@@ -336,10 +332,10 @@ namespace ColossalServiceTests.Services
             try
             {
                 var result = service.VerifyToken(
-                    "badtoken",
+                    null,
                     username);
             }
-            catch (BadUsernameException)
+            catch (BadTokenException)
             {
                 throws = true;
             }
@@ -371,26 +367,21 @@ namespace ColossalServiceTests.Services
             // Arrange
             var service = this.CreateService();
             var (username, password) = GenerateValidLogin();
+            Assert.False(subUserService.UserExistsByUsername(username));
 
             // Act
-            var res = false;
-            try
-            {
-                service.DeleteUser(
+            
+            var res = service.DeleteUser(
                     username);
-            }
-            catch (UserDoesNotExistException)
-            {
-                res = true;
-            }
+            
 
-            Assert.True(res);
+            Assert.False(res);
             // Assert
             //Assert.Fail();
         }
 
         [Test]
-        public void DeleteUser_NullUsername_ExpectedBehavior()
+        public void DeleteUser_NullUsername_ThrowsException()
         {
             // Arrange
             var service = this.CreateService();
