@@ -9,7 +9,6 @@ export interface ApplicationState {
     weatherForecasts: WeatherForecasts.WeatherForecastsState | undefined;
     globalchat: GlobalChat.GlobalChatState | undefined;
     View: View.ViewState | undefined;
-
 }
 
 // Whenever an action is dispatched, Redux will update each top-level application state property using
