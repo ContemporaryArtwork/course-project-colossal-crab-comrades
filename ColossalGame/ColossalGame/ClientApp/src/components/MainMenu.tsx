@@ -1,20 +1,28 @@
 import * as React from 'react';
 import "./MainMenu.css";
 
+//Redux Imports
+import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router';
+import { ApplicationState } from '../store';
+import * as GameMainMenuTogglerStore from "../store/GameMainMenuToggler";
+
+//Graphics Imports
 import MainBackground from "../assets/mainMenu/mainBackground.jpg";
 import BGVideo from "../assets/mainMenu/BGVideo.mp4";
 import SettingsButton from "../assets/mainMenu/Settings Button.png";
 import SettingsPanel from "../assets/mainMenu/SettingsPanel.png";
 import LoginButton from "../assets/mainMenu/GoogleIcon.png";
 
-export default class MainMenu extends React.Component {
-    state = {
 
-    };
+type GameMainMenuTogglerProps =
+    GameMainMenuTogglerStore.GameMainMenuTogglerState &
+    typeof GameMainMenuTogglerStore.actionCreators &
+    RouteComponentProps<{}>;
 
-    StartGame() {
 
-    }
+
+class MainMenu extends React.PureComponent<GameMainMenuTogglerProps> {
     
     ToggleSettings() {                
         var settingsPanel = document.getElementsByClassName("settings") as HTMLCollectionOf<HTMLElement>; 
@@ -116,7 +124,7 @@ export default class MainMenu extends React.Component {
                         <h1>Pre Alpha CSE 442 Project</h1>
                         <h3>Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner </h3> 
                         <button className="classSelect"> Select Class </button>
-                        <button className="classSelect" onClick={this.StartGame}> Start Game </button>
+                        <button className="classSelect" onClick={() => { this.props.toggleGame(); }}> Start Game </button>
                     </div>
 
                 </section>
@@ -124,3 +132,9 @@ export default class MainMenu extends React.Component {
         );
     }
 }
+
+
+export default connect(
+    (state: ApplicationState) => state.gameMainMenuToggler,
+    GameMainMenuTogglerStore.actionCreators
+)(MainMenu as any);

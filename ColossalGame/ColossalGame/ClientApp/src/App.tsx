@@ -8,7 +8,7 @@ import GlobalChat from './components/GlobalChat';
 
 import './custom.css'
 import MainMenu from './components/MainMenu';
-import View from './components/View';
+import View from './components/GameMainMenuToggler';
 
 export default () => (
     <body>

@@ -14,22 +14,19 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var react_redux_1 = require("react-redux");
+var GameMainMenuTogglerStore = require("../store/GameMainMenuToggler");
 var MainMenu_1 = require("./MainMenu");
-var View = /** @class */ (function (_super) {
-    __extends(View, _super);
-    function View() {
+var GameMainMenuToggler = /** @class */ (function (_super) {
+    __extends(GameMainMenuToggler, _super);
+    function GameMainMenuToggler() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    View.prototype.render = function () {
-        var i = 0;
-        if (i != 0) {
-            return (React.createElement("div", null, "hi"));
-        }
-        else {
-            return (React.createElement(MainMenu_1.default, null));
-        }
+    GameMainMenuToggler.prototype.render = function () {
+        return (this.props.inGame ? React.createElement("div", null, "[GAME PLACEHOLDER TEXT]") : React.createElement(MainMenu_1.default, null));
     };
-    return View;
-}(React.Component));
-exports.default = View;
-//# sourceMappingURL=View.js.map
+    return GameMainMenuToggler;
+}(React.PureComponent));
+;
+exports.default = react_redux_1.connect(function (state) { return state.gameMainMenuToggler; }, GameMainMenuTogglerStore.actionCreators)(GameMainMenuToggler);
+//# sourceMappingURL=GameMainMenuToggler.js.map

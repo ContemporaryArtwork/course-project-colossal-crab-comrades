@@ -1,14 +1,14 @@
 import * as WeatherForecasts from './WeatherForecasts';
 import * as Counter from './Counter';
 import * as GlobalChat from './GlobalChat';
-import * as View from '../components/View';
+import * as GameMainMenuToggler from './GameMainMenuToggler';
 
 // The top-level state object
 export interface ApplicationState {
     counter: Counter.CounterState | undefined;
     weatherForecasts: WeatherForecasts.WeatherForecastsState | undefined;
     globalchat: GlobalChat.GlobalChatState | undefined;
-    View: View.ViewState | undefined;
+    gameMainMenuToggler: GameMainMenuToggler.GameMainMenuTogglerState | undefined;
 }
 
 // Whenever an action is dispatched, Redux will update each top-level application state property using
@@ -18,6 +18,7 @@ export const reducers = {
     counter: Counter.reducer,
     weatherForecasts: WeatherForecasts.reducer,
     globalchat: GlobalChat.reducer,
+    gameMainMenuToggler: GameMainMenuToggler.reducer,
 };
 
 // This type can be used as a hint on action creators so that its 'dispatch' and 'getState' params are
