@@ -63,6 +63,7 @@ namespace ColossalGame.Services
         /// <returns>A boolean representing whether the token is legitimate</returns>
         public bool VerifyToken(string token, string username)
         {
+            if (string.IsNullOrEmpty(token)) throw new BadTokenException("Token is null");
             if (string.IsNullOrEmpty(username)) throw new BadUsernameException("Username was null");
             if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
             var returnedUser = _us.GetByUsername(username);
@@ -78,6 +79,7 @@ namespace ColossalGame.Services
         /// <returns>A boolean representing whether that user was deleted</returns>
         public bool DeleteUser(string username)
         {
+            if (string.IsNullOrEmpty(username)) throw new BadUsernameException("Username was null");
             if (!_us.UserExistsByUsername(username))
             {
                 return false;
@@ -86,6 +88,26 @@ namespace ColossalGame.Services
             User returnedUser = _us.GetByUsername(username);
             _us.Remove(returnedUser.Id);
             return true;
+        }
+    }
+
+    [Serializable]
+    public class BadTokenException : Exception
+    {
+        public BadTokenException()
+        {
+        }
+
+        public BadTokenException(string message) : base(message)
+        {
+        }
+
+        public BadTokenException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected BadTokenException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
         }
     }
 
