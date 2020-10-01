@@ -12,6 +12,10 @@ export default class MainMenu extends React.Component {
 
     };
 
+    StartGame() {
+
+    }
+    
     ToggleSettings() {                
         var settingsPanel = document.getElementsByClassName("settings") as HTMLCollectionOf<HTMLElement>; 
         if (settingsPanel[0].style.display === "none") {
@@ -20,7 +24,7 @@ export default class MainMenu extends React.Component {
             settingsPanel[0].style.display = "none";
         }       
     }
-
+    
     SignIn() {
         var log = document.getElementsByClassName("loginPanel") as HTMLCollectionOf<HTMLElement>;
         if (log[0].style.display === "none") {
@@ -112,6 +116,7 @@ export default class MainMenu extends React.Component {
                         <h1>Pre Alpha CSE 442 Project</h1>
                         <h3>Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner </h3> 
                         <button className="classSelect"> Select Class </button>
+                        <button className="classSelect" onClick={this.StartGame}> Start Game </button>
                     </div>
 
                 </section>

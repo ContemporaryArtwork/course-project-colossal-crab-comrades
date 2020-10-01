@@ -18,14 +18,11 @@ var MainMenu_1 = require("./MainMenu");
 var View = /** @class */ (function (_super) {
     __extends(View, _super);
     function View() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.state = {
-            inGame: false
-        };
-        return _this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     View.prototype.render = function () {
-        if (this.state.inGame) {
+        var i = 0;
+        if (i != 0) {
             return (React.createElement("div", null, "hi"));
         }
         else {

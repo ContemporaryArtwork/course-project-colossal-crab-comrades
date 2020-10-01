@@ -2,14 +2,20 @@
 import MainMenu from './MainMenu';
 
 
+export interface ViewState {
+
+    isLoading: boolean;
+    inGame: boolean;
+
+}
+
 export default class View extends React.Component {
-    state = {
-        inGame: false
-    };
+
 
 
     render() {
-        if (this.state.inGame) {
+        var i = 0;
+        if (i != 0) {
             return (<div>
                 hi
                 </div>);

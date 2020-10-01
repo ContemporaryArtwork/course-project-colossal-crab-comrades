@@ -1,12 +1,15 @@
 import * as WeatherForecasts from './WeatherForecasts';
 import * as Counter from './Counter';
 import * as GlobalChat from './GlobalChat';
+import * as View from '../components/View';
 
 // The top-level state object
 export interface ApplicationState {
     counter: Counter.CounterState | undefined;
     weatherForecasts: WeatherForecasts.WeatherForecastsState | undefined;
     globalchat: GlobalChat.GlobalChatState | undefined;
+    View: View.ViewState | undefined;
+
 }
 
 // Whenever an action is dispatched, Redux will update each top-level application state property using
