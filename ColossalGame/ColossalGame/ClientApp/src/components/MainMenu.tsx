@@ -55,6 +55,36 @@ export default class MainMenu extends React.Component {
             signUp[0].style.display = "none";
         }
     }
+
+    OpenLoadout() {
+        var load = document.getElementsByClassName("loadout") as HTMLCollectionOf<HTMLElement>;
+        if (load[0].style.display === "none") {
+            load[0].style.display = "block";
+        } else {
+            load[0].style.display = "none";
+        }
+    }
+
+    ChooseHeavy() {
+        var heav = document.getElementsByClassName("classColor") as HTMLCollectionOf<HTMLElement>;
+        var load = document.getElementsByClassName("loadout") as HTMLCollectionOf<HTMLElement>;
+        heav[0].style.backgroundColor = "purple";
+        load[0].style.display = "none"
+    }
+
+    ChooseBrawler() {
+        var braw = document.getElementsByClassName("classColor") as HTMLCollectionOf<HTMLElement>;
+        var load = document.getElementsByClassName("loadout") as HTMLCollectionOf<HTMLElement>;
+        braw[0].style.backgroundColor = "red";
+        load[0].style.display = "none"
+    }
+
+    ChooseBuilder() {
+        var bui = document.getElementsByClassName("classColor") as HTMLCollectionOf<HTMLElement>;
+        var load = document.getElementsByClassName("loadout") as HTMLCollectionOf<HTMLElement>;
+        bui[0].style.backgroundColor = "yellowgreen";
+        load[0].style.display = "none"
+    }
     
         
     render() {
@@ -114,10 +144,32 @@ export default class MainMenu extends React.Component {
 
                     <div className="content">
                         <h1>Pre Alpha CSE 442 Project</h1>
-                        <h3>Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner </h3> 
-                        <button className="classSelect"> Select Class </button>
-                        <button className="classSelect" onClick={this.StartGame}> Start Game </button>
+                        <h3>Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner </h3>
+                        <button className="classSelectButton" onClick={this.OpenLoadout} > Select Class </button>
+                        <div className="classColor"></div>
+                        <button className="classSelectButton" onClick={this.StartGame}> Start Game </button>
                     </div>
+
+                    <div className="loadout">
+                        <div className="signContainer">
+                            <div className="classContainer">
+                                <div className="Heavy"></div>
+                                <button className="loadButton" onClick={this.ChooseHeavy}>HEAVY</button>
+                            </div>
+
+                            <div className="classContainer">
+                                <div className="Brawler"></div>
+                                <button className="loadButton" onClick={this.ChooseBrawler}>BRAWLER</button>
+                            </div>
+
+                            <div className="classContainer">
+                                <div className="Builder"></div>
+                                <button className="loadButton" onClick={this.ChooseBuilder}>BUILDER</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    
 
                 </section>
             </body>

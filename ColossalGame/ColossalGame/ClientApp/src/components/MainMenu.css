@@ -178,7 +178,7 @@ input {
     
 ----------------*/
 
-.classSelect {
+.classSelectButton {
     z-index: 10;
     background-color: yellow;
     display: block;
@@ -188,3 +188,66 @@ input {
     font-weight: bold;
 }
 
+.loadout {
+    z-index: 20;
+    margin: 0 auto;
+    display:none;
+    width: 95%;
+    height: 95%;
+    border-radius: 20px;
+    background-color: aliceblue;
+}
+
+.classContainer {
+    border: 1px solid #e6e6e6;
+    border-radius: 5px;
+    background: white;
+    box-shadow: 0 1px 1px rgb(0,0,0,0.5);
+    padding: 5px;
+    margin-left: 50px;
+    display: inline-block;
+}
+
+.loadButton {
+    width: 50%;
+    margin-top: 10px;
+    border-radius: 10px;
+    background-color: dimgray;
+    color: white;
+    font-weight: 700;
+}
+
+.Heavy {
+    height: 300px;
+    width: 300px;
+    border: solid 1px;
+    border-color: black;
+    border-radius: 10px;
+    background-color: purple;
+}
+
+.Brawler {
+    height: 300px;
+    width: 300px;
+    border: solid 1px;
+    border-color: black;
+    border-radius: 10px;
+    background-color: red;
+}
+
+.Builder {
+    height: 300px;
+    width: 300px;
+    border: solid 1px;
+    border-color: black;
+    border-radius: 10px;
+    background-color: yellowgreen;
+}
+
+.classColor {
+    display: block;
+    width: 200px;
+    height: 50px;
+    background-color: white;
+    border-radius: 10px;
+}

@@ -8,7 +8,7 @@ export interface ApplicationState {
     counter: Counter.CounterState | undefined;
     weatherForecasts: WeatherForecasts.WeatherForecastsState | undefined;
     globalchat: GlobalChat.GlobalChatState | undefined;
-    View: View.ViewState | undefined;
+    view: View.ViewState | undefined;
 
 }
 
