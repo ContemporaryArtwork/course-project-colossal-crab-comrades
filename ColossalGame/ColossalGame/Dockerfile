@@ -10,6 +10,8 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+RUN curl -sL https://deb.nodesource.com/setup_10.x |  bash -
+RUN apt-get install -y nodejs
 WORKDIR /src
 COPY ["ColossalGame/ColossalGame.csproj", "ColossalGame/"]
 RUN dotnet restore "ColossalGame/ColossalGame.csproj"
