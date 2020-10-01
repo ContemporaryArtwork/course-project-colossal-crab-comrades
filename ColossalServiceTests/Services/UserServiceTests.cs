@@ -19,7 +19,7 @@ namespace ColossalServiceTests.Services
 
         private UserService CreateService()
         {
-            return new UserService();
+            return new UserService("mongodb://127.0.0.1:27017");
         }
 
         [Test]
