@@ -34,13 +34,17 @@
 
   <ItemGroup>
     <None Remove="ClientApp\Signalr\SingalR.js" />
+    <None Remove="ClientApp\src\components\GameMainMenuToggler.tsx" />
     <None Remove="ClientApp\src\components\GlobalChat.tsx" />
+    <None Remove="ClientApp\src\store\GameMainMenuToggler.ts" />
     <None Remove="ClientApp\src\store\GlobalChat.ts" />
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\components\GameMainMenuToggler.tsx" />
     <TypeScriptCompile Include="ClientApp\src\SignalR\SingalR.js" />
     <TypeScriptCompile Include="ClientApp\src\components\GlobalChat.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\store\GameMainMenuToggler.ts" />
     <TypeScriptCompile Include="ClientApp\src\store\GlobalChat.ts" />
   </ItemGroup>
 

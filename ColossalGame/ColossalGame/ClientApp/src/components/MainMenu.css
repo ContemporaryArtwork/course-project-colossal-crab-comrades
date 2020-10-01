@@ -63,7 +63,7 @@ h1 {
 }
 
 .content{
-
+    position: absolute;
     transform:translate(0%, 30%);
     z-index: 10;
 }
@@ -88,19 +88,103 @@ h1 {
     display: none;
 }
 
-.loginButton {
+/*-----------------
+
+    Login
+    
+----------------*/
+
+.loginOpen {
     position: fixed;
     top: 0px;
     right: 0px;
     z-index: 1;
+    width: 12%;
+    height:6%;
+    background-color: dimgray;
+    color:white;
+    font-weight: 700;
+    font-size: 18pt;
 }
 
-.tempText {
-    z-index: 1;
-    position: fixed;
-    top: 120px;
-    right: 10px;
+.loginPanel {
+    z-index: 20;
+    margin: 0 auto;
+    width: 30%;
+    height: 60%;
     display: none;
-    color: white;
-
+    color: black;
+    background-color:white;
+    text-align: center;
+    border: 1px solid black;
+    border-radius: 20px;
 }
+
+.registerPanel {
+    z-index: 20;
+    margin: 0 auto;
+    width: 30%;
+    height: 60%;
+    display: none;
+    color: black;
+    background-color: white;
+    text-align: center;
+    border: 1px solid black;
+    border-radius: 20px;
+}
+
+.signContainer {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+label {
+    margin: 0 auto;
+}
+
+input {
+    display: block;
+    margin: 0 auto;
+    width: 50%;
+    border-radius: 5px;
+}
+
+.loginButton {
+    display: block;
+    margin: 0 auto;
+    width: 25%;
+    height: 30px;
+    background-color: green;
+    color: white;
+    border-radius: 10px;
+}
+
+.registerButton {
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+}
+
+
+/*-----------------
+
+    Class Select
+    
+----------------*/
+
+.classSelect {
+    z-index: 10;
+    background-color: yellow;
+    display: block;
+    width: 200px;
+    height: 50px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
