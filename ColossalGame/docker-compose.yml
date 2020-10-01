@@ -6,8 +6,17 @@ services:
     build:
       context: .
       dockerfile: ColossalGame/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
     depends_on: 
         - "db"
+    ports:
+      - "80"
+      - "443"
+    volumes:
+      - ./.aspnet/https:/https/:ro
   db:
       container_name: mongo
       image: ${DOCKER_REGISTRY-}mongo
