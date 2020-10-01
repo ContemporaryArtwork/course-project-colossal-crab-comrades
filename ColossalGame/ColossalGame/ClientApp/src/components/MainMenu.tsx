@@ -151,10 +151,11 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps> {
                     </div>
 
                     <div className="content">
+                        <h1>Pre Alpha CSE 442 Project</h1>
                         <h3>Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner </h3>
                         <button className="classSelectButton" onClick={this.OpenLoadout} > Select Class </button>
                         <div className="classColor"></div>
-                        <button className="classSelect" onClick={() => { this.props.toggleGame(); }}> Start Game </button>
+                        <button className="classSelectButton" onClick={() => { this.props.toggleGame(); }}> Start Game </button>
                     </div>
 
                     <div className="loadout">
