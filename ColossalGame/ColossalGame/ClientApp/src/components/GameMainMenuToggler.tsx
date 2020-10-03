@@ -2,6 +2,7 @@
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { ApplicationState } from '../store';
+import * as Phaser from 'phaser';
 import * as GameMainMenuTogglerStore from "../store/GameMainMenuToggler";
 import MainMenu from './MainMenu';
 import GameStartRenderer from './gameComponents/GameStartRenderer';

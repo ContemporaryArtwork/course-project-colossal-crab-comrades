@@ -14,13 +14,39 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var Phaser = require("phaser");
+require("./GameStartRenderer.css");
 var GameMainMenuToggler = /** @class */ (function (_super) {
     __extends(GameMainMenuToggler, _super);
     function GameMainMenuToggler() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    GameMainMenuToggler.prototype.componentDidMount = function () {
+        var game = new Phaser.Game({
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: "gameCanvas",
+            scene: {
+                preload: this.preload,
+                create: this.create,
+                update: this.update,
+            },
+        });
+        var controls = null;
+    };
+    GameMainMenuToggler.prototype.preload = function () {
+        //Test Image
+        this.load.image("testSoldierGuy", "../../assets/gameAssets/testSoldierGuy.png");
+    };
+    GameMainMenuToggler.prototype.create = function () {
+        this.add.image(400, 100, "testSoldierGuy");
+        this.add.image(100, 100, "testSoldierGuy");
+    };
+    GameMainMenuToggler.prototype.update = function () {
+    };
     GameMainMenuToggler.prototype.render = function () {
-        return (React.createElement("div", null, " hi "));
+        return (React.createElement("div", { id: "gameCanvas" }));
     };
     return GameMainMenuToggler;
 }(React.Component));
