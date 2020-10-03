@@ -14,20 +14,16 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
-var react_redux_1 = require("react-redux");
-var GameMainMenuTogglerStore = require("../store/GameMainMenuToggler");
-var MainMenu_1 = require("./MainMenu");
-var GameStartRenderer_1 = require("./gameComponents/GameStartRenderer");
 var GameMainMenuToggler = /** @class */ (function (_super) {
     __extends(GameMainMenuToggler, _super);
     function GameMainMenuToggler() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     GameMainMenuToggler.prototype.render = function () {
-        return (this.props.inGame ? React.createElement(GameStartRenderer_1.default, null) : React.createElement(MainMenu_1.default, null));
+        return (React.createElement("div", null, " hi "));
     };
     return GameMainMenuToggler;
-}(React.PureComponent));
+}(React.Component));
+exports.default = GameMainMenuToggler;
 ;
-exports.default = react_redux_1.connect(function (state) { return state.gameMainMenuToggler; }, GameMainMenuTogglerStore.actionCreators)(GameMainMenuToggler);
-//# sourceMappingURL=GameMainMenuToggler.js.map
+//# sourceMappingURL=GameStartRenderer.js.map
