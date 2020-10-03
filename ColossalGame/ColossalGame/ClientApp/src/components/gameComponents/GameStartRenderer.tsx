@@ -5,6 +5,7 @@ import "./GameStartRenderer.css";
 
 
 
+
 export default class GameMainMenuToggler extends React.Component {
 
     componentDidMount () {
@@ -26,15 +27,35 @@ export default class GameMainMenuToggler extends React.Component {
     preload(this: Phaser.Scene) {
 
         //Test Image
-        this.load.image("testSoldierGuy", "../../assets/gameAssets/testSoldierGuy.png");
+        this.load.image('Human', './gameComponents/testBuilder.png');
+        
     }
     create(this: Phaser.Scene) {
+        this.add.image(200, 200, "Human");
+
+        const logo = this.add.image(400, 150, "Human");
 
 
+        this.add.text(
+            100,
+            500,
+            "Well text certainly works...", {
+            font: "40px Arial",
+            fill: "#ffffff"
+        }
+        );
+
+        this.add.text(
+            500,
+            520,
+            "YEAHHHHH", {
+            font: "40px Arial",
+            fill: "#ffffff"
+        }
+        );
+      
 
 
-        this.add.image(400, 100, "testSoldierGuy");
-        this.add.image(100, 100, "testSoldierGuy");
     }
     update() {
 
