@@ -2,18 +2,26 @@
 import * as Phaser from 'phaser';
 import "./GameStartRenderer.css";
 
-
-
-
+//Phaser Variables
+var game: Phaser.Game;
+var cursors: any;
+var player: any;
 
 export default class GameMainMenuToggler extends React.Component {
 
     componentDidMount () {
 
-        var game = new Phaser.Game({
+        game = new Phaser.Game({
             type: Phaser.AUTO,
             width: 800,
             height: 600,
+            physics: {
+                default: "arcade",
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false,
+                },
+            },
             parent: "gameCanvas",
             scene: {
                 preload: this.preload,
@@ -21,20 +29,17 @@ export default class GameMainMenuToggler extends React.Component {
                 update: this.update,
             },
         });
-        var controls = null;
+        //var controls = null;
     }
 
-    preload(this: Phaser.Scene) {
-
-        //Test Image
-        this.load.image('Human', './gameComponents/testBuilder.png');
-        
+    preload(this: Phaser.Scene) {     
+        this.load.image("player", './gameComponents/testBuilder.png');
     }
+
     create(this: Phaser.Scene) {
-        this.add.image(200, 200, "Human");
 
-        const logo = this.add.image(400, 150, "Human");
-
+        cursors = this.input.keyboard.createCursorKeys();
+        player = this.physics.add.sprite(100, 450, "player");
 
         this.add.text(
             100,
@@ -44,7 +49,6 @@ export default class GameMainMenuToggler extends React.Component {
             fill: "#ffffff"
         }
         );
-
         this.add.text(
             500,
             520,
@@ -53,12 +57,19 @@ export default class GameMainMenuToggler extends React.Component {
             fill: "#ffffff"
         }
         );
-      
-
-
     }
+
+
     update() {
 
+        //THIS IS JUST FOR TESTING
+        player.setVelocityX(
+            (cursors.left.isDown ? -160 : 0) + (cursors.right.isDown ? 160 : 0)
+        );
+        player.setVelocityY(
+            (cursors.up.isDown ? -160 : 0) + (cursors.down.isDown ? 160 : 0)
+        );
+        //THIS IS JUST FOR TESTING
     }
 
     public render() {

@@ -16,16 +16,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var Phaser = require("phaser");
 require("./GameStartRenderer.css");
+//Phaser Variables
+var game;
+var cursors;
+var player;
 var GameMainMenuToggler = /** @class */ (function (_super) {
     __extends(GameMainMenuToggler, _super);
     function GameMainMenuToggler() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     GameMainMenuToggler.prototype.componentDidMount = function () {
-        var game = new Phaser.Game({
+        game = new Phaser.Game({
             type: Phaser.AUTO,
             width: 800,
             height: 600,
+            physics: {
+                default: "arcade",
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false,
+                },
+            },
             parent: "gameCanvas",
             scene: {
                 preload: this.preload,
@@ -33,15 +44,14 @@ var GameMainMenuToggler = /** @class */ (function (_super) {
                 update: this.update,
             },
         });
-        var controls = null;
+        //var controls = null;
     };
     GameMainMenuToggler.prototype.preload = function () {
-        //Test Image
-        this.load.image('Human', './gameComponents/testBuilder.png');
+        this.load.image("player", './gameComponents/testBuilder.png');
     };
     GameMainMenuToggler.prototype.create = function () {
-        this.add.image(200, 200, "Human");
-        var logo = this.add.image(400, 150, "Human");
+        cursors = this.input.keyboard.createCursorKeys();
+        player = this.physics.add.sprite(100, 450, "player");
         this.add.text(100, 500, "Well text certainly works...", {
             font: "40px Arial",
             fill: "#ffffff"
@@ -52,6 +62,10 @@ var GameMainMenuToggler = /** @class */ (function (_super) {
         });
     };
     GameMainMenuToggler.prototype.update = function () {
+        //THIS IS JUST FOR TESTING
+        player.setVelocityX((cursors.left.isDown ? -160 : 0) + (cursors.right.isDown ? 160 : 0));
+        player.setVelocityY((cursors.up.isDown ? -160 : 0) + (cursors.down.isDown ? 160 : 0));
+        //THIS IS JUST FOR TESTING
     };
     GameMainMenuToggler.prototype.render = function () {
         return (React.createElement("div", { id: "gameCanvas" }));
