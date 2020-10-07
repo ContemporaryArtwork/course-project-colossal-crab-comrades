@@ -16,6 +16,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var Phaser = require("phaser");
 require("./GameStartRenderer.css");
+//import playerThing from "./testBuilder.png";
 //Phaser Variables
 var game;
 var cursors;
@@ -47,11 +48,12 @@ var GameMainMenuToggler = /** @class */ (function (_super) {
         //var controls = null;
     };
     GameMainMenuToggler.prototype.preload = function () {
-        this.load.image("player", './gameComponents/testBuilder.png');
+        // this.load.image("playerThing", playerThing);
+        this.load.image('playerThing', require("./testBuilder.png").default);
     };
     GameMainMenuToggler.prototype.create = function () {
         cursors = this.input.keyboard.createCursorKeys();
-        player = this.physics.add.sprite(100, 450, "player");
+        player = this.physics.add.sprite(100, 450, "playerThing");
         this.add.text(100, 500, "Well text certainly works...", {
             font: "40px Arial",
             fill: "#ffffff"

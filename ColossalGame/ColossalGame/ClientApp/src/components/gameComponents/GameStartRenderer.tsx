@@ -1,6 +1,7 @@
 ﻿import * as React from 'react';
 import * as Phaser from 'phaser';
 import "./GameStartRenderer.css";
+//import playerThing from "./testBuilder.png";
 
 //Phaser Variables
 var game: Phaser.Game;
@@ -32,14 +33,15 @@ export default class GameMainMenuToggler extends React.Component {
         //var controls = null;
     }
 
-    preload(this: Phaser.Scene) {     
-        this.load.image("player", './gameComponents/testBuilder.png');
+    preload(this: Phaser.Scene) {
+       // this.load.image("playerThing", playerThing);
+        this.load.image('playerThing', require("./testBuilder.png").default);
     }
 
     create(this: Phaser.Scene) {
 
         cursors = this.input.keyboard.createCursorKeys();
-        player = this.physics.add.sprite(100, 450, "player");
+        player = this.physics.add.sprite(100, 450, "playerThing");
 
         this.add.text(
             100,

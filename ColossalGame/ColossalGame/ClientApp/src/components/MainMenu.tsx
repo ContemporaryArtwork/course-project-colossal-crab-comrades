@@ -23,16 +23,16 @@ type GameMainMenuTogglerProps =
 
 
 class MainMenu extends React.PureComponent<GameMainMenuTogglerProps> {
-    
-    ToggleSettings() {                
-        var settingsPanel = document.getElementsByClassName("settings") as HTMLCollectionOf<HTMLElement>; 
+
+    ToggleSettings() {
+        var settingsPanel = document.getElementsByClassName("settings") as HTMLCollectionOf<HTMLElement>;
         if (settingsPanel[0].style.display === "none") {
             settingsPanel[0].style.display = "block";
         } else {
             settingsPanel[0].style.display = "none";
-        }       
+        }
     }
-    
+
     SignIn() {
         var log = document.getElementsByClassName("loginPanel") as HTMLCollectionOf<HTMLElement>;
         if (log[0].style.display === "none") {
@@ -93,8 +93,8 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps> {
         bui[0].style.backgroundColor = "yellowgreen";
         load[0].style.display = "none"
     }
-    
-        
+
+
     render() {
         return (
             <body>
@@ -146,7 +146,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps> {
                         </div>
                     </div>
 
-                    <div className="video-container">                        
+                    <div className="video-container">
                         <video src={BGVideo} loop autoPlay muted />
                     </div>
 
@@ -177,7 +177,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps> {
                         </div>
                     </div>
 
-                    
+
 
                 </section>
             </body>
