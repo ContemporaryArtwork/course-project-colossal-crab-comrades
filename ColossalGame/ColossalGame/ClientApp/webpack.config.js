@@ -26,9 +26,11 @@ const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
 	mode: 'development',
-	entry: './src/index.ts',
+	entry: './src/index.tsx', //used to be index.ts. index.ts might still be the correct choice.
 	plugins: [new webpack.ProgressPlugin()],
-
+	output: {
+		filename: './bundle.js',
+	},
 	module: {
 		rules: [
 			{
@@ -50,6 +52,15 @@ module.exports = {
 						options: {
 							sourceMap: true,
 						},
+					},
+				],
+			},
+			//Added for Phaser
+			{
+				test: /\.(png|jpe?g|gif)$/i,
+				use: [
+					{
+						loader: 'file-loader',
 					},
 				],
 			},
