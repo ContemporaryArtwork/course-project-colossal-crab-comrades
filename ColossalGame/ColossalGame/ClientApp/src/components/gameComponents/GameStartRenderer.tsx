@@ -35,6 +35,7 @@ export default class GameMainMenuToggler extends React.Component {
 
     preload(this: Phaser.Scene) {
        // this.load.image("playerThing", playerThing);
+       
         this.load.image('playerThing', require("./testBuilder.png").default);
     }
 
