@@ -78,12 +78,16 @@ namespace ColossalGame
             
             app.UseRouting();
             app.UseAuthorization();
+
+
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
                 endpoints.MapHub<GlobalChatHub>("/hubs/globalchat");
+                endpoints.MapHub<GameDataHub>("/hubs/gamedata");
             });
 
             app.UseSpa(spa =>
