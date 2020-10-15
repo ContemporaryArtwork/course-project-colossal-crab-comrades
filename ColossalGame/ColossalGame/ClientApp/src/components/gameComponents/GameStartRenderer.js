@@ -49,18 +49,20 @@ var GameMainMenuToggler = /** @class */ (function (_super) {
     };
     GameMainMenuToggler.prototype.preload = function () {
         // this.load.image("playerThing", playerThing);
+        this.load.image('ground', require("./testGround.jpg").default);
         this.load.image('playerThing', require("./testBuilder.png").default);
     };
     GameMainMenuToggler.prototype.create = function () {
         cursors = this.input.keyboard.createCursorKeys();
+        this.add.image(400, 300, "ground");
         player = this.physics.add.sprite(100, 450, "playerThing");
-        this.add.text(100, 500, "Well text certainly works...", {
+        this.add.text(100, 500, "OH YEAH DESERT GROUND", {
             font: "40px Arial",
-            fill: "#ffffff"
+            fill: "#000000"
         });
-        this.add.text(500, 520, "YEAHHHHH", {
+        this.add.text(300, 400, "DESERT OR DESSERT\n AM I RIGHT???", {
             font: "40px Arial",
-            fill: "#ffffff"
+            fill: "#000000"
         });
     };
     GameMainMenuToggler.prototype.update = function () {

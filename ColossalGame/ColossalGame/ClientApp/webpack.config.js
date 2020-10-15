@@ -28,9 +28,6 @@ module.exports = {
 	mode: 'development',
 	entry: './src/index.tsx', //used to be index.ts. index.ts might still be the correct choice.
 	plugins: [new webpack.ProgressPlugin()],
-	output: {
-		filename: './bundle.js',
-	},
 	module: {
 		rules: [
 			{
@@ -55,7 +52,7 @@ module.exports = {
 					},
 				],
 			},
-			//Added for Phaser
+			//Added for Phaser images
 			{
 				test: /\.(png|jpe?g|gif)$/i,
 				use: [
