@@ -26,7 +26,7 @@ namespace ColossalGame.Models.Hubs
             await Clients.All.ReceiveString("This was your message: " + message);
         }
 
-        public async Task SendPositionUpdates(string message)
+        public async Task SendMovement(string message)
         {
             await Clients.All.ReceiveString("This was your message: " + message);
         }
