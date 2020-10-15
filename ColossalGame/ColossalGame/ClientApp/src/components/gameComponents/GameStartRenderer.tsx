@@ -65,9 +65,48 @@ export default class GameMainMenuToggler extends React.Component {
         );
     }
 
+    GetActions() {
+    /*
+    0 = Up Move
+    1 = Left Move
+    2 = Back Move
+    3 = Right Move
+    */
+    var actions = new Array(4);
+
+    //This is the exact same as line 79-82, but line 79-82 is a shorthand way of writing it.
+    /*
+            if (cursors.up.isDown)
+            {actions[0] = 1;} 
+            else 
+            {actions[0] = 0;}
+    */
+
+
+    actions[0] = cursors.up.isDown ? 1 : 0;
+    actions[1] = cursors.left.isDown ? 1 : 0;
+    actions[2] = cursors.down.isDown ? 1 : 0;
+    actions[3] = cursors.right.isDown ? 1 : 0;
+
+    return actions;
+    }
+
+    PrintActions(actions: number[]) {
+        if (actions[0] == 1) {
+            console.log("Up");
+        }
+        if (actions[1] == 1) {
+            console.log("Left");
+        }
+        if (actions[2] == 1) {
+            console.log("Back");
+        }
+        if (actions[3] == 1) {
+            console.log("Right");
+        }
+    }
 
     update() {
-
         //THIS IS JUST FOR TESTING
         player.setVelocityX(
             (cursors.left.isDown ? -160 : 0) + (cursors.right.isDown ? 160 : 0)
@@ -76,6 +115,42 @@ export default class GameMainMenuToggler extends React.Component {
             (cursors.up.isDown ? -160 : 0) + (cursors.down.isDown ? 160 : 0)
         );
         //THIS IS JUST FOR TESTING
+        /*
+        0 = Up Move
+        1 = Left Move
+        2 = Back Move
+        3 = Right Move
+        */
+        var actions = new Array(4);
+
+        //This is the exact same as line 79-82, but line 79-82 is a shorthand way of writing it.
+        /*
+                if (cursors.up.isDown)
+                {actions[0] = 1;} 
+                else 
+                {actions[0] = 0;}
+        */
+
+
+        actions[0] = cursors.up.isDown ? 1 : 0;
+        actions[1] = cursors.left.isDown ? 1 : 0;
+        actions[2] = cursors.down.isDown ? 1 : 0;
+        actions[3] = cursors.right.isDown ? 1 : 0;
+
+        if (actions[0] == 1) {
+            console.log("Up");
+        }
+        if (actions[1] == 1) {
+            console.log("Left");
+        }
+        if (actions[2] == 1) {
+            console.log("Back");
+        }
+        if (actions[3] == 1) {
+            console.log("Right");
+        }
+        //var actions = this.GetActions();
+        //this.PrintActions(actions);
     }
 
     public render() {
