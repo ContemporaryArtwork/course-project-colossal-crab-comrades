@@ -14,15 +14,17 @@ type PlayerOutputProcessorProps =
 
 class PlayerOutputProcessor extends React.PureComponent<PlayerOutputProcessorProps> {
 
+    
     render() {
         return (
-            this.props.inGame ? <GameStartRenderer /> : <MainMenu />
+            <div>hi</div>
         );
     }
+   
 };
 
 
 export default connect(
-    (state: ApplicationState) => state.PlayerOutputProcessor,
+    (state: ApplicationState) => state.playerOutputProcessor,
     PlayerOutputProcessorStore.actionCreators
 )(PlayerOutputProcessor as any);
