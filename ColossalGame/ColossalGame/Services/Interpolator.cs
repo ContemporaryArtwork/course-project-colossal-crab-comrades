@@ -10,7 +10,7 @@ namespace ColossalGame.Services
     public class Interpolator : IInterpolator
     {
 
-        public double Interval { get; set; } = 50;
+        public double Interval { get; set; } = 16;
         private Dictionary<string, DateTime> PlayerTimings = new Dictionary<string, DateTime>();
 
         private readonly LoginService _ls;

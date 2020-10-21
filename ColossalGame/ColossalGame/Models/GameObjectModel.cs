@@ -7,5 +7,7 @@ namespace ColossalGame.Models
 {
     public class GameObjectModel
     {
+        public double YPos { get; set; }
+        public double XPos { get; set; }
     }
 }

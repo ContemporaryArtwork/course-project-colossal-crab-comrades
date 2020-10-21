@@ -8,9 +8,15 @@ namespace ColossalGame.Services
 {
     public class GameLogic
     {
-        private Dictionary<string,PlayerModel> PlayerDictionary = new Dictionary<string, PlayerModel>();
+        private Dictionary<string,PlayerModel> PlayerDictionary { get; set; } = new Dictionary<string, PlayerModel>();
+        private List<GameObjectModel> ObjectList {get;set;} = new List<GameObjectModel>();
         private readonly LoginService _ls;
         private readonly UserService _us;
+        private bool KeepGoing = true;
+        private int tickRate = 50;
+        private int tickCounter = 0;
+        public event EventHandler<CustomEventArgs> RaiseCustomEvent;
+
         public GameLogic(LoginService ls, UserService us)
         {
             _ls = ls;
@@ -67,10 +73,55 @@ namespace ColossalGame.Services
             //TODO
         }
 
-        public List<GameObjectModel> getState()
+        public (List<GameObjectModel>,Dictionary<string,PlayerModel>) getState()
         {
             //TODO
-            return null;
+            return (null,null);
         }
+
+        public async void Start()
+        {
+            await Task.Run(runServer);
+        }
+        private async void runServer()
+        {
+            while (KeepGoing)
+            {
+                System.Threading.Thread.Sleep(tickRate);
+                simulateOneServerTick();
+                tickCounter++;
+                //TODO: Add logic dictating when to publish the state instead of after every tick
+                PublishState();
+            }
+        }
+
+        private void PublishState()
+        {
+            var (returnedList, returnedDictionary) = getState();
+            CustomEventArgs e = new CustomEventArgs(returnedList,returnedDictionary);
+            OnRaiseCustomEvent(e);
+        }
+
+        protected virtual void OnRaiseCustomEvent(CustomEventArgs e)
+        {
+            // Make a temporary copy of the event to avoid possibility of
+            // a race condition if the last subscriber unsubscribes
+            // immediately after the null check and before the event is raised.
+            RaiseCustomEvent?.Invoke(this, e);
+        }
+    }
+
+    public class CustomEventArgs : EventArgs
+    {
+        public CustomEventArgs(List<GameObjectModel> objectList,Dictionary<string,PlayerModel> playerDict)
+        {
+            ObjectList = objectList;
+            PlayerDict = playerDict;
+        }
+
+        public List<GameObjectModel> ObjectList { get; set; }
+
+        public Dictionary<string, PlayerModel> PlayerDict { get; set; }
+
     }
 }

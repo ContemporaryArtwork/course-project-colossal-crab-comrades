@@ -7,8 +7,7 @@ namespace ColossalGame.Models
 {
     public class PlayerModel : GameObjectModel
     {
-        public double YPos { get; set; }
-        public double XPos { get; set; }
+        
         public string Username { get; set; }
     }
 }
