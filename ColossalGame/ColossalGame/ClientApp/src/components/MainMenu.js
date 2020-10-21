@@ -79,31 +79,58 @@ var MainMenu = /** @class */ (function (_super) {
         var heav = document.getElementsByClassName("classColor");
         var load = document.getElementsByClassName("loadout");
         heav[0].style.backgroundColor = "purple";
+        heav[0].textContent = "HEAVY";
         load[0].style.display = "none";
     };
     MainMenu.prototype.ChooseBrawler = function () {
         var braw = document.getElementsByClassName("classColor");
         var load = document.getElementsByClassName("loadout");
         braw[0].style.backgroundColor = "red";
+        braw[0].textContent = "BRAWLER";
         load[0].style.display = "none";
     };
     MainMenu.prototype.ChooseBuilder = function () {
         var bui = document.getElementsByClassName("classColor");
         var load = document.getElementsByClassName("loadout");
         bui[0].style.backgroundColor = "yellowgreen";
+        bui[0].textContent = "BUILDER";
         load[0].style.display = "none";
     };
     MainMenu.prototype.render = function () {
         var _this = this;
         return (React.createElement("body", null,
-            React.createElement("section", { className: "enclosing" },
-                React.createElement("button", { className: "settingsButton", onClick: this.ToggleSettings },
-                    React.createElement("img", { src: Settings_Button_png_1.default })),
+            React.createElement("div", { className: "enclosing" },
+                React.createElement("div", { className: "video-container" },
+                    React.createElement("video", { src: BGVideo_mp4_1.default, loop: true, autoPlay: true, muted: true })),
+                React.createElement("div", { className: "containMain" },
+                    React.createElement("button", { className: "settingsButton", onClick: this.ToggleSettings },
+                        React.createElement("img", { src: Settings_Button_png_1.default })),
+                    React.createElement("button", { className: "loginOpen", onClick: this.SignIn }, " Login ")),
+                React.createElement("div", { className: "containMain" },
+                    React.createElement("div", { className: "content" },
+                        React.createElement("h1", null, "Pre Alpha CSE 442 Project"),
+                        React.createElement("h3", null, "Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner ")),
+                    React.createElement("div", null,
+                        React.createElement("div", { className: "alignButtons" },
+                            React.createElement("div", { className: "classColor" }),
+                            React.createElement("button", { className: "classSelectButton", onClick: this.OpenLoadout }, " Select Class ")),
+                        React.createElement("div", { className: "alignButtons" },
+                            React.createElement("button", { className: "startGameButton", onClick: function () { _this.props.toggleGame(); } }, " Start Game ")))),
+                React.createElement("div", { className: "loadout" },
+                    React.createElement("div", { className: "signContainer" },
+                        React.createElement("div", { className: "classContainer" },
+                            React.createElement("div", { className: "Heavy" }),
+                            React.createElement("button", { className: "loadButton", onClick: this.ChooseHeavy }, "HEAVY")),
+                        React.createElement("div", { className: "classContainer" },
+                            React.createElement("div", { className: "Brawler" }),
+                            React.createElement("button", { className: "loadButton", onClick: this.ChooseBrawler }, "BRAWLER")),
+                        React.createElement("div", { className: "classContainer" },
+                            React.createElement("div", { className: "Builder" }),
+                            React.createElement("button", { className: "loadButton", onClick: this.ChooseBuilder }, "BUILDER")))),
                 React.createElement("div", { className: "settings" },
                     " ",
                     React.createElement("img", { src: SettingsPanel_png_1.default }),
                     "  "),
-                React.createElement("button", { className: "loginOpen", onClick: this.SignIn }, " Login "),
                 React.createElement("div", { className: "loginPanel" },
                     React.createElement("div", { className: "signContainer" },
                         React.createElement("label", null, "Email"),
@@ -130,26 +157,7 @@ var MainMenu = /** @class */ (function (_super) {
                         React.createElement("br", null),
                         React.createElement("input", { type: "text", placeholder: "Repeat Password" }),
                         React.createElement("br", null),
-                        React.createElement("button", { className: "loginButton", onClick: this.SendData }, " REGISTER "))),
-                React.createElement("div", { className: "video-container" },
-                    React.createElement("video", { src: BGVideo_mp4_1.default, loop: true, autoPlay: true, muted: true })),
-                React.createElement("div", { className: "content" },
-                    React.createElement("h1", null, "Pre Alpha CSE 442 Project"),
-                    React.createElement("h3", null, "Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner "),
-                    React.createElement("button", { className: "classSelectButton", onClick: this.OpenLoadout }, " Select Class "),
-                    React.createElement("div", { className: "classColor" }),
-                    React.createElement("button", { className: "classSelectButton", onClick: function () { _this.props.toggleGame(); } }, " Start Game ")),
-                React.createElement("div", { className: "loadout" },
-                    React.createElement("div", { className: "signContainer" },
-                        React.createElement("div", { className: "classContainer" },
-                            React.createElement("div", { className: "Heavy" }),
-                            React.createElement("button", { className: "loadButton", onClick: this.ChooseHeavy }, "HEAVY")),
-                        React.createElement("div", { className: "classContainer" },
-                            React.createElement("div", { className: "Brawler" }),
-                            React.createElement("button", { className: "loadButton", onClick: this.ChooseBrawler }, "BRAWLER")),
-                        React.createElement("div", { className: "classContainer" },
-                            React.createElement("div", { className: "Builder" }),
-                            React.createElement("button", { className: "loadButton", onClick: this.ChooseBuilder }, "BUILDER")))))));
+                        React.createElement("button", { className: "loginButton", onClick: this.SendData }, " REGISTER "))))));
     };
     return MainMenu;
 }(React.PureComponent));
