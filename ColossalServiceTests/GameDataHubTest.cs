@@ -5,6 +5,7 @@ using NUnit.Framework;
 using ColossalGame.Models.Hubs.Clients;
 using ColossalGame.Models.Hubs;
 using Moq;
+using ColossalGame.Models;
 
 namespace ColossalServiceTests
 {
@@ -44,10 +45,10 @@ namespace ColossalServiceTests
             //Conn id is guid. It is different in each test. But is same in scope of test.
             ContextMock.Setup(x => x.ConnectionId).Returns(connId);
 
-            await exampleHub.SendMovement("20,4");
+            await exampleHub.SendMovement(new MovementAction { Username="", Token="", Direction=EDirection.Right});
 
-            ClientsAllMock.Verify(
-                x => x.ReceiveString("This was your message: 20,4"),
+            ClientsCallerMock.Verify(
+                x => x.ReceiveString("Action rejected by interpolator. Action sent too close to previous action."),
                 Times.Once()
                 );
         }

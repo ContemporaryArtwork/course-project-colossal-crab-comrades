@@ -1,6 +1,7 @@
 ﻿using ColossalGame.Helpers;
 using ColossalGame.Models.DTO;
 using ColossalGame.Models.Hubs.Clients;
+using ColossalGame.Services;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,18 @@ namespace ColossalGame.Models.Hubs
 {
     public class GameDataHub : Hub<IGameDataClient>, IGameDataMessageTypes
     {
+        private readonly Interpolator _interpolator;
+
+        public GameDataHub(Interpolator interpolator)
+        {
+            _interpolator = interpolator;
+        }
+
+        public GameDataHub()
+        {
+            //Method only exists for Test Client for GameDataHub. Need to find way to simulate interpolator working.
+        }
+
         public async Task ChangeWeapon(string message)
         {
             await Clients.All.ReceiveString("This was your message: " + message);
@@ -26,9 +39,20 @@ namespace ColossalGame.Models.Hubs
             await Clients.All.ReceiveString("This was your message: " + message);
         }
 
-        public async Task SendMovement(string message)
+        public async Task SendMovement(MovementAction movementAction)
         {
-            await Clients.All.ReceiveString("This was your message: " + message);
+            bool res = false;
+            
+
+            if (_interpolator != null)
+            {
+                res = _interpolator.ParseAction(movementAction);
+            }
+
+            var responseString = res ? "Action accepted by interpolator" :
+                                        "Action rejected by interpolator. Action sent too close to previous action.";
+            await Clients.Caller.ReceiveString(responseString);
         }
+        
     }
 }
