@@ -12,18 +12,21 @@ namespace ColossalServiceTests.Services
     {
         private LoginService subLoginService;
         private UserService subUserService;
+        private GameLogic subGameLogic;
 
         [SetUp]
         public void SetUp()
         {
             this.subUserService = Substitute.For<UserService>("mongodb://localhost:27017/");
             this.subLoginService = Substitute.For<LoginService>(subUserService);
+            this.subGameLogic = Substitute.For<GameLogic>(this.subLoginService,this.subUserService);
+            this.subGameLogic.AddPlayerToSpawnQueue("testUser");
         }
 
         private Interpolator CreateInterpolator()
         {
             return new Interpolator(
-                this.subLoginService);
+                this.subLoginService, this.subGameLogic);
         }
 
         [Test]
@@ -37,7 +40,7 @@ namespace ColossalServiceTests.Services
             subLoginService.SignUp("testUser", "testPassword");
             string token = subLoginService.SignIn("testUser", "testPassword");
 
-
+            
             action.Username = "testUser";
             action.Token = token;
 
@@ -67,7 +70,7 @@ namespace ColossalServiceTests.Services
 
             // Act
             Assert.True( interpolator.ParseAction(action));
-            System.Threading.Thread.Sleep(20);
+            System.Threading.Thread.Sleep(5);
             bool result = interpolator.ParseAction(action);
 
             //Assert

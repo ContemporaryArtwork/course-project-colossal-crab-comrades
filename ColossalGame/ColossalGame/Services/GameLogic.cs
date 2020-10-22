@@ -18,7 +18,7 @@ namespace ColossalGame.Services
         /// <summary>
         /// boolean representing whether the server thread should continue processing new states
         /// </summary>
-        private readonly bool KeepGoing = true;
+        private bool KeepGoing = true;
         /// <summary>
         /// variable that keeps track of the current tick
         /// </summary>
@@ -42,16 +42,30 @@ namespace ColossalGame.Services
         public event EventHandler<CustomEventArgs> RaiseCustomEvent;
 
         /// <summary>
+        /// Queue of Player Actions
+        /// </summary>
+        private Queue<AUserAction> ActionQueue { get; set; } = new Queue<AUserAction>();
+        /// <summary>
+        /// Queue of players to spawn in the next tick
+        /// </summary>
+        private Queue<PlayerModel> PlayerSpawnQueue { get; set; } = new Queue<PlayerModel>();
+
+        /// <summary>
+        /// Queue of players to despawn in the next tick
+        /// </summary>
+        private Queue<string> PlayerDespawnQueue { get; set; } = new Queue<string>();
+
+        /// <summary>
         /// Constructor for GameLogic class
         /// </summary>
         /// <param name="ls">LoginService of server</param>
         /// <param name="us">UserService of server</param>
-        /// <param name="startServer">Boolean representing whether server should immediately start tick processing thread on construction</param>
-        public GameLogic(LoginService ls, UserService us, bool startServer)
+        public GameLogic(LoginService ls, UserService us)
         {
             _ls = ls;
             _us = us;
-            if (startServer) Start();
+            //TODO: Separate constructor and Start method
+            Start();
         }
 
         
@@ -74,7 +88,8 @@ namespace ColossalGame.Services
                     pm.XPos -= 1;
                 else if (m.Direction == EDirection.Right) pm.XPos += 1;
 
-                PlayerDictionary.Add(m.Username, pm);
+                //PlayerDictionary.Add(m.Username, pm);
+                PlayerDictionary[m.Username] = pm;
             }
         }
 
@@ -84,7 +99,7 @@ namespace ColossalGame.Services
         /// <param name="username">Username of desired user to spawn</param>
         /// <param name="xPos">Desired x position</param>
         /// <param name="yPos">Desired y position</param>
-        public void SpawnPlayer(string username, double xPos = 0.0, double yPos = 0.0)
+        private void SpawnPlayer(string username, double xPos = 0.0, double yPos = 0.0)
         {
             if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
 
@@ -93,41 +108,64 @@ namespace ColossalGame.Services
             pm.XPos = xPos;
             pm.YPos = yPos;
 
-            PlayerDictionary.Add(username, pm);
+            //PlayerDictionary.Add(username, pm);
+            PlayerDictionary[username] = pm;
         }
 
         /// <summary>
         /// Despawn a player
         /// </summary>
         /// <param name="username">Username of player to despawn</param>
-        public void DespawnPlayer(string username)
+        public void AddPlayerToDespawnQueue(string username)
         {
             if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
-            PlayerDictionary.Remove(username);
+            //PlayerDictionary.Remove(username);
+            PlayerDespawnQueue.Enqueue(username);
         }
 
         /// <summary>
         /// Will eventually run all user actions and simulate all environmental objects and AI
         /// </summary>
-        public void simulateOneServerTick()
+        private void simulateOneServerTick()
         {
-            //TODO
+
+            while (PlayerDespawnQueue.Count != 0)
+            {
+                var p = PlayerDespawnQueue.Dequeue();
+                PlayerDictionary.Remove(p);
+            }
+
+            while (PlayerSpawnQueue.Count != 0)
+            {
+                var p = PlayerSpawnQueue.Dequeue();
+                //PlayerDictionary.Add(p.Username, p);
+                PlayerDictionary[p.Username] = p;
+            }
+
+            while (ActionQueue.Count != 0)
+            {
+                HandleAction(ActionQueue.Dequeue());
+            }
+
+            
+
+            //TODO Handle non-player objects
+
         }
 
         /// <summary>
         /// Returns the current game state
         /// </summary>
         /// <returns></returns>
-        public (List<GameObjectModel>, Dictionary<string, PlayerModel>) getState()
+        public (List<GameObjectModel>, Dictionary<string, PlayerModel>) GetState()
         {
-            //TODO
-            return (null, null);
+            return (ObjectList, PlayerDictionary);
         }
 
         /// <summary>
         /// Starts the server tick processing thread
         /// </summary>
-        public void Start()
+        private void Start()
         {
             var instanceCaller = new Thread(
                 RunServer);
@@ -154,7 +192,7 @@ namespace ColossalGame.Services
         /// </summary>
         private void PublishState()
         {
-            var (returnedList, returnedDictionary) = getState();
+            var (returnedList, returnedDictionary) = GetState();
             var e = new CustomEventArgs(returnedList, returnedDictionary);
             OnRaiseCustomEvent(e);
         }
@@ -169,6 +207,38 @@ namespace ColossalGame.Services
             // a race condition if the last subscriber unsubscribes
             // immediately after the null check and before the event is raised.
             RaiseCustomEvent?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// Add action to server action queue
+        /// </summary>
+        /// <param name="action">Action to be added</param>
+        public void AddActionToQueue(AUserAction action)
+        {
+            ActionQueue.Enqueue(action);
+        }
+
+        /// <summary>
+        /// Add a new player to the spawn queue
+        /// </summary>
+        /// <param name="username">Username to spawn. Must exist in the user database</param>
+        /// <param name="xPos">X Position to spawn at. Default is 0</param>
+        /// <param name="yPos">Y Position to spawn at. Default is 0</param>
+        public void AddPlayerToSpawnQueue(string username, double xPos = 0.0, double yPos = 0.0)
+        {
+            PlayerModel pm = new PlayerModel();
+            pm.Username = username;
+            pm.XPos = xPos;
+            pm.YPos = yPos;
+            PlayerSpawnQueue.Enqueue(pm);
+        }
+
+        /// <summary>
+        /// Stop the server thread from running new states
+        /// </summary>
+        public void StopServer()
+        {
+            KeepGoing = false;
         }
     }
 
