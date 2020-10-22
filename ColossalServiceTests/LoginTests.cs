@@ -12,7 +12,7 @@ namespace ColossalServiceTests
         [SetUp]
         public void Setup()
         {
-            _loginService = new LoginService(new UserService());
+            _loginService = new LoginService(new UserService("mongodb://localhost:27017/"));
         }
 
         [Test]

@@ -40,7 +40,13 @@ namespace ColossalGame
 
             services.AddSingleton<LoginController>();
 
+            services.AddSingleton<GameLogic>();
+
+            
+
             services.AddSingleton<Interpolator>();
+
+            
 
             services.AddControllersWithViews();
 
