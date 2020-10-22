@@ -10,14 +10,16 @@ namespace ColossalGame.Services
     public class Interpolator : IInterpolator
     {
 
-        public double Interval { get; set; } = 50;
+        public double Interval { get; set; } = 16;
         private Dictionary<string, DateTime> PlayerTimings = new Dictionary<string, DateTime>();
 
         private readonly LoginService _ls;
+        private readonly GameLogic _gl;
 
-        public Interpolator(LoginService ls)
+        public Interpolator(LoginService ls, GameLogic gl)
         {
             _ls = ls;
+            _gl = gl;
         }
 
         /// <summary>
@@ -44,7 +46,7 @@ namespace ColossalGame.Services
                 
                 PlayerTimings.Add(action.Username, DateTime.Now);
                 //Run relevant method to update game state
-                Console.WriteLine("Game state update behavior not implemented yet");
+                _gl.AddActionToQueue(action);
                 //
                 return true;
             }
@@ -59,7 +61,7 @@ namespace ColossalGame.Services
             {
                 PlayerTimings[action.Username] = DateTime.Now;
                 //Run relevant method to update game state
-                Console.WriteLine("Game state update behavior not implemented yet");
+                _gl.AddActionToQueue(action);
                 //
                 return true;
             }
