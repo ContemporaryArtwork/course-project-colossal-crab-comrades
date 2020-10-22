@@ -14,15 +14,15 @@ namespace ColossalGame.Models.Hubs
     {
         private readonly Interpolator _interpolator;
 
-        public GameDataHub(Interpolator interpolator)
-        {
-            _interpolator = interpolator;
-        }
+         public GameDataHub(Interpolator interpolator)
+         {
+             _interpolator = interpolator;
+         }
 
-        public GameDataHub()
+/*        public GameDataHub()
         {
             //Method only exists for Test Client for GameDataHub. Need to find way to simulate interpolator working.
-        }
+        }*/
 
         public async Task ChangeWeapon(string message)
         {
