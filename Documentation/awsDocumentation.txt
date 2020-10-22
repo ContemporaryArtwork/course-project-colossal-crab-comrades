@@ -1,0 +1,44 @@
+Docker hosting research. Task #27
+
+1:	Amazon Elastic Container Service(ECS)
+	-	Free use through being a UB student
+		o	ECS is free, but the ECS extension(fargate) is pricey
+	-	Medium setup difficulty 
+	-	Plenty of flexibility
+	-	No GPU support
+		o	Probably don’t need this
+	-	Allows multiple application per host
+		o	Probably wont need this
+	-	Lots of documentation online on how to do it
+		o	Just have to find what documentation hooks up with our implementation
+
+2: 	Amazon Elastic Container Service for Kuberetes (EKS)
+		-Free use through being a UB student
+		-Very difficult setup difficulty
+		-Tons of flexibility
+		- Allows multiple applications per host
+			-Probably don’t need this
+		- Can run in multiple place(main selling point)
+			-AWS
+			-Azure
+			-Google cloud
+			-on-premises
+			-Local machine(probably not)
+		
+3:	AWS Elastic Beanstalk(EB) with single Container Docker
+		-Free use through being a UB student
+		-Low setup complexity
+			-Easy to use
+		-Lowest operational effort
+		-High maturity
+		-Single docker container
+			-Is what we need
+		-Plenty of power to run the docker
+
+
+
+
+Sources:
+https://cloudonaut.io/three-ways-to-run-docker-on-aws/
+
+

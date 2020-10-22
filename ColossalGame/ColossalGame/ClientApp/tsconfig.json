@@ -14,9 +14,11 @@
     "jsx": "preserve",
     "lib": [
       "es2015",
-      "dom"
+      "dom",
+      "scripthost"
     ],
-    "skipLibCheck": false
+    "skipLibCheck": false,
+    "noImplicitAny": true
   },
   "include": [
     "src"

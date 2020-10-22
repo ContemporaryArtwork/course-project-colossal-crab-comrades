@@ -40,6 +40,14 @@ namespace ColossalGame
 
             services.AddSingleton<LoginController>();
 
+            services.AddSingleton<GameLogic>();
+
+            
+
+            services.AddSingleton<Interpolator>();
+
+            
+
             services.AddControllersWithViews();
 
             // In production, the React files will be served from this directory
@@ -76,12 +84,16 @@ namespace ColossalGame
             
             app.UseRouting();
             app.UseAuthorization();
+
+
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
                 endpoints.MapHub<GlobalChatHub>("/hubs/globalchat");
+                endpoints.MapHub<GameDataHub>("/hubs/gamedata");
             });
 
             app.UseSpa(spa =>
