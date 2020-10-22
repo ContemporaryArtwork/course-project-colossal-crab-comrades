@@ -39,14 +39,14 @@ namespace ColossalGame.Models.Hubs
             await Clients.All.ReceiveString("This was your message: " + message);
         }
 
-        public async Task SendMovement(MovementAction movementAction)
+        public async Task SendMovement(object movementAction)
         {
             bool res = false;
             
 
             if (_interpolator != null)
             {
-                res = _interpolator.ParseAction(movementAction);
+                res = _interpolator.ParseAction((MovementAction)movementAction);
             }
 
             var responseString = res ? "Action accepted by interpolator" :

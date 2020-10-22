@@ -1,16 +1,34 @@
 ﻿import * as React from 'react';
 import * as Phaser from 'phaser';
 import "./GameStartRenderer.css";
-//import playerThing from "./testBuilder.png";
+import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router';
+import { ApplicationState } from '../../store';
+import * as GameDataStore from "../../store/GameData";
+
+
+
+type GameDataProps =
+    GameDataStore.GameDataState &
+    typeof GameDataStore.actionCreators &
+    RouteComponentProps<{}>;
+
 
 //Phaser Variables
 var game: Phaser.Game;
 var cursors: any;
 var player: any;
 
-export default class GameMainMenuToggler extends React.Component {
+class GameStartRenderer extends React.PureComponent<GameDataProps> {
 
+    constructor(props: any) {
+        super(props);
+        this.update = this.update.bind(this);
+    }
     componentDidMount () {
+
+        var x = this.props;
+        this.props.initialize();
 
         game = new Phaser.Game({
             type: Phaser.AUTO,
@@ -59,19 +77,17 @@ export default class GameMainMenuToggler extends React.Component {
 
     update() {
         
-
-
-        if (cursors.up.isDown) { /*send it*/}
-        if (cursors.left.isDown) { /*send it*/}
-        if (cursors.down.isDown) { /*send it*/}
-        if (cursors.right.isDown) { /*send it*/}
+        if (cursors.up.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Up);}
+        if (cursors.left.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Left); }
+        if (cursors.down.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Down); }
+        if (cursors.right.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Right); }
 
     /*
-    0 = Up Move
-    1 = Left Move
-    2 = Back Move
-    3 = Right Move
-    */
+    //0 = Up Move
+    //1 = Left Move
+    //2 = Back Move
+    //3 = Right Move
+    
 
         var actions = new Array(4);
 
@@ -92,7 +108,7 @@ export default class GameMainMenuToggler extends React.Component {
         if (actions[3] == 1) {
             console.log("Right");
         }
-
+        */
         //THIS IS JUST FOR TESTING
         player.setVelocityX(
             (cursors.left.isDown ? -160 : 0) + (cursors.right.isDown ? 160 : 0)
@@ -109,3 +125,8 @@ export default class GameMainMenuToggler extends React.Component {
         return (<div id="gameCanvas" />);
     }  
 };
+
+export default connect(
+    (state: ApplicationState) => state.gameData,
+    GameDataStore.actionCreators
+)(GameStartRenderer as any);

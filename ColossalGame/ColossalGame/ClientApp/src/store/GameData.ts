@@ -9,8 +9,8 @@ import getCookie from "../Helpers/GetCookies"
 
 
 export enum Direction {
-    Up = 0,
-    Down,
+    Down = 0,
+    Up,
     Left,
     Right
 }
@@ -84,22 +84,27 @@ export const actionCreators = {
         // Only load data if it's something we don't already have (and are not already loading)
         const appState = getState();
         console.log(appState);
-        if (appState && appState.globalchat) {
-            const setupEventsHub: HubConnection = setupSignalRConnection('/hubs/globalChat', SignalRActionsList)(dispatch);
+        if (appState && appState.gameData) {                               // might be caps
+            const setupEventsHub: HubConnection = setupSignalRConnection('/hubs/gamedata', SignalRActionsList)(dispatch);
             dispatch({ type: 'INITIALIZED', connection: setupEventsHub });
         }
     },
 
     sendMovementAction: (direction: Direction): AppThunkAction<KnownAction> => (dispatch, getState) => {
         const appState = getState();
-        if (appState && appState.globalchat && appState.globalchat.connection) {
+        if (appState && appState.gameData && appState.gameData.connection) {
+
+            //TEMPORARY
+            let cookieVal = getCookie("auth-token") as string;
+            var tokenString = (cookieVal !== undefined) ? cookieVal : "";
+
 
             const movementActionDTO: MovementAction = {
-                Username: appState.globalchat.username,
-                Token: getCookie("auth-token"),
+                Username: appState.gameData.playerData.username,
+                Token: tokenString,
                 Direction: direction
             }
-            appState.gameData.connection && appState.gameData.connection.invoke("SendMessage", movementActionDTO)
+            appState.gameData.connection && appState.gameData.connection.invoke("SendMovement", movementActionDTO)
 
             dispatch({ type: 'SEND_MOVEMENT', direction: direction });
         }
