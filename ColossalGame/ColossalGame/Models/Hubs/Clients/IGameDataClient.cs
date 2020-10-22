@@ -9,5 +9,7 @@ namespace ColossalGame.Models.Hubs.Clients
     public interface IGameDataClient
     {
         Task ReceiveString(string message);
+
+        Task ReceiveToken(string message);
     }
 }

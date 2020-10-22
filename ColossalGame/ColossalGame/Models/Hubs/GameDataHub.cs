@@ -13,10 +13,12 @@ namespace ColossalGame.Models.Hubs
     public class GameDataHub : Hub<IGameDataClient>, IGameDataMessageTypes
     {
         private readonly Interpolator _interpolator;
+        private readonly LoginService _ls;
 
-         public GameDataHub(Interpolator interpolator)
+         public GameDataHub(Interpolator interpolator, LoginService ls)
          {
              _interpolator = interpolator;
+            _ls = ls;
          }
 
 /*        public GameDataHub()
@@ -37,6 +39,16 @@ namespace ColossalGame.Models.Hubs
         public async Task FireWeapon(string message)
         {
             await Clients.All.ReceiveString("This was your message: " + message);
+        }
+
+        public async Task TempLogin(string username, string password)
+        {
+            _ls.DeleteUser(username);
+            _ls.SignUp(username, password);
+            string token = _ls.SignIn(username, password);
+
+
+            await Clients.Caller.ReceiveString(token);
         }
 
         public async Task SendMovement(MovementAction movementAction)
