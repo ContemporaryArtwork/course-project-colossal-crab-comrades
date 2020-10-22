@@ -14,15 +14,15 @@ namespace ColossalGame.Models.Hubs
     {
         private readonly Interpolator _interpolator;
 
-        public GameDataHub(Interpolator interpolator)
-        {
-            _interpolator = interpolator;
-        }
+         public GameDataHub(Interpolator interpolator)
+         {
+             _interpolator = interpolator;
+         }
 
-        public GameDataHub()
+/*        public GameDataHub()
         {
             //Method only exists for Test Client for GameDataHub. Need to find way to simulate interpolator working.
-        }
+        }*/
 
         public async Task ChangeWeapon(string message)
         {
@@ -39,14 +39,14 @@ namespace ColossalGame.Models.Hubs
             await Clients.All.ReceiveString("This was your message: " + message);
         }
 
-        public async Task SendMovement(object movementAction)
+        public async Task SendMovement(MovementAction movementAction)
         {
             bool res = false;
             
 
             if (_interpolator != null)
             {
-                res = _interpolator.ParseAction((MovementAction)movementAction);
+                res = _interpolator.ParseAction(movementAction);
             }
 
             var responseString = res ? "Action accepted by interpolator" :
