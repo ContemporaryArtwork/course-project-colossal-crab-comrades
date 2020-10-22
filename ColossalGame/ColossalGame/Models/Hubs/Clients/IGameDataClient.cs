@@ -10,6 +10,6 @@ namespace ColossalGame.Models.Hubs.Clients
     {
         Task ReceiveString(string message);
         Task ReceiveMessage(ASignalRDTO message);
-        Task ReceiveToken(string message);
+        Task ReceiveToken(TokenMessageDTO message);
     }
 }

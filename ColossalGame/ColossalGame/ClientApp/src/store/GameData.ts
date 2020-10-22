@@ -8,6 +8,24 @@ import getCookie from "../Helpers/GetCookies"
 // STATE - This defines the type of data maintained in the Redux store.
 
 
+export interface GameObjectModel {
+
+    YPos: number,
+    XPos: number
+}
+export interface PlayerModel {
+    Username: string,
+    YPos: number,
+    XPos: number
+}
+
+export interface GameLogicMessage {
+    objectList: GameObjectModel[],
+    playerDict: Map<string, PlayerModel>
+}
+
+
+
 export enum Direction {
     Down = 0,
     Up,
@@ -37,10 +55,11 @@ export interface PlayerData {
 }
 
 export interface GameDataState {
-    isLoading: boolean;
-
+    isLoading: boolean,
+    token?: string,
     connection?: HubConnection,
-    playerData: PlayerData
+    playerData: PlayerData,
+    currentGameState?: GameLogicMessage
 }
 
 // -----------------
@@ -60,6 +79,20 @@ export interface SetUsernameAction {
     type: 'SET_USERNAME';
     username: string;
 }
+export interface TempLoginAction {
+    type: 'TEMP_LOGIN_SENT';
+    username: string,
+    password: string
+}
+export interface ReceivedTokenAction {
+    type: 'RECEIVE_TOKEN';
+    token: string
+}
+export interface ReceivePositionsUpdateAction {
+    type: 'RECEIVE_POSITIONS_UPDATE';
+    objectList: GameObjectModel[],
+    playerDict: Map<string, PlayerModel>
+}
 
 /*export interface ReceivedPostionalUpdatesAction {
     type: 'RECEIVED_MESSAGE';
@@ -69,9 +102,9 @@ export interface SetUsernameAction {
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-export type KnownAction = InitializeAction | SendMovementAction | SetUsernameAction;
+export type KnownAction = InitializeAction | SendMovementAction | SetUsernameAction | TempLoginAction | ReceivedTokenAction | ReceivePositionsUpdateAction;
 
-const SignalRActionsList: string[] = ["RECEIVED_STRING"]
+const SignalRActionsList: string[] = ["RECEIVED_STRING", "RECEIVE_TOKEN", "RECEIVE_POSITIONS_UPDATE"];
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
 // They don't directly mutate state, but they can have external side-effects (such as loading data).
@@ -90,18 +123,29 @@ export const actionCreators = {
         }
     },
 
-    sendMovementAction: (direction: Direction): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    tempLogin: (username: string, password: string): AppThunkAction<KnownAction> => (dispatch, getState) => {
         const appState = getState();
         if (appState && appState.gameData && appState.gameData.connection) {
 
-            //TEMPORARY
-            let cookieVal = getCookie("auth-token") as string;
-            var tokenString = (cookieVal !== undefined) ? cookieVal : "";
 
+            appState.gameData.connection && appState.gameData.connection.invoke("TempLogin", username,password)
+
+            dispatch({ type: 'TEMP_LOGIN_SENT', username: username, password: password });
+        }
+    },
+
+    sendMovementAction: (direction: Direction): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        const appState = getState();
+        if (appState && appState.gameData && appState.gameData.connection && appState.gameData.token) {
+
+            //TEMPORARY
+            //let cookieVal = getCookie("auth-token") as string;
+            // tokenString = (cookieVal !== undefined) ? cookieVal : "";
+            console.log("about to send movement");
 
             const movementActionDTO: MovementAction = {
-                Username: appState.gameData.playerData.username,
-                Token: tokenString,
+                Username: "admin1"/*appState.gameData.playerData.username*/,
+                Token: appState.gameData.token,
                 Direction: direction
             }
             appState.gameData.connection && appState.gameData.connection.invoke("SendMovement", movementActionDTO)
@@ -115,7 +159,7 @@ export const actionCreators = {
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
 
 const unloadedState: GameDataState = {
-    isLoading: false, playerData: {
+    isLoading: false,playerData: {
         username: "", position: { coords: { x: 0, y: 0 }, direction: Direction.Right }
     }
 };
@@ -134,6 +178,18 @@ export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined
                 playerData: {
                     username: "", position: { coords: { x: 0, y: 0 }, direction: Direction.Right }
                 }
+            };
+        case 'TEMP_LOGIN_SENT':
+            return {
+                ...state, playerData: { ...state.playerData, username: action.username }
+            };
+        case 'RECEIVE_TOKEN':
+            return {
+                ...state, token: action.token
+            };
+        case 'RECEIVE_POSITIONS_UPDATE':
+            return {
+                ...state, currentGameState: { playerDict: action.playerDict, objectList: action.objectList }
             };
         case 'SEND_MOVEMENT':
             return state;

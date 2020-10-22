@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import * as Phaser from 'phaser';
 import "./GameStartRenderer.css";
 import { connect } from 'react-redux';
@@ -25,10 +25,11 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         super(props);
         this.update = this.update.bind(this);
     }
-    componentDidMount () {
+    async componentDidMount () {
 
         var x = this.props;
-        this.props.initialize();
+        await this.props.initialize();
+        setTimeout(() => { this.props.tempLogin("admin1", "password"); }, 1000);
 
         game = new Phaser.Game({
             type: Phaser.AUTO,
