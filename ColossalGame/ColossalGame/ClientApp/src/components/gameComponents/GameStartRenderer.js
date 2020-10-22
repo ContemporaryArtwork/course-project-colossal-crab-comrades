@@ -54,18 +54,18 @@ var GameMainMenuToggler = /** @class */ (function (_super) {
     };
     GameMainMenuToggler.prototype.create = function () {
         cursors = this.input.keyboard.createCursorKeys();
-        this.add.image(400, 300, "ground");
+        this.add.image(100, 300, "ground");
         player = this.physics.add.sprite(100, 450, "playerThing");
-        this.add.text(100, 500, "OH YEAH DESERT GROUND", {
+        this.add.text(500, 550, "*Test Grounds*", {
             font: "40px Arial",
-            fill: "#000000"
-        });
-        this.add.text(300, 400, "DESERT OR DESSERT\n AM I RIGHT???", {
-            font: "40px Arial",
-            fill: "#000000"
+            fill: "#001DFF"
         });
     };
     GameMainMenuToggler.prototype.update = function () {
+        if (cursors.up.isDown) { /*send it*/ }
+        if (cursors.left.isDown) { /*send it*/ }
+        if (cursors.down.isDown) { /*send it*/ }
+        if (cursors.right.isDown) { /*send it*/ }
         /*
         0 = Up Move
         1 = Left Move
