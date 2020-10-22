@@ -9,7 +9,7 @@ namespace ColossalGame.Models.Hubs.Clients
     public interface IGameDataClient
     {
         Task ReceiveString(string message);
-
+        Task ReceiveMessage(ASignalRDTO message);
         Task ReceiveToken(string message);
     }
 }

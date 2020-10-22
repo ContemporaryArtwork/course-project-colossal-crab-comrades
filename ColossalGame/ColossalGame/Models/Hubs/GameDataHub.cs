@@ -13,18 +13,33 @@ namespace ColossalGame.Models.Hubs
     public class GameDataHub : Hub<IGameDataClient>, IGameDataMessageTypes
     {
         private readonly Interpolator _interpolator;
+        private readonly GameLogic _gameLogic;
         private readonly LoginService _ls;
 
-         public GameDataHub(Interpolator interpolator, LoginService ls)
-         {
-             _interpolator = interpolator;
+        public GameDataHub(Interpolator interpolator, GameLogic gamelogic, LoginService ls)
+        {
+            _interpolator = interpolator;
+            _gameLogic = gamelogic;
+            _gameLogic.RaiseCustomEvent += HandleCustomEvent;
             _ls = ls;
-         }
+        }
 
 /*        public GameDataHub()
         {
             //Method only exists for Test Client for GameDataHub. Need to find way to simulate interpolator working.
         }*/
+
+        async void HandleCustomEvent(object sender, CustomEventArgs e)
+        {
+            PositionUpdateDTO positionUpdateDTO = new PositionUpdateDTO
+            {
+                type= "POSITION_UPDATE",
+                ObjectList= e.ObjectList,
+                PlayerDict=e.PlayerDict
+            }
+            await Clients.All.ReceiveMessage()
+        }
+
 
         public async Task ChangeWeapon(string message)
         {
