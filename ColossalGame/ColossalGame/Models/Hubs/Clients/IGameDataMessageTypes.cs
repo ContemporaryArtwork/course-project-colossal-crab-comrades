@@ -7,7 +7,7 @@ namespace ColossalGame.Models.Hubs.Clients
 {
     public interface IGameDataMessageTypes
     {
-        Task SendMovement(string message);
+        Task SendMovement(MovementAction movementAction);
 
         Task ExitGame(string message);
 
