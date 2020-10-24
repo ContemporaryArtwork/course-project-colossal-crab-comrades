@@ -26,7 +26,7 @@ namespace ColossalGame.Services
         /// <summary>
         /// Amount of seconds per tick
         /// </summary>
-        private readonly int tickRate = 50;
+        private readonly int tickRate = 100;
 
         /// <summary>
         /// Dictionary of usernames to PlayerModels.
@@ -101,6 +101,7 @@ namespace ColossalGame.Services
         /// <param name="yPos">Desired y position</param>
         private void SpawnPlayer(string username, double xPos = 0.0, double yPos = 0.0)
         {
+            if (string.IsNullOrEmpty(username)) return;
             if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
 
             var pm = new PlayerModel();
@@ -128,11 +129,12 @@ namespace ColossalGame.Services
         /// </summary>
         private void simulateOneServerTick()
         {
-
+            bool somethingChanged = false;
             while (PlayerDespawnQueue.Count != 0)
             {
                 var p = PlayerDespawnQueue.Dequeue();
                 PlayerDictionary.Remove(p);
+                somethingChanged = true;
             }
 
             while (PlayerSpawnQueue.Count != 0)
@@ -140,14 +142,19 @@ namespace ColossalGame.Services
                 var p = PlayerSpawnQueue.Dequeue();
                 //PlayerDictionary.Add(p.Username, p);
                 PlayerDictionary[p.Username] = p;
+                somethingChanged = true;
             }
 
             while (ActionQueue.Count != 0)
             {
                 HandleAction(ActionQueue.Dequeue());
+                somethingChanged = true;
             }
 
+            if (somethingChanged) PublishState();
             
+
+
 
             //TODO Handle non-player objects
 
@@ -172,18 +179,23 @@ namespace ColossalGame.Services
             instanceCaller.Start();
         }
 
+        private readonly object _serverLock = new object();
+
         /// <summary>
         /// Keeps looping every {tickRate} milliseconds, simulating a new server tick every time
         /// </summary>
         private void RunServer()
         {
-            while (KeepGoing)
+            lock (_serverLock)
             {
-                Thread.Sleep(tickRate);
-                simulateOneServerTick();
-                tickCounter++;
-                //TODO: Add logic dictating when to publish the state instead of after every tick
-                PublishState();
+                while (KeepGoing)
+                {
+
+                    simulateOneServerTick();
+                    tickCounter++;
+                    //TODO: Add logic dictating when to publish the state instead of after every tick
+                    Thread.Sleep(tickRate);
+                }
             }
         }
 
