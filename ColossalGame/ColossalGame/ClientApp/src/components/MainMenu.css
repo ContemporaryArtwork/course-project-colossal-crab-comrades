@@ -1,5 +1,11 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
 
+/*-----------------
+
+    General CSS
+    
+----------------*/
+
 :root {
 
     --primary-color: #3a4052;
@@ -62,11 +68,23 @@ h1 {
     transform: translate(-50%, -50%);
 }
 
+
 .content{
-    position: absolute;
-    transform:translate(0%, 30%);
+   color: white;
+}
+
+.containMain{
+    display: block;
+    width: 100%;
+    height: 50%;
     z-index: 10;
 }
+
+/*-----------------
+
+    Settings
+    
+----------------*/
 
 .settingsButton {
     position: fixed;
@@ -109,6 +127,7 @@ h1 {
 
 .loginPanel {
     z-index: 20;
+    position: absolute;
     margin: 0 auto;
     width: 30%;
     height: 60%;
@@ -122,6 +141,7 @@ h1 {
 
 .registerPanel {
     z-index: 20;
+    position: absolute;
     margin: 0 auto;
     width: 30%;
     height: 60%;
@@ -178,13 +198,90 @@ input {
     
 ----------------*/
 
-.classSelect {
+.alignButtons {
+    display: inline-block;
+}
+
+.startGameButton {
     z-index: 10;
-    background-color: yellow;
-    display: block;
+    background-color: #fee600;
     width: 200px;
     height: 50px;
     border-radius: 10px;
     font-weight: bold;
 }
 
+.classSelectButton {
+    z-index: 10;
+    background-color: #fee600;
+    width: 200px;
+    height: 50px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.classColor {
+    width: 200px;
+    height: 50px;
+    background-color: white;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+}
+
+.loadout {
+    z-index: 20;
+    position: absolute;
+    margin: 0 auto;
+    display:none;
+    width: 95%;
+    height: 95%;
+    border-radius: 20px;
+    background-color: aliceblue;
+}
+
+.classContainer {
+    border: 1px solid #e6e6e6;
+    border-radius: 5px;
+    background: white;
+    box-shadow: 0 1px 1px rgb(0,0,0,0.5);
+    padding: 5px;
+    margin-left: 50px;
+    display: inline-block;
+}
+
+.loadButton {
+    width: 50%;
+    margin-top: 10px;
+    border-radius: 10px;
+    background-color: dimgray;
+    color: white;
+    font-weight: 700;
+}
+
+.Heavy {
+    height: 300px;
+    width: 300px;
+    border: solid 1px;
+    border-color: black;
+    border-radius: 10px;
+    background-color: purple;
+}
+
+.Brawler {
+    height: 300px;
+    width: 300px;
+    border: solid 1px;
+    border-color: black;
+    border-radius: 10px;
+    background-color: red;
+}
+
+.Builder {
+    height: 300px;
+    width: 300px;
+    border: solid 1px;
+    border-color: black;
+    border-radius: 10px;
+    background-color: yellowgreen;
+}

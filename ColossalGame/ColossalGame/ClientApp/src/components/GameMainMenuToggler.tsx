@@ -2,8 +2,10 @@
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { ApplicationState } from '../store';
+import * as Phaser from 'phaser';
 import * as GameMainMenuTogglerStore from "../store/GameMainMenuToggler";
 import MainMenu from './MainMenu';
+import GameStartRenderer from './gameComponents/GameStartRenderer';
 
 type GameMainMenuTogglerProps =
     GameMainMenuTogglerStore.GameMainMenuTogglerState &
@@ -15,7 +17,7 @@ class GameMainMenuToggler extends React.PureComponent<GameMainMenuTogglerProps> 
 
     render() {
         return (
-            this.props.inGame ? <div>[GAME PLACEHOLDER TEXT]</div> : <MainMenu />            
+            this.props.inGame ? <GameStartRenderer/> : <MainMenu />            
             );  
     }
 };

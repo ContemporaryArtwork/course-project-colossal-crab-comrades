@@ -71,6 +71,21 @@ export const setupSignalRConnection = (connectionHub, actionEventList) => (dispa
             dispatch(res);
         }
     });
+    connection.on('ReceiveToken', res => {
+        //const eventHandler = actionEventMap[res.type];
+        //eventHandler && dispatch(eventHandler(res));
+        console.log("Yo I got this token!")
+        console.log(res)
+        if (actionEventList && actionEventList.includes(res.type)) {
+            dispatch(res);
+        }
+    });
+    connection.on('ReceiveString', res => {
+        //const eventHandler = actionEventMap[res.type];
+        //eventHandler && dispatch(eventHandler(res));
+        console.log("Hey I got this string!")
+        console.log(res)
+    });
 
     return connection;
 };
