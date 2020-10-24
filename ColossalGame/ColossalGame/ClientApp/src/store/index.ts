@@ -2,7 +2,6 @@ import * as WeatherForecasts from './WeatherForecasts';
 import * as Counter from './Counter';
 import * as GlobalChat from './GlobalChat';
 import * as GameMainMenuToggler from './GameMainMenuToggler';
-import * as PlayerOutputProcessor from './PlayerOutputProcessor';
 import * as GameData from './GameData';
 
 // The top-level state object
@@ -11,7 +10,6 @@ export interface ApplicationState {
     weatherForecasts: WeatherForecasts.WeatherForecastsState | undefined;
     globalchat: GlobalChat.GlobalChatState | undefined;
     gameMainMenuToggler: GameMainMenuToggler.GameMainMenuTogglerState | undefined;
-    playerOutputProcessor: PlayerOutputProcessor.PlayerOutputProcessorState | undefined;
     gameData: GameData.GameDataState | undefined;
 }
 
@@ -23,7 +21,6 @@ export const reducers = {
     weatherForecasts: WeatherForecasts.reducer,
     globalchat: GlobalChat.reducer,
     gameMainMenuToggler: GameMainMenuToggler.reducer,
-    playerOutputProcessor: PlayerOutputProcessor.reducer,
     gameData: GameData.reducer
 };
 

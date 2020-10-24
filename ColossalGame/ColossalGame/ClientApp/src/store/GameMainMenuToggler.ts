@@ -5,6 +5,7 @@
 
 export interface GameMainMenuTogglerState {
     inGame: boolean;
+    loggedIn: boolean;
 }
 
 // -----------------
@@ -15,12 +16,16 @@ export interface GameMainMenuTogglerState {
 export interface ToggleGameAction {
     type: 'TOGGLE_GAME';
 }
+export interface ToggleLoggedInAction {
+    type: 'TOGGLE_LOGGED_IN';
+}
 
 
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-export type KnownAction = ToggleGameAction;
+export type KnownAction = ToggleGameAction | ToggleLoggedInAction;
+
 
 
 // ----------------
@@ -30,13 +35,14 @@ export type KnownAction = ToggleGameAction;
 //WHAT IS AVAILABLE TO THE FRONT END!!!!!!!!!!!!!!!!!!!!!
 export const actionCreators = {
 
-    toggleGame: () => ({ type: 'TOGGLE_GAME' } as ToggleGameAction)
+    toggleGame: () => ({ type: 'TOGGLE_GAME' } as ToggleGameAction),
+    toggleLoggedIn: () => ({ type: 'TOGGLE_LOGGED_IN' } as ToggleLoggedInAction)
 };
 
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
 
-const defaultState: GameMainMenuTogglerState = { inGame: false };
+const defaultState: GameMainMenuTogglerState = { inGame: false, loggedIn: false };
 
 export const reducer: Reducer<GameMainMenuTogglerState> = (state: GameMainMenuTogglerState | undefined, incomingAction: Action): GameMainMenuTogglerState => {
     if (state === undefined) {
@@ -46,7 +52,9 @@ export const reducer: Reducer<GameMainMenuTogglerState> = (state: GameMainMenuTo
     const action = incomingAction as KnownAction;
     switch (action.type) {
         case 'TOGGLE_GAME':
-            return {inGame: !state.inGame};
+            return {...state, inGame: !state.inGame };
+        case 'TOGGLE_LOGGED_IN':
+            return {...state, loggedIn: !state.loggedIn };
         default:
             return state;
     }

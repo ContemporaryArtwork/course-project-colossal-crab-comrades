@@ -15,10 +15,21 @@ type GameMainMenuTogglerProps =
 
 class GameMainMenuToggler extends React.PureComponent<GameMainMenuTogglerProps> {
 
+    componentDidMount() {
+        //Test "logging in"
+        this.props.toggleLoggedIn();
+        
+    }
+
     render() {
-        return (
-            this.props.inGame ? <GameStartRenderer/> : <MainMenu />            
-            );  
+
+        
+
+        if (this.props.loggedIn) {
+            return (this.props.inGame ? <GameStartRenderer /> : <MainMenu />);
+        } else {
+            return (<div>YES LETS LOG IN </div>);
+        }
     }
 };
 
