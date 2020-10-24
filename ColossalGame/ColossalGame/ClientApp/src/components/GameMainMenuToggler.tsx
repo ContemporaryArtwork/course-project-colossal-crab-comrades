@@ -6,6 +6,7 @@ import * as Phaser from 'phaser';
 import * as GameMainMenuTogglerStore from "../store/GameMainMenuToggler";
 import MainMenu from './MainMenu';
 import GameStartRenderer from './gameComponents/GameStartRenderer';
+import UserAuth from './UserAuth';
 
 type GameMainMenuTogglerProps =
     GameMainMenuTogglerStore.GameMainMenuTogglerState &
@@ -17,7 +18,7 @@ class GameMainMenuToggler extends React.PureComponent<GameMainMenuTogglerProps> 
 
     componentDidMount() {
         //Test "logging in"
-        this.props.toggleLoggedIn();
+        //this.props.toggleLoggedIn();
         
     }
 
@@ -28,7 +29,7 @@ class GameMainMenuToggler extends React.PureComponent<GameMainMenuTogglerProps> 
         if (this.props.loggedIn) {
             return (this.props.inGame ? <GameStartRenderer /> : <MainMenu />);
         } else {
-            return (<div>YES LETS LOG IN </div>);
+            return (<UserAuth/>);
         }
     }
 };
