@@ -26,7 +26,7 @@ namespace ColossalGame.Services
         /// <summary>
         /// Amount of seconds per tick
         /// </summary>
-        private readonly int tickRate = 100;
+        private double tickRate = 1000.0;
 
         /// <summary>
         /// Dictionary of usernames to PlayerModels.
@@ -41,6 +41,10 @@ namespace ColossalGame.Services
         /// </summary>
         public event EventHandler<CustomEventArgs> RaiseCustomEvent;
 
+        public void ClearEh()
+        {
+            this.RaiseCustomEvent = null;
+        }
         /// <summary>
         /// Queue of Player Actions
         /// </summary>
@@ -91,6 +95,11 @@ namespace ColossalGame.Services
                 //PlayerDictionary.Add(m.Username, pm);
                 PlayerDictionary[m.Username] = pm;
             }
+        }
+
+        public Boolean IsPlayerSpawned(string username)
+        {
+            return PlayerDictionary.ContainsKey(username);
         }
 
         /// <summary>
@@ -179,34 +188,49 @@ namespace ColossalGame.Services
             instanceCaller.Start();
         }
 
-        private readonly object _serverLock = new object();
-
+        private static readonly object _serverLock = new object();
+        private DateTime lastTick = DateTime.Now;
         /// <summary>
         /// Keeps looping every {tickRate} milliseconds, simulating a new server tick every time
         /// </summary>
         private void RunServer()
         {
-            lock (_serverLock)
-            {
+                TimeSpan ts = new TimeSpan();
                 while (KeepGoing)
                 {
+                    
 
-                    simulateOneServerTick();
-                    tickCounter++;
-                    //TODO: Add logic dictating when to publish the state instead of after every tick
-                    Thread.Sleep(tickRate);
+                    if (ts.TotalMilliseconds >= tickRate)
+                    {
+                        lastTick = DateTime.Now;
+                        Console.WriteLine("GameLogic: " + DateTime.Now.Second);
+                        Console.WriteLine("ts: " + ts.Milliseconds);
+                        simulateOneServerTick();
+
+                        tickCounter++;
+                        
+                    }
+
+                    ts = DateTime.Now - lastTick;
+
+
                 }
-            }
+            
         }
+
+
 
         /// <summary>
         /// Publishes current state to event handler
         /// </summary>
         private void PublishState()
         {
+            
+            Console.WriteLine("Publish: "+DateTime.Now.Second);
             var (returnedList, returnedDictionary) = GetState();
             var e = new CustomEventArgs(returnedList, returnedDictionary);
             OnRaiseCustomEvent(e);
+            
         }
 
         /// <summary>

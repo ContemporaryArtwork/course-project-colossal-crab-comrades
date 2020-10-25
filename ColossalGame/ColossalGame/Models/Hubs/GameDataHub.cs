@@ -16,12 +16,15 @@ namespace ColossalGame.Models.Hubs
         private readonly GameLogic _gameLogic;
         private readonly LoginService _ls;
         private readonly IHubContext<GameDataHub, IGameDataClient> _hubContext;
-
+        private bool added = false;
         public GameDataHub(Interpolator interpolator, GameLogic gamelogic, LoginService ls, IHubContext<GameDataHub, IGameDataClient> hubContext)
         {
+            Console.WriteLine("Constructor called");
             _interpolator = interpolator;
             _gameLogic = gamelogic;
+            _gameLogic.ClearEh();
             _gameLogic.RaiseCustomEvent += HandleCustomEvent;
+            
             _ls = ls;
             _hubContext = hubContext;
         }
@@ -30,17 +33,21 @@ namespace ColossalGame.Models.Hubs
         {
             //Method only exists for Test Client for GameDataHub. Need to find way to simulate interpolator working.
         }*/
-
+        private DateTime lastUpdate = DateTime.Now;
          public async void HandleCustomEvent(object sender, CustomEventArgs e)
-        {
-            PositionUpdateDTO positionUpdateDTO = new PositionUpdateDTO
-            {
-                type = "RECEIVE_POSITIONS_UPDATE",
-                ObjectList = e.ObjectList,
-                PlayerDict = e.PlayerDict
-            };
-            await _hubContext.Clients.All.ReceiveMessage(positionUpdateDTO);
-        }
+         {
+             
+                 
+                 PositionUpdateDTO positionUpdateDTO = new PositionUpdateDTO
+                 {
+                     type = "RECEIVE_POSITIONS_UPDATE",
+                     ObjectList = e.ObjectList,
+                     PlayerDict = e.PlayerDict
+                 };
+                 await _hubContext.Clients.All.ReceiveMessage(positionUpdateDTO);
+                 lastUpdate = DateTime.Now;
+             
+         }
 
 
         public async Task ChangeWeapon(string message)
@@ -67,7 +74,7 @@ namespace ColossalGame.Models.Hubs
 
             await Clients.Caller.ReceiveToken(new TokenMessageDTO() { type="RECEIVE_TOKEN", Token=token });
         }
-
+        
         public async Task SendMovement(MovementAction movementAction)
         {
             bool res = false;
@@ -77,7 +84,11 @@ namespace ColossalGame.Models.Hubs
             {
                 try
                 {
-                    _gameLogic.AddPlayerToSpawnQueue(movementAction.Username);
+                    if (!_gameLogic.IsPlayerSpawned(movementAction.Username))
+                    {
+                        _gameLogic.AddPlayerToSpawnQueue(movementAction.Username);
+                    }
+                    
                     res = _interpolator.ParseAction(movementAction);
                 }
                 catch(Exception e)
