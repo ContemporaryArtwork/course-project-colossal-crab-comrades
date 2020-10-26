@@ -14,27 +14,54 @@ type GameMainMenuTogglerProps =
     RouteComponentProps<{}>;
 
 
+
 class UserAuth extends React.PureComponent<GameMainMenuTogglerProps> {
 
+
+    componentDidMount() {
+        //Test "logging in"
+        //this.props.toggleLoginPage();
+        this.goToMainMenu = this.goToMainMenu.bind(this);
+    }
+
+    goToMainMenu = (e: React.FormEvent<HTMLFormElement>) => {        
+            e.preventDefault();
+            alert("FIRST");
+            this.props.toggleLoggedIn();
+            alert("SECOND");
+        }
+
     render() {
-        return (
-            <body>
-                <div className="enclosing">
+        if (this.props.loginPage) {
+            return (
+                <body>
+                    <div className="enclosing">
 
-                    <div className="video-container">
-                        <video src={BGVideo} loop autoPlay muted />
-                    </div>
+                        <div className="video-container">
+                            <video src={BGVideo} loop autoPlay muted />
+                        </div>
 
-                    <div className="containMain">
-                        <div className="content">
-                            <h1>Pre Alpha CSE 442 Project</h1>
-                            <h3>Founders (A-Z): Eoghan Mccarroll, Jacob Santoni, Joshua Lacey, Kyle Pellechia, Zachary Wagner </h3>
+                        <div className="containMain">
+                            <div className="content">
+
+                                <div className="loginForm">
+                                    <form onSubmit={this.goToMainMenu}>
+                                        <label htmlFor="fname">Username:</label><br />
+                                        <input type="text" id="fname" name="fname" placeholder="Awesome Username" /><br />
+                                        <label htmlFor="lname">Password:</label><br />
+                                        <input type="text" id="lname" name="lname" placeholder="Super Secure Password" /><br /><br />
+                                        <input type="submit" value="Submit"/>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </body>
-        );
-    }
+                </body>
+            );
+        } else {
+            return (<div>hi</div>);
+        }
+        }
 }
 
 
