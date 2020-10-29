@@ -1,0 +1,10 @@
+version: v1.0.0
+steps:
+# Build target image
+- cmd: docker compose -f "docker-compose-hosted.yml" -f "docker-compose.vs.release.yml" build
+# Run image 
+- cmd: docker compose -f "docker-compose-hosted.yml" -f "docker-compose.vs.release.yml" up
+  detach: true
+- cmd: docker compose down
+# Push image
+- cmd: docker compose -f "docker-compose-hosted.yml" -f "docker-compose.vs.release.yml" push
