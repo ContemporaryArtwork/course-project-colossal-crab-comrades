@@ -26,7 +26,7 @@ namespace ColossalGame.Services
         /// <summary>
         /// Amount of seconds per tick
         /// </summary>
-        private readonly int tickRate = 50;
+        private double tickRate = 1000.0;
 
         /// <summary>
         /// Dictionary of usernames to PlayerModels.
@@ -41,6 +41,10 @@ namespace ColossalGame.Services
         /// </summary>
         public event EventHandler<CustomEventArgs> RaiseCustomEvent;
 
+        public void ClearEh()
+        {
+            this.RaiseCustomEvent = null;
+        }
         /// <summary>
         /// Queue of Player Actions
         /// </summary>
@@ -93,6 +97,11 @@ namespace ColossalGame.Services
             }
         }
 
+        public Boolean IsPlayerSpawned(string username)
+        {
+            return PlayerDictionary.ContainsKey(username);
+        }
+
         /// <summary>
         /// Spawns a player based on input username, subject to change.
         /// </summary>
@@ -101,6 +110,7 @@ namespace ColossalGame.Services
         /// <param name="yPos">Desired y position</param>
         private void SpawnPlayer(string username, double xPos = 0.0, double yPos = 0.0)
         {
+            if (string.IsNullOrEmpty(username)) return;
             if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
 
             var pm = new PlayerModel();
@@ -128,11 +138,12 @@ namespace ColossalGame.Services
         /// </summary>
         private void simulateOneServerTick()
         {
-
+            bool somethingChanged = false;
             while (PlayerDespawnQueue.Count != 0)
             {
                 var p = PlayerDespawnQueue.Dequeue();
                 PlayerDictionary.Remove(p);
+                somethingChanged = true;
             }
 
             while (PlayerSpawnQueue.Count != 0)
@@ -140,14 +151,19 @@ namespace ColossalGame.Services
                 var p = PlayerSpawnQueue.Dequeue();
                 //PlayerDictionary.Add(p.Username, p);
                 PlayerDictionary[p.Username] = p;
+                somethingChanged = true;
             }
 
             while (ActionQueue.Count != 0)
             {
                 HandleAction(ActionQueue.Dequeue());
+                somethingChanged = true;
             }
 
+            if (somethingChanged) PublishState();
             
+
+
 
             //TODO Handle non-player objects
 
@@ -172,29 +188,49 @@ namespace ColossalGame.Services
             instanceCaller.Start();
         }
 
+        private static readonly object _serverLock = new object();
+        private DateTime lastTick = DateTime.Now;
         /// <summary>
         /// Keeps looping every {tickRate} milliseconds, simulating a new server tick every time
         /// </summary>
         private void RunServer()
         {
-            while (KeepGoing)
-            {
-                Thread.Sleep(tickRate);
-                simulateOneServerTick();
-                tickCounter++;
-                //TODO: Add logic dictating when to publish the state instead of after every tick
-                PublishState();
-            }
+                TimeSpan ts = new TimeSpan();
+                while (KeepGoing)
+                {
+                    
+
+                    if (ts.TotalMilliseconds >= tickRate)
+                    {
+                        lastTick = DateTime.Now;
+                        Console.WriteLine("GameLogic: " + DateTime.Now.Second);
+                        Console.WriteLine("ts: " + ts.Milliseconds);
+                        simulateOneServerTick();
+
+                        tickCounter++;
+                        
+                    }
+
+                    ts = DateTime.Now - lastTick;
+
+
+                }
+            
         }
+
+
 
         /// <summary>
         /// Publishes current state to event handler
         /// </summary>
         private void PublishState()
         {
+            
+            Console.WriteLine("Publish: "+DateTime.Now.Second);
             var (returnedList, returnedDictionary) = GetState();
             var e = new CustomEventArgs(returnedList, returnedDictionary);
             OnRaiseCustomEvent(e);
+            
         }
 
         /// <summary>
