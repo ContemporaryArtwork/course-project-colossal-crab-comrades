@@ -137,16 +137,40 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps> {
                         <div className="signContainer">
                             <div className="classContainer">
                                 <div className="Heavy"></div>
+                                <p> Class Summary: <br/>
+                                    Pros:<br />
+                                    - More Health <br />
+                                    Cons:<br />
+                                    - shorter firing range<br />
+                                    Abilities: <br />
+                                    - Bulk Up: gains a shield <br/>for 5 seconds
+                                </p>
                                 <button className="loadButton" onClick={this.ChooseHeavy}>HEAVY</button>
                             </div>
 
                             <div className="classContainer">
                                 <div className="Brawler"></div>
+                                <p> Class Summary: <br />
+                                    Pros:<br />
+                                    - faster rate of fire <br />
+                                    Cons:<br />
+                                    - No special attributes<br />
+                                    Abilities: <br />
+                                    - Frenzy: gains rate of fire <br/> increase for 5 seconds
+                                </p>
                                 <button className="loadButton" onClick={this.ChooseBrawler}>BRAWLER</button>
                             </div>
 
                             <div className="classContainer">
                                 <div className="Builder"></div>
+                                <p> Class Summary: <br />
+                                    Pros:<br />
+                                    - build structures to protect you<br/>
+                                    Cons:<br />
+                                    - Not as much firepower <br />
+                                    Abilities: <br />
+                                    - Hammer time: No cooldown on <br/> building for 5 seconds 
+                                </p>
                                 <button className="loadButton" onClick={this.ChooseBuilder}>BUILDER</button>
                             </div>
                         </div>
