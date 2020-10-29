@@ -1,5 +1,6 @@
 using ColossalGame.Controllers;
-using ColossalGame.Models.Hubs;
+using ColossalGame.Hubs.Chat;
+using ColossalGame.Hubs.GameData;
 using ColossalGame.Models;
 using ColossalGame.Services;
 using Microsoft.AspNetCore.Builder;

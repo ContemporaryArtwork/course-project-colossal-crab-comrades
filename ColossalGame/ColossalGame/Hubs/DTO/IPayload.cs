@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ColossalGame.Models
+namespace ColossalGame.Hubs.DTO
 {
-    public abstract class ASignalRDTO : IPayload
+    interface IPayload
     {
         public string type { get; set; }
-
     }
 }
