@@ -234,3 +234,16 @@ _Pvt_Extensions
 # bin and obj folders
 bin/
 obj/
+
+ClientApp/src/*.js
+ClientApp/src/*.js.map
+
+ClientApp/src/components/**/*.js
+ClientApp/src/components/**/*.js.map
+!ClientApp/src/components/**/js/*.js
+!ClientApp/src/components/**/js/*.js.map
+
+ClientApp/src/Helpers/**/*.js
+ClientApp/src/Helpers/**/*.js.map
+!ClientApp/src/Helpers/**/js/*.js
+!ClientApp/src/Helpers/**/js/*.js.map
