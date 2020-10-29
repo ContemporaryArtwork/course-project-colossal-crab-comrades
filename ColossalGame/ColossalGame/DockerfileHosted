@@ -2,14 +2,22 @@
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 
-RUN curl -sL https://deb.nodesource.com/setup_10.x |  bash -
-RUN apt-get install -y nodejs
-
 WORKDIR /app
 EXPOSE 80
-EXPOSE 443
+
+FROM node:10-alpine as build-node
+WORKDIR /ClientApp
+COPY ColossalGame/ClientApp/package.json .
+COPY ColossalGame/ClientApp/package-lock.json .
+RUN npm install
+COPY ColossalGame/ClientApp/ .
+
+RUN npm run build --yes
+
+
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+ENV BuildingDocker true
 WORKDIR /src
 COPY ["ColossalGame/ColossalGame.csproj", "ColossalGame/"]
 RUN dotnet restore "ColossalGame/ColossalGame.csproj"
@@ -23,4 +31,5 @@ RUN dotnet publish "ColossalGame.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY --from=build-node /ClientApp/build ./ClientApp/build
 ENTRYPOINT ["dotnet", "ColossalGame.dll"]
