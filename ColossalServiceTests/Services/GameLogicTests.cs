@@ -24,8 +24,8 @@ namespace ColossalServiceTests.Services
             this._subUserService = Substitute.For<UserService>("mongodb://localhost:27017/");
             this._subLoginService = Substitute.For<LoginService>(this._subUserService);
             _subLoginService.DeleteUser("realUser");
-            _subLoginService.SignUp("realUser", "123");
             _subLoginService.DeleteUser("realUser2");
+            _subLoginService.SignUp("realUser", "123");
             _subLoginService.SignUp("realUser2", "123");
 
         }
@@ -714,9 +714,9 @@ namespace ColossalServiceTests.Services
                 yPos2);
 
             MovementAction ma2 = new MovementAction();
-            ma.Direction = EDirection.Right;
-            ma.Token = null;
-            ma.Username = username2;
+            ma2.Direction = EDirection.Right;
+            ma2.Token = null;
+            ma2.Username = username2;
             gameLogic.AddActionToQueue(ma2);
 
             // Assert
@@ -772,9 +772,9 @@ namespace ColossalServiceTests.Services
                 yPos2);
 
             MovementAction ma2 = new MovementAction();
-            ma.Direction = EDirection.Left;
-            ma.Token = null;
-            ma.Username = username2;
+            ma2.Direction = EDirection.Left;
+            ma2.Token = null;
+            ma2.Username = username2;
             gameLogic.AddActionToQueue(ma2);
 
             // Assert
