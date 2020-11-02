@@ -34,7 +34,7 @@ namespace ColossalGame.Services
         /// <summary>
         ///     Amount of seconds per tick
         /// </summary>
-        private readonly double tickRate = 1000.0;
+        private readonly double tickRate = 50.0;
 
         /// <summary>
         ///     Constructor for GameLogic class
@@ -93,8 +93,8 @@ namespace ColossalGame.Services
         {
             if (action is MovementAction m)
             {
+                if (!PlayerDictionary.ContainsKey(m.Username)) throw new Exception("Player must be spawned first!");
                 var pm = PlayerDictionary.GetValueOrDefault(m.Username);
-                if (pm == null) throw new Exception("Player must be spawned first!");
                 if (m.Direction == EDirection.Down)
                     pm.YPos -= 1;
                 else if (m.Direction == EDirection.Up)
