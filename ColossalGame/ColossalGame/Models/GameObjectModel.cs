@@ -10,4 +10,10 @@ namespace ColossalGame.Models
         public double YPos { get; set; }
         public double XPos { get; set; }
     }
+
+    public class BulletModel : GameObjectModel
+    {
+        public Angle Angle { get; set; }
+        public double Speed { get; set; }
+    }
 }
