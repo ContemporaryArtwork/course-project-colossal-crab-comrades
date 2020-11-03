@@ -31,10 +31,12 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         await this.props.initialize();
         setTimeout(() => { this.props.tempLogin("admin1", "password"); }, 1000);
 
+
+
         game = new Phaser.Game({
             type: Phaser.AUTO,
-            width: 800,
-            height: 600,
+            width: window.innerWidth,
+            height: window.innerHeight,
             physics: {
                 default: "arcade",
                 arcade: {
@@ -123,7 +125,9 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
 
 
     public render() {
-        return (<div id="gameCanvas" />);
+        return (
+     
+            <div id="gameCanvas" />);
     }  
 };
 
