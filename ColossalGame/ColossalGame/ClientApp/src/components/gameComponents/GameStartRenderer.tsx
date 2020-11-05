@@ -96,7 +96,7 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         var gameState = this.props.currentGameState;
         if (gameState == undefined) {
             //console.log("SHIT");
-        } else if(gameState.playerDict !== undefined){
+        } else if(gameState.playerDict.size>0){
             //console.log("GOOD");
 
             
