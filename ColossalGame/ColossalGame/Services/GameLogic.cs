@@ -26,7 +26,7 @@ namespace ColossalGame.Services
         /// <summary>
         /// Amount of seconds per tick
         /// </summary>
-        private double tickRate = 1000.0;
+        private double tickRate = 5.0;
 
         /// <summary>
         /// Dictionary of usernames to PlayerModels.
