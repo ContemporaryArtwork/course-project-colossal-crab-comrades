@@ -18,6 +18,7 @@ type GameDataProps =
 var game: Phaser.Game;
 var cursors: any;
 var player: any;
+var text: any;
 
 class GameStartRenderer extends React.PureComponent<GameDataProps> {
 
@@ -68,7 +69,8 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         player.collideWorldBounds = true;
         player.enableBody = true;
         player.x = 50;
-        player.y=50;
+        player.y = 50;
+        text = this.add.text(0, 0, "admin1", { font: "16px Arial", fill: "#ffffff" });
         //this.add.image(54, 0, "playerThing");
         this.add.text(
             500,
@@ -104,9 +106,13 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
                 console.log(admin);
                 var xpos = admin.xPos;
                 var ypos = admin.yPos;
+                xpos = Phaser.Math.Interpolation.Bezier([xpos, player.body.x], .8);
+                ypos = Phaser.Math.Interpolation.Bezier([ypos, player.body.y], .8);
                 console.log(xpos);
                 player.body.x = xpos;
                 player.body.y = ypos;
+                text.x = xpos - player.width / 2 + 100;
+                text.y = ypos + player.height/2 - 115;
 
 
             }

@@ -108,16 +108,16 @@ namespace ColossalGame.Services
                 {
                     case EDirection.Down:
                         
-                        pm.ApplyLinearImpulse(new Vector2(0,10f));
+                        pm.ApplyLinearImpulse(new Vector2(0,20f));
                         break;
                     case EDirection.Up:
-                        pm.ApplyLinearImpulse(new Vector2(0, -10f));
+                        pm.ApplyLinearImpulse(new Vector2(0, -20f));
                         break;
                     case EDirection.Left:
-                        pm.ApplyLinearImpulse(new Vector2(-10f, 0));
+                        pm.ApplyLinearImpulse(new Vector2(-20f, 0));
                         break;
                     case EDirection.Right:
-                        pm.ApplyLinearImpulse(new Vector2(10f, 0));
+                        pm.ApplyLinearImpulse(new Vector2(20f, 0));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -157,8 +157,8 @@ namespace ColossalGame.Services
             pm.BodyType = BodyType.Dynamic;
             pm.SetRestitution(0.3f);
             pm.SetFriction(.3f);
-            pm.Mass = .3f;
-            pm.LinearDamping = 5f;
+            pm.Mass = .1f;
+            pm.LinearDamping = 4f;
 
             
             
