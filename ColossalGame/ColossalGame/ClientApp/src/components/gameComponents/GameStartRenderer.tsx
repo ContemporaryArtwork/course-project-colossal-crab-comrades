@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { ApplicationState } from '../../store';
 import * as GameDataStore from "../../store/GameData";
-
+import PlayerModel = GameDataStore.PlayerModel;
 
 
 type GameDataProps =
@@ -65,7 +65,11 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         cursors = this.input.keyboard.createCursorKeys();
         this.add.image(100, 300, "ground");
         player = this.physics.add.sprite(100, 450, "playerThing");
-        
+        player.collideWorldBounds = true;
+        player.enableBody = true;
+        player.x = 50;
+        player.y=50;
+        //this.add.image(54, 0, "playerThing");
         this.add.text(
             500,
             550,
@@ -76,6 +80,8 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         );
     }
 
+
+
     update() {
         
         if (cursors.up.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Up);}
@@ -83,33 +89,58 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         if (cursors.down.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Down); }
         if (cursors.right.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Right); }
 
-    /*
-    //0 = Up Move
-    //1 = Left Move
-    //2 = Back Move
-    //3 = Right Move
+        var gameState = this.props.currentGameState;
+        if (gameState == undefined) {
+            //console.log("SHIT");
+        } else {
+            //console.log("GOOD");
+            var dict: Map<string, PlayerModel> = gameState.playerDict;
+            //console.log(dict);
+            
+            var admin: PlayerModel = dict["admin1"];
+            if (admin !== undefined) {
+                //player.setPosition(admin.XPos, admin.YPos);
+                //console.log(admin);
+                console.log(admin);
+                var xpos = admin.xPos;
+                var ypos = admin.yPos;
+                console.log(xpos);
+                player.body.x = xpos;
+                player.body.y = ypos;
+
+
+            }
+
+        }
+        
+
+        /*
+        //0 = Up Move
+        //1 = Left Move
+        //2 = Back Move
+        //3 = Right Move
+        
     
-
-        var actions = new Array(4);
-
-        actions[0] = cursors.up.isDown ? 1 : 0;
-        actions[1] = cursors.left.isDown ? 1 : 0;
-        actions[2] = cursors.down.isDown ? 1 : 0;
-        actions[3] = cursors.right.isDown ? 1 : 0;
-
-        if (actions[0] == 1) {
-            console.log("Up");
-        }
-        if (actions[1] == 1) {
-            console.log("Left");
-        }
-        if (actions[2] == 1) {
-            console.log("Back");
-        }
-        if (actions[3] == 1) {
-            console.log("Right");
-        }
-        */
+            var actions = new Array(4);
+    
+            actions[0] = cursors.up.isDown ? 1 : 0;
+            actions[1] = cursors.left.isDown ? 1 : 0;
+            actions[2] = cursors.down.isDown ? 1 : 0;
+            actions[3] = cursors.right.isDown ? 1 : 0;
+    
+            if (actions[0] == 1) {
+                console.log("Up");
+            }
+            if (actions[1] == 1) {
+                console.log("Left");
+            }
+            if (actions[2] == 1) {
+                console.log("Back");
+            }
+            if (actions[3] == 1) {
+                console.log("Right");
+            }
+            */
         //THIS IS JUST FOR TESTING
         /*
         player.setVelocityX(

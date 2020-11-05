@@ -108,16 +108,16 @@ namespace ColossalGame.Services
                 {
                     case EDirection.Down:
                         
-                        pm.ApplyLinearImpulse(new Vector2(0,-4.9f));
+                        pm.ApplyLinearImpulse(new Vector2(0,10f));
                         break;
                     case EDirection.Up:
-                        pm.ApplyLinearImpulse(new Vector2(0, 4.9f));
+                        pm.ApplyLinearImpulse(new Vector2(0, -10f));
                         break;
                     case EDirection.Left:
-                        pm.ApplyLinearImpulse(new Vector2(-4.9f, 0));
+                        pm.ApplyLinearImpulse(new Vector2(-10f, 0));
                         break;
                     case EDirection.Right:
-                        pm.ApplyLinearImpulse(new Vector2(4.9f, 0));
+                        pm.ApplyLinearImpulse(new Vector2(10f, 0));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -155,8 +155,12 @@ namespace ColossalGame.Services
 
             var pm = _world.CreateCircle(1f, 1f, playerPosition);
             pm.BodyType = BodyType.Dynamic;
-            //pm.SetRestitution(0.3f);
+            pm.SetRestitution(0.3f);
             pm.SetFriction(.3f);
+            pm.Mass = .3f;
+            pm.LinearDamping = 5f;
+
+            
             
             //PlayerDictionary.Add(username, pm);
             PlayerDictionary[username] = pm;
@@ -201,7 +205,7 @@ namespace ColossalGame.Services
                 somethingChanged = true;
             }
 
-            if (somethingChanged) PublishState();
+            if (somethingChanged) ;
 
 
             //TODO Handle non-player objects
@@ -257,10 +261,12 @@ namespace ColossalGame.Services
                     for (int i = 0; i < 3; i++)
                     {
                         _world.Step(1/60f);
+                        PublishState();
                     }
 
                     tickCounter++;
                     ts = DateTime.Now - lastTick;
+                    
                     Thread.Sleep((int)tickRate);
             }
         }
@@ -295,7 +301,11 @@ namespace ColossalGame.Services
         /// <param name="action">Action to be added</param>
         public void AddActionToQueue(AUserAction action)
         {
-            ActionQueue.Enqueue(action);
+           if (ActionQueue.Count<1) ActionQueue.Enqueue(action);
+           else
+           {
+               return;
+           }
         }
 
         /// <summary>
