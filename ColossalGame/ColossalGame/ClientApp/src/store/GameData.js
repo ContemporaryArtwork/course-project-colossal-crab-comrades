@@ -63,7 +63,13 @@ exports.actionCreators = {
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
 var unloadedState = {
     isLoading: false, playerData: {
-        username: "", position: { coords: { x: 0, y: 0 }, direction: Direction.Right }
+        username: "", position: {
+            coords: { x: 0, y: 0 }, direction: Direction.Right,
+        }
+    },
+    currentGameState: {
+        objectList: [],
+        playerDict: new Map(),
     }
 };
 exports.reducer = function (state, incomingAction) {
@@ -71,6 +77,11 @@ exports.reducer = function (state, incomingAction) {
         return unloadedState;
     }
     var action = incomingAction;
+    if (action.type == "RECEIVE_POSITIONS_UPDATE") {
+        console.log("HEY GOT THE DICT!");
+        console.log(action.playerDict);
+        console.log(action);
+    }
     switch (action.type) {
         case 'INITIALIZED':
             return {
@@ -78,6 +89,10 @@ exports.reducer = function (state, incomingAction) {
                 connection: action.connection,
                 playerData: {
                     username: "", position: { coords: { x: 0, y: 0 }, direction: Direction.Right }
+                },
+                currentGameState: {
+                    objectList: [],
+                    playerDict: new Map(),
                 }
             };
         case 'TEMP_LOGIN_SENT':
@@ -85,7 +100,7 @@ exports.reducer = function (state, incomingAction) {
         case 'RECEIVE_TOKEN':
             return __assign(__assign({}, state), { token: action.token });
         case 'RECEIVE_POSITIONS_UPDATE':
-            return __assign(__assign({}, state), { currentGameState: { playerDict: action.playerDict, objectList: action.objectList } });
+            return __assign(__assign({}, state), { currentGameState: { playerDict: makeMapIfNot(action.playerDict), objectList: action.objectList } });
         case 'SEND_MOVEMENT':
             return state;
         case 'SET_USERNAME':
@@ -94,4 +109,10 @@ exports.reducer = function (state, incomingAction) {
             return state;
     }
 };
+function makeMapIfNot(input) {
+    if (typeof (input) == "object") {
+        return new Map(Object.entries(input));
+    }
+    return input;
+}
 //# sourceMappingURL=GameData.js.map

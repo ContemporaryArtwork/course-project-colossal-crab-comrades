@@ -261,10 +261,10 @@ namespace ColossalGame.Services
                     for (int i = 0; i < 3; i++)
                     {
                         _world.Step(1/60f);
-                        PublishState();
+                        
                     }
-
-                    tickCounter++;
+                PublishState();
+                tickCounter++;
                     ts = DateTime.Now - lastTick;
                     
                     Thread.Sleep((int)tickRate);
