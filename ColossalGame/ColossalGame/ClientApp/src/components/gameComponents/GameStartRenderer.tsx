@@ -30,7 +30,7 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
 
         var x = this.props;
         await this.props.initialize();
-        setTimeout(() => { this.props.tempLogin("admin1", "password"); }, 1000);
+        setTimeout(() => { this.props.tempLogin("admin1", "passworD1$"); }, 1000);
 
         game = new Phaser.Game({
             type: Phaser.AUTO,
