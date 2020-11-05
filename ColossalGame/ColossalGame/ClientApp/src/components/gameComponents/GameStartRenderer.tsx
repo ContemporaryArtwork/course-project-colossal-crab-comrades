@@ -89,7 +89,7 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         if (cursors.up.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Up);}
         if (cursors.left.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Left); }
         if (cursors.down.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Down); }
-        if (cursors.right.isDown) { console.log("RIGHT");this.props.sendMovementAction(GameDataStore.Direction.Right); }
+        if (cursors.right.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Right); }
         //console.log(this.props.currentGameState);
         var gameState = this.props.currentGameState;
         if (gameState == undefined) {
