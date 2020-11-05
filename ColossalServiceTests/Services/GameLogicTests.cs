@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using Castle.Core.Internal;
 using ColossalGame.Models;
+using tainicom.Aether.Physics2D.Common;
 
 namespace ColossalServiceTests.Services
 {
@@ -24,8 +25,8 @@ namespace ColossalServiceTests.Services
             this._subUserService = Substitute.For<UserService>("mongodb://localhost:27017/");
             this._subLoginService = Substitute.For<LoginService>(this._subUserService);
             _subLoginService.DeleteUser("realUser");
-            _subLoginService.SignUp("realUser", "123");
             _subLoginService.DeleteUser("realUser2");
+            _subLoginService.SignUp("realUser", "123");
             _subLoginService.SignUp("realUser2", "123");
 
         }
@@ -37,6 +38,66 @@ namespace ColossalServiceTests.Services
                 this._subUserService);
         }
 
+        [Test]
+        public void SpawnPlayer_ValidPlayer_DictionaryIncludesPlayer()
+        {
+            // Arrange
+            var gameLogic = this.CreateGameLogic();
+            string username = "realUser";
+            float xPos = 1.0f;
+            float yPos = 2.0f;
+
+            // Act
+            gameLogic.AddPlayerToSpawnQueue(
+                username,
+                xPos,
+                yPos);
+
+            // Assert
+            Thread.Sleep(100);
+            var (a, b) = gameLogic.GetState();
+
+            Assert.True(a.IsNullOrEmpty());
+            Assert.AreEqual(1, b.Count);
+            Assert.AreEqual("realUser", b.ElementAt(0).Key);
+            Assert.AreEqual(1.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).X);
+            Assert.AreEqual(2.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).Y);
+        }
+
+        [Test]
+        public void AddActionToQueue_ValidActionLeftAndPlayer_PositionMovesOnNextServerTick()
+        {
+            // Arrange
+            var gameLogic = this.CreateGameLogic();
+            string username = "realUser";
+            float xPos = 0.0f;
+            float yPos = 2.0f;
+
+            // Act
+            gameLogic.AddPlayerToSpawnQueue(
+                username,
+                xPos,
+                yPos);
+
+            MovementAction ma = new MovementAction();
+            ma.Direction = EDirection.Left;
+            ma.Token = null;//only relevant for interpolator
+            ma.Username = username;
+            gameLogic.AddActionToQueue(ma);
+            // Assert
+
+            Thread.Sleep(1000);
+            var (a, b) = gameLogic.GetState();
+
+            Assert.True(a.IsNullOrEmpty());
+            Assert.AreEqual(1, b.Count);
+            Assert.AreEqual("realUser", b.ElementAt(0).Key);
+            //Average walking speed of a person is 1.4 meters / second
+            Assert.AreEqual(-1.4f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).X,.1);
+            Assert.AreEqual(2.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).Y);
+        }
+
+        /*
         [Test]
         public void SpawnPlayer_ValidPlayer_DictionaryIncludesPlayer()
         {
@@ -714,9 +775,9 @@ namespace ColossalServiceTests.Services
                 yPos2);
 
             MovementAction ma2 = new MovementAction();
-            ma.Direction = EDirection.Right;
-            ma.Token = null;
-            ma.Username = username2;
+            ma2.Direction = EDirection.Right;
+            ma2.Token = null;
+            ma2.Username = username2;
             gameLogic.AddActionToQueue(ma2);
 
             // Assert
@@ -772,9 +833,9 @@ namespace ColossalServiceTests.Services
                 yPos2);
 
             MovementAction ma2 = new MovementAction();
-            ma.Direction = EDirection.Left;
-            ma.Token = null;
-            ma.Username = username2;
+            ma2.Direction = EDirection.Left;
+            ma2.Token = null;
+            ma2.Username = username2;
             gameLogic.AddActionToQueue(ma2);
 
             // Assert
@@ -796,7 +857,7 @@ namespace ColossalServiceTests.Services
 
 
         }
-
+        */
     }
 }
 

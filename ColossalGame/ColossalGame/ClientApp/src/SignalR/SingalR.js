@@ -65,8 +65,8 @@ export const setupSignalRConnection = (connectionHub, actionEventList) => (dispa
     connection.on('ReceiveMessage', res => {
         //const eventHandler = actionEventMap[res.type];
         //eventHandler && dispatch(eventHandler(res));
-        console.log("Yo I got this message!")
-        console.log(res)
+        //console.log("Yo I got this message!")
+        //console.log(res)
         if (actionEventList && actionEventList.includes(res.type)) {
             dispatch(res);
         }
@@ -74,7 +74,7 @@ export const setupSignalRConnection = (connectionHub, actionEventList) => (dispa
     connection.on('ReceiveToken', res => {
         //const eventHandler = actionEventMap[res.type];
         //eventHandler && dispatch(eventHandler(res));
-        console.log("Yo I got this token!")
+        //console.log("Yo I got this token!")
         console.log(res)
         if (actionEventList && actionEventList.includes(res.type)) {
             dispatch(res);
@@ -83,8 +83,8 @@ export const setupSignalRConnection = (connectionHub, actionEventList) => (dispa
     connection.on('ReceiveString', res => {
         //const eventHandler = actionEventMap[res.type];
         //eventHandler && dispatch(eventHandler(res));
-        console.log("Hey I got this string!")
-        console.log(res)
+        //console.log("Hey I got this string!")
+        //console.log(res)
     });
 
     return connection;
