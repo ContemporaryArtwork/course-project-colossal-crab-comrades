@@ -38,6 +38,7 @@
     <None Remove="ClientApp\src\components\gameComponents\GameStartRenderer.tsx" />
     <None Remove="ClientApp\src\components\GameMainMenuToggler.tsx" />
     <None Remove="ClientApp\src\components\GlobalChat.tsx" />
+    <None Remove="ClientApp\src\components\UserAuth.tsx" />
     <None Remove="ClientApp\src\Helpers\GetCookies.ts" />
     <None Remove="ClientApp\src\store\GameData.ts" />
     <None Remove="ClientApp\src\store\GameMainMenuToggler.ts" />

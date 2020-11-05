@@ -32,10 +32,12 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         await this.props.initialize();
         setTimeout(() => { this.props.tempLogin("admin1", "passworD1$"); }, 1000);
 
+
+
         game = new Phaser.Game({
             type: Phaser.AUTO,
-            width: 800,
-            height: 600,
+            width: window.innerWidth,
+            height: window.innerHeight,
             physics: {
                 default: "arcade",
                 arcade: {
@@ -54,11 +56,8 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
     }
 
     preload(this: Phaser.Scene) {
-       // this.load.image("playerThing", playerThing);
-
         this.load.image('ground', require("./testGround.jpg").default);
-        this.load.image('playerThing', require("./testBuilder.png").default);
-        
+        this.load.image('playerThing', require("./testBuilder.png").default);      
     }
 
     create(this: Phaser.Scene) {
@@ -72,6 +71,9 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         player.y = 50;
         text = this.add.text(0, 0, "admin1", { font: "16px Arial", fill: "#ffffff" });
         //this.add.image(54, 0, "playerThing");
+       
+        this.cameras.main.startFollow(player);
+
         this.add.text(
             500,
             550,
@@ -167,10 +169,10 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         //THIS IS JUST FOR TESTING
     }
 
-
-
     public render() {
-        return (<div id="gameCanvas" />);
+        return (
+     
+            <div id="gameCanvas" />);
     }  
 };
 
