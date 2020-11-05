@@ -1,4 +1,6 @@
-﻿namespace ColossalGame.Models.DTO
+﻿using ColossalGame.Models;
+
+namespace ColossalGame.Hubs.DTO
 {
     public class GlobalChatMessageDTO: IPayload
     {

@@ -1,10 +1,11 @@
-﻿using System;
+﻿using ColossalGame.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 
-namespace ColossalGame.Models.DTO
+namespace ColossalGame.Hubs.DTO
 {
     public class DirectionDTO : ASignalRDTO
     {

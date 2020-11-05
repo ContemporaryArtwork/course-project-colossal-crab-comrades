@@ -1,14 +1,11 @@
-using ColossalGame.Helpers;
-using ColossalGame.Models.DTO;
-using ColossalGame.Models.Hubs.Clients;
+using ColossalGame.Hubs.DTO;
+using ColossalGame.Models;
 using ColossalGame.Services;
 using Microsoft.AspNetCore.SignalR;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace ColossalGame.Models.Hubs
+namespace ColossalGame.Hubs.GameData
 {
     public class GameDataHub : Hub<IGameDataClient>, IGameDataMessageTypes
     {
