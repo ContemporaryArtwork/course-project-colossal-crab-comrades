@@ -267,7 +267,7 @@ input {
     border: solid 1px;
     border-color: black;
     border-radius: 10px;
-    background-color: purple;
+    background-image: url("../assets/Crawl_class_icons/Heavy.png");
 }
 
 .Brawler {
@@ -276,7 +276,7 @@ input {
     border: solid 1px;
     border-color: black;
     border-radius: 10px;
-    background-color: red;
+    background-image: url("../assets/Crawl_class_icons/Brawler.png");
 }
 
 .Builder {
@@ -285,5 +285,5 @@ input {
     border: solid 1px;
     border-color: black;
     border-radius: 10px;
-    background-color: yellowgreen;
+    background-image: url("../assets/Crawl_class_icons/Builder.png");
 }

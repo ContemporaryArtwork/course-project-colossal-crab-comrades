@@ -18,6 +18,7 @@ type GameDataProps =
 var game: Phaser.Game;
 var cursors: any;
 var player: any;
+var text: any;
 
 class GameStartRenderer extends React.PureComponent<GameDataProps> {
 
@@ -29,7 +30,7 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
 
         var x = this.props;
         await this.props.initialize();
-        setTimeout(() => { this.props.tempLogin("admin1", "password"); }, 1000);
+        setTimeout(() => { this.props.tempLogin("admin1", "passworD1$"); }, 1000);
 
         game = new Phaser.Game({
             type: Phaser.AUTO,
@@ -65,7 +66,12 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         cursors = this.input.keyboard.createCursorKeys();
         this.add.image(100, 300, "ground");
         player = this.physics.add.sprite(100, 450, "playerThing");
-        
+        player.collideWorldBounds = true;
+        player.enableBody = true;
+        player.x = 50;
+        player.y = 50;
+        text = this.add.text(0, 0, "admin1", { font: "16px Arial", fill: "#ffffff" });
+        //this.add.image(54, 0, "playerThing");
         this.add.text(
             500,
             550,
@@ -76,6 +82,8 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         );
     }
 
+
+
     update() {
         
         if (cursors.up.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Up);}
@@ -83,40 +91,70 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         if (cursors.down.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Down); }
         if (cursors.right.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Right); }
 
-    /*
-    //0 = Up Move
-    //1 = Left Move
-    //2 = Back Move
-    //3 = Right Move
+        var gameState = this.props.currentGameState;
+        if (gameState == undefined) {
+            //console.log("SHIT");
+        } else {
+            //console.log("GOOD");
+            var dict: Map<string, GameDataStore.PlayerModel> = gameState.playerDict;
+            //console.log(dict);
+
+            var admin: GameDataStore.PlayerModel | undefined = dict.get("admin1");
+            if (admin !== undefined) {
+                //player.setPosition(admin.XPos, admin.YPos);
+                //console.log(admin);
+                console.log(admin);
+                var xpos = admin.xPos;
+                var ypos = admin.yPos;
+                xpos = Phaser.Math.Interpolation.Bezier([xpos, player.body.x], .8);
+                ypos = Phaser.Math.Interpolation.Bezier([ypos, player.body.y], .8);
+                console.log(xpos);
+                player.body.x = xpos;
+                player.body.y = ypos;
+                text.x = xpos - player.width / 2 + 100;
+                text.y = ypos + player.height/2 - 115;
+
+
+            }
+
+        }
+        
+
+        /*
+        //0 = Up Move
+        //1 = Left Move
+        //2 = Back Move
+        //3 = Right Move
+        
     
-
-        var actions = new Array(4);
-
-        actions[0] = cursors.up.isDown ? 1 : 0;
-        actions[1] = cursors.left.isDown ? 1 : 0;
-        actions[2] = cursors.down.isDown ? 1 : 0;
-        actions[3] = cursors.right.isDown ? 1 : 0;
-
-        if (actions[0] == 1) {
-            console.log("Up");
-        }
-        if (actions[1] == 1) {
-            console.log("Left");
-        }
-        if (actions[2] == 1) {
-            console.log("Back");
-        }
-        if (actions[3] == 1) {
-            console.log("Right");
-        }
-        */
+            var actions = new Array(4);
+    
+            actions[0] = cursors.up.isDown ? 1 : 0;
+            actions[1] = cursors.left.isDown ? 1 : 0;
+            actions[2] = cursors.down.isDown ? 1 : 0;
+            actions[3] = cursors.right.isDown ? 1 : 0;
+    
+            if (actions[0] == 1) {
+                console.log("Up");
+            }
+            if (actions[1] == 1) {
+                console.log("Left");
+            }
+            if (actions[2] == 1) {
+                console.log("Back");
+            }
+            if (actions[3] == 1) {
+                console.log("Right");
+            }
+            */
         //THIS IS JUST FOR TESTING
+        /*
         player.setVelocityX(
             (cursors.left.isDown ? -160 : 0) + (cursors.right.isDown ? 160 : 0)
         );
         player.setVelocityY(
             (cursors.up.isDown ? -160 : 0) + (cursors.down.isDown ? 160 : 0)
-        );
+        );*/
         //THIS IS JUST FOR TESTING
     }
 
