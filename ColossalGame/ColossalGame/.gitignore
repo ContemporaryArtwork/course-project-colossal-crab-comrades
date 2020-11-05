@@ -247,3 +247,8 @@ ClientApp/src/Helpers/**/*.js
 ClientApp/src/Helpers/**/*.js.map
 !ClientApp/src/Helpers/**/js/*.js
 !ClientApp/src/Helpers/**/js/*.js.map
+
+ClientApp/src/Store/**/*.js
+ClientApp/src/Store/**/*.js.map
+!ClientApp/src/Store/**/js/*.js
+!ClientApp/src/Store/**/js/*.js.map
