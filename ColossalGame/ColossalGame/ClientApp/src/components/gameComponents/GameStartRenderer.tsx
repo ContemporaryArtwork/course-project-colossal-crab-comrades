@@ -89,33 +89,42 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         if (cursors.up.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Up);}
         if (cursors.left.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Left); }
         if (cursors.down.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Down); }
-        if (cursors.right.isDown) { this.props.sendMovementAction(GameDataStore.Direction.Right); }
-
+        if (cursors.right.isDown) { console.log("RIGHT");this.props.sendMovementAction(GameDataStore.Direction.Right); }
+        //console.log(this.props.currentGameState);
         var gameState = this.props.currentGameState;
         if (gameState == undefined) {
             //console.log("SHIT");
-        } else {
+        } else if(gameState.playerDict !== undefined){
             //console.log("GOOD");
+
+            
+
             var dict: Map<string, GameDataStore.PlayerModel> = gameState.playerDict;
             //console.log(dict);
 
-            var admin: GameDataStore.PlayerModel | undefined = dict.get("admin1");
-            if (admin !== undefined) {
-                //player.setPosition(admin.XPos, admin.YPos);
-                //console.log(admin);
-                console.log(admin);
-                var xpos = admin.xPos;
-                var ypos = admin.yPos;
-                xpos = Phaser.Math.Interpolation.Bezier([xpos, player.body.x], .8);
-                ypos = Phaser.Math.Interpolation.Bezier([ypos, player.body.y], .8);
-                console.log(xpos);
-                player.body.x = xpos;
-                player.body.y = ypos;
-                text.x = xpos - player.width / 2 + 100;
-                text.y = ypos + player.height/2 - 115;
+            //console.log(dict);
+
+            if (dict.has("admin1")) {
+                var admin: GameDataStore.PlayerModel | undefined = dict.get("admin1");
+                if (admin !== undefined) {
+                    //player.setPosition(admin.XPos, admin.YPos);
+                    //console.log(admin);
+                    //console.log(admin);
+                    var xpos = admin.xPos;
+                    var ypos = admin.yPos;
+                    xpos = Phaser.Math.Interpolation.Bezier([xpos, player.body.x], .8);
+                    ypos = Phaser.Math.Interpolation.Bezier([ypos, player.body.y], .8);
+                    //console.log(xpos);
+                    player.body.x = xpos;
+                    player.body.y = ypos;
+                    text.x = xpos - player.width / 2 + 100;
+                    text.y = ypos + player.height / 2 - 115;
 
 
+                }
             }
+            
+            
 
         }
         
@@ -148,8 +157,8 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
             }
             */
         //THIS IS JUST FOR TESTING
-        /*
-        player.setVelocityX(
+        
+/*        player.setVelocityX(
             (cursors.left.isDown ? -160 : 0) + (cursors.right.isDown ? 160 : 0)
         );
         player.setVelocityY(
