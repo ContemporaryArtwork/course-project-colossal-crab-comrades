@@ -34,13 +34,14 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
     
     constructor(props: any) {
         super(props);
-        this.state = { loginPageVisible: true }
+        this.state = { loginPageVisible: false }
     }
     
 
 
     componentDidMount() {
         this.goToMainMenu = this.goToMainMenu.bind(this);
+        this.flipLogInPage = this.flipLogInPage.bind(this);
     }
 
     goToMainMenu = (e: React.MouseEvent<HTMLElement>): void => {       
@@ -74,6 +75,7 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
                 .then(json => json)
                 .catch(error => console.log(error));
         }
+        this.props.toggleLoggedIn();
     }
 
     submitSignUp = (e: React.FormEvent<HTMLElement>): void => {
@@ -97,24 +99,25 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
                 .then(json => json)
                 .catch(error => console.log(error));
         }
+        this.props.toggleLoggedIn();
     }
 
 
     render() {
-        if (this.state.loginPageVisible) {
-            return (this.renderLogIn());
-        } else {
-            return (this.renderSignUp());
-        }
+
+        return (<div>  
+            {this.state.loginPageVisible ? this.renderLogIn() : this.renderSignUp()}
+        </div>);
     }
 
 
     renderSignUp() {
         return (
             <div>
+                <input type="button" value="Switch to Log In" onClick={this.flipLogInPage}/>
                 <div className="signupBox" />
                 <h1>Create an Account</h1>
-                <form id="signUpForm" action="api/login" method="post" onSubmit={this.submitSignUp}>
+                <form id="signUpForm" action="api/signup" method="post" onSubmit={this.submitSignUp}>
 
                     <input type="text" id="Username" name="Username" value="testAccount" />
                     <input type="text" id="Password" name="Password" value="12345" />
@@ -129,6 +132,7 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
     renderLogIn() {
         return (
             <div>
+                <input type="button" value="Switch to Create an Account" onClick={this.flipLogInPage} />
                 <div className="loginBox" />
                 <h1>Login</h1>
                 <form id="logInForm" action="api/login" method="post" onSubmit={this.submitLogIn}>
@@ -141,6 +145,10 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
                 </form>
             </div>
         );
+    }
+
+    flipLogInPage = (e: React.MouseEvent<HTMLElement>): void => {       
+        this.setState({ loginPageVisible: !this.state.loginPageVisible });
     }
 }
 
