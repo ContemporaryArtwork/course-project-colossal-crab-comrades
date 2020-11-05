@@ -111,12 +111,13 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
         }
         */
         //THIS IS JUST FOR TESTING
+        /*
         player.setVelocityX(
             (cursors.left.isDown ? -160 : 0) + (cursors.right.isDown ? 160 : 0)
         );
         player.setVelocityY(
             (cursors.up.isDown ? -160 : 0) + (cursors.down.isDown ? 160 : 0)
-        );
+        );*/
         //THIS IS JUST FOR TESTING
     }
 

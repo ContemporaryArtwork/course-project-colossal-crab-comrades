@@ -216,6 +216,21 @@ namespace ColossalGame.Services
             return (ObjectList, PlayerDictionary);
         }
 
+        public (List<GameObjectModel>, Dictionary<string, PlayerModel>) GetStatePM()
+        {
+            Dictionary<string,PlayerModel> oPD = new Dictionary<string, PlayerModel>();
+            foreach (string p in PlayerDictionary.Keys)
+            {
+                var temp = PlayerDictionary[p];
+                PlayerModel tempPlayerModel = new PlayerModel();
+                tempPlayerModel.Username = p;
+                tempPlayerModel.XPos = temp.GetWorldPoint(Vector2.Zero).X;
+                tempPlayerModel.YPos = temp.GetWorldPoint(Vector2.Zero).Y;
+                oPD[p] = tempPlayerModel;
+            }
+            return (ObjectList, oPD);
+        }
+
         /// <summary>
         ///     Starts the server tick processing thread
         /// </summary>
@@ -257,7 +272,7 @@ namespace ColossalGame.Services
         private void PublishState()
         {
             //Console.WriteLine("Publish: " + DateTime.Now.Second);
-            var (returnedList, returnedDictionary) = GetState();
+            var (returnedList, returnedDictionary) = GetStatePM();
             var e = new CustomEventArgs(returnedList, returnedDictionary);
             OnRaiseCustomEvent(e);
         }
@@ -321,7 +336,7 @@ namespace ColossalGame.Services
     /// </summary>
     public class CustomEventArgs : EventArgs
     {
-        public CustomEventArgs(List<GameObjectModel> objectList, Dictionary<string, Body> playerDict)
+        public CustomEventArgs(List<GameObjectModel> objectList, Dictionary<string, PlayerModel> playerDict)
         {
             ObjectList = objectList;
             PlayerDict = playerDict;
@@ -329,6 +344,6 @@ namespace ColossalGame.Services
 
         public List<GameObjectModel> ObjectList { get; set; }
 
-        public Dictionary<string, Body> PlayerDict { get; set; }
+        public Dictionary<string, PlayerModel> PlayerDict { get; set; }
     }
 }

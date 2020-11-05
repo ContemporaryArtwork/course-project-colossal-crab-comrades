@@ -10,6 +10,6 @@ namespace ColossalGame.Models.DTO
     {
         public List<GameObjectModel> ObjectList { get; set; }
 
-        public Dictionary<string, Body> PlayerDict { get; set; }
+        public Dictionary<string, PlayerModel> PlayerDict { get; set; }
     }
 }
