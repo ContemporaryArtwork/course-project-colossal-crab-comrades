@@ -20,35 +20,32 @@ type GameMainMenuTogglerProps =
     typeof GameMainMenuTogglerStore.actionCreators &
     RouteComponentProps<{}>;
 
-/*
+
 interface IProps {
+
 }
 
 interface IState {
-    username?: string;
-    password?: string;
+    loginPageVisible?: boolean;
 }
-*/
 
-//class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IProps, IState> {
-class UserAuth extends React.PureComponent<GameMainMenuTogglerProps> {
-    /*
-    constructor(props: IProps) {
+
+class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
+    
+    constructor(props: any) {
         super(props);
-        this.state = { username: "", password: ""}
-
+        this.state = { loginPageVisible: true }
     }
-    */
+    
 
 
     componentDidMount() {
-        //Test "logging in"
-        //this.props.toggleLoginPage();
         this.goToMainMenu = this.goToMainMenu.bind(this);
     }
 
     goToMainMenu = (e: React.MouseEvent<HTMLElement>): void => {       
-            e.preventDefault();
+        e.preventDefault();
+        console.log("hi");
         this.props.toggleLoggedIn();
     }
 
@@ -56,58 +53,95 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps> {
         this.props.toggleLoginPage();
     }
 
-    usernameChangeHandler = (e: React.ChangeEvent<HTMLInputElement>): void => {
-        this.setState({ username: e.target.value });       
+    submitLogIn = (e: React.FormEvent<HTMLElement>): void => {
+
+        e.preventDefault();
+        
+        const tempElement: HTMLElement | null = document.getElementById("logInForm");
+        if (tempElement == undefined) {
+            //It's undefined!
+        } else {
+            
+            const form = tempElement as HTMLFormElement;
+
+            console.log(form);
+
+            const result = fetch(form.action, {
+                method: form.method,                
+                body: new FormData(form) as any,
+            })
+                .then((response: Response) => { console.log("Logging in..."); response.json()})
+                .then(json => json)
+                .catch(error => console.log(error));
+        }
     }
 
-    passwordChangeHandler = (e: React.ChangeEvent<HTMLInputElement>): void => {
-        this.setState({ password: e.target.value });
-    }
+    submitSignUp = (e: React.FormEvent<HTMLElement>): void => {
 
-    submitLogIn() {
-        /*
-        fetch(
-            "https://www.getpostman.com/collections/743c07eb0b37c8b0a2b6",
-            {
-                method: "post",
-                body: JSON.stringify({
-                    //username: this.state.username,
-                   // password: this.state.password,
-                }),
-            }
-        )
-            .then((res) => res.json())
-            .then(
-                (result) => {
-                    console.log(result.message);
-                },
-                (error) => {
-                    // alert("CURSES! FOILED AGAIN!");
-                }
-            );
-            */
+        e.preventDefault();
+
+        const tempElement: HTMLElement | null = document.getElementById("signUpForm");
+        if (tempElement == undefined) {
+            //It's undefined!
+        } else {
+
+            const form = tempElement as HTMLFormElement;
+
+            console.log(form);
+
+            const result = fetch(form.action, {
+                method: form.method,
+                body: new FormData(form) as any,
+            })
+                .then((response: Response) => { console.log("Signing Up..."); response.json() })
+                .then(json => json)
+                .catch(error => console.log(error));
+        }
     }
 
 
     render() {
+        if (this.state.loginPageVisible) {
+            return (this.renderLogIn());
+        } else {
+            return (this.renderSignUp());
+        }
+    }
 
+
+    renderSignUp() {
         return (
-
             <div>
-                <div className="loginBox"/>
-                    <h1>Login</h1>
-                <div className="usernameTextbox">
-                    <input type="text" placeholder="Username" onChange={this.usernameChangeHandler} />
-                    </div> 
+                <div className="signupBox" />
+                <h1>Create an Account</h1>
+                <form id="signUpForm" action="api/login" method="post" onSubmit={this.submitSignUp}>
 
-                    <div className="passwordTextbox">
-                    <input type="password" placeholder="Password" onChange={this.passwordChangeHandler} />
-                    </div>  
+                    <input type="text" id="Username" name="Username" value="testAccount" />
+                    <input type="text" id="Password" name="Password" value="12345" />
 
-                <input className="btn" type="button" name="" value="Sign in" onClick={this.goToMainMenu} />
+                    <button type="submit" name="" value="Create Account" >Submit</button>
+
+                </form>
             </div>
-            );
-    }            
+        );
+    }
+
+    renderLogIn() {
+        return (
+            <div>
+                <div className="loginBox" />
+                <h1>Login</h1>
+                <form id="logInForm" action="api/login" method="post" onSubmit={this.submitLogIn}>
+
+                    <input type="text" id="Username" name="Username" value="testAccount" />
+                    <input type="text" id="Password" name="Password" value="12345" />
+
+                    <button type="submit" name="" value="Log In" >Submit</button>
+
+                </form>
+            </div>
+        );
+    }
 }
 
 
