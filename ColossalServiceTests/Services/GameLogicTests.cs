@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using Castle.Core.Internal;
 using ColossalGame.Models;
+using tainicom.Aether.Physics2D.Common;
 
 namespace ColossalServiceTests.Services
 {
@@ -37,6 +38,66 @@ namespace ColossalServiceTests.Services
                 this._subUserService);
         }
 
+        [Test]
+        public void SpawnPlayer_ValidPlayer_DictionaryIncludesPlayer()
+        {
+            // Arrange
+            var gameLogic = this.CreateGameLogic();
+            string username = "realUser";
+            float xPos = 1.0f;
+            float yPos = 2.0f;
+
+            // Act
+            gameLogic.AddPlayerToSpawnQueue(
+                username,
+                xPos,
+                yPos);
+
+            // Assert
+            Thread.Sleep(100);
+            var (a, b) = gameLogic.GetState();
+
+            Assert.True(a.IsNullOrEmpty());
+            Assert.AreEqual(1, b.Count);
+            Assert.AreEqual("realUser", b.ElementAt(0).Key);
+            Assert.AreEqual(1.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).X);
+            Assert.AreEqual(2.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).Y);
+        }
+
+        [Test]
+        public void AddActionToQueue_ValidActionLeftAndPlayer_PositionMovesOnNextServerTick()
+        {
+            // Arrange
+            var gameLogic = this.CreateGameLogic();
+            string username = "realUser";
+            float xPos = 0.0f;
+            float yPos = 2.0f;
+
+            // Act
+            gameLogic.AddPlayerToSpawnQueue(
+                username,
+                xPos,
+                yPos);
+
+            MovementAction ma = new MovementAction();
+            ma.Direction = EDirection.Left;
+            ma.Token = null;//only relevant for interpolator
+            ma.Username = username;
+            gameLogic.AddActionToQueue(ma);
+            // Assert
+
+            Thread.Sleep(1000);
+            var (a, b) = gameLogic.GetState();
+
+            Assert.True(a.IsNullOrEmpty());
+            Assert.AreEqual(1, b.Count);
+            Assert.AreEqual("realUser", b.ElementAt(0).Key);
+            //Average walking speed of a person is 1.4 meters / second
+            Assert.AreEqual(-1.4f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).X,.1);
+            Assert.AreEqual(2.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).Y);
+        }
+
+        /*
         [Test]
         public void SpawnPlayer_ValidPlayer_DictionaryIncludesPlayer()
         {
@@ -796,7 +857,7 @@ namespace ColossalServiceTests.Services
 
 
         }
-
+        */
     }
 }
 

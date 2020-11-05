@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using ColossalGame.Models;
+using tainicom.Aether.Physics2D.Common;
+using tainicom.Aether.Physics2D.Dynamics;
 
 namespace ColossalGame.Services
 {
@@ -52,7 +55,7 @@ namespace ColossalGame.Services
         /// <summary>
         ///     Dictionary of usernames to PlayerModels.
         /// </summary>
-        private Dictionary<string, PlayerModel> PlayerDictionary { get; } = new Dictionary<string, PlayerModel>();
+        private Dictionary<string, Body> PlayerDictionary { get; } = new Dictionary<string, Body>();
 
         /// <summary>
         ///     List of non-player GameObjectModels
@@ -95,13 +98,30 @@ namespace ColossalGame.Services
             {
                 if (!PlayerDictionary.ContainsKey(m.Username)) throw new Exception("Player must be spawned first!");
                 var pm = PlayerDictionary.GetValueOrDefault(m.Username);
-                if (m.Direction == EDirection.Down)
-                    pm.YPos -= 1;
-                else if (m.Direction == EDirection.Up)
-                    pm.YPos += 1;
-                else if (m.Direction == EDirection.Left)
-                    pm.XPos -= 1;
-                else if (m.Direction == EDirection.Right) pm.XPos += 1;
+                if (pm == null)
+                {
+                    //THIS SHOULD NOT BE ABLE TO HAPPEN!!!
+                    throw new Exception("NULL VALUE IN DICTIONARY");
+                }
+
+                switch (m.Direction)
+                {
+                    case EDirection.Down:
+                        
+                        pm.ApplyLinearImpulse(new Vector2(0,-4.9f));
+                        break;
+                    case EDirection.Up:
+                        pm.ApplyLinearImpulse(new Vector2(0, 4.9f));
+                        break;
+                    case EDirection.Left:
+                        pm.ApplyLinearImpulse(new Vector2(-4.9f, 0));
+                        break;
+                    case EDirection.Right:
+                        pm.ApplyLinearImpulse(new Vector2(4.9f, 0));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
                 //PlayerDictionary.Add(m.Username, pm);
                 PlayerDictionary[m.Username] = pm;
@@ -118,22 +138,26 @@ namespace ColossalGame.Services
             return PlayerDictionary.ContainsKey(username);
         }
 
+        private World _world = new World(Vector2.Zero);
+
         /// <summary>
         ///     Spawns a player based on input username, subject to change.
         /// </summary>
         /// <param name="username">Username of desired user to spawn</param>
         /// <param name="xPos">Desired x position</param>
         /// <param name="yPos">Desired y position</param>
-        private void SpawnPlayer(string username, double xPos = 0.0, double yPos = 0.0)
+        private void SpawnPlayer(string username, float xPos = 0f, float yPos = 0f)
         {
             if (string.IsNullOrEmpty(username)) return;
             if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
 
-            var pm = new PlayerModel();
-            pm.Username = username;
-            pm.XPos = xPos;
-            pm.YPos = yPos;
+            Vector2 playerPosition = new Vector2(xPos, yPos);
 
+            var pm = _world.CreateCircle(1f, 1f, playerPosition);
+            pm.BodyType = BodyType.Dynamic;
+            //pm.SetRestitution(0.3f);
+            pm.SetFriction(.3f);
+            
             //PlayerDictionary.Add(username, pm);
             PlayerDictionary[username] = pm;
         }
@@ -144,6 +168,7 @@ namespace ColossalGame.Services
         /// <param name="username">Username of player to despawn</param>
         public void AddPlayerToDespawnQueue(string username)
         {
+
             if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
             //PlayerDictionary.Remove(username);
             PlayerDespawnQueue.Enqueue(username);
@@ -166,7 +191,7 @@ namespace ColossalGame.Services
             {
                 var p = PlayerSpawnQueue.Dequeue();
                 //PlayerDictionary.Add(p.Username, p);
-                PlayerDictionary[p.Username] = p;
+                SpawnPlayer(p.Username,p.XPos,p.YPos);
                 somethingChanged = true;
             }
 
@@ -186,7 +211,7 @@ namespace ColossalGame.Services
         ///     Returns the current game state
         /// </summary>
         /// <returns></returns>
-        public (List<GameObjectModel>, Dictionary<string, PlayerModel>) GetState()
+        public (List<GameObjectModel>, Dictionary<string, Body>) GetState()
         {
             return (ObjectList, PlayerDictionary);
         }
@@ -209,17 +234,19 @@ namespace ColossalGame.Services
             var ts = new TimeSpan();
             while (KeepGoing)
             {
-                if (ts.TotalMilliseconds >= tickRate)
-                {
-                    lastTick = DateTime.Now;
-                    Console.WriteLine("GameLogic: " + DateTime.Now.Second);
-                    Console.WriteLine("ts: " + ts.Milliseconds);
+                    
+                    //lastTick = DateTime.Now;
+                   // Console.WriteLine("GameLogic: " + DateTime.Now.Second);
+                   // Console.WriteLine("ts: " + ts.Milliseconds);
                     simulateOneServerTick();
+                    for (int i = 0; i < 3; i++)
+                    {
+                        _world.Step(1/60f);
+                    }
 
                     tickCounter++;
-                }
-
-                ts = DateTime.Now - lastTick;
+                    ts = DateTime.Now - lastTick;
+                    Thread.Sleep((int)tickRate);
             }
         }
 
@@ -229,7 +256,7 @@ namespace ColossalGame.Services
         /// </summary>
         private void PublishState()
         {
-            Console.WriteLine("Publish: " + DateTime.Now.Second);
+            //Console.WriteLine("Publish: " + DateTime.Now.Second);
             var (returnedList, returnedDictionary) = GetState();
             var e = new CustomEventArgs(returnedList, returnedDictionary);
             OnRaiseCustomEvent(e);
@@ -262,8 +289,10 @@ namespace ColossalGame.Services
         /// <param name="username">Username to spawn. Must exist in the user database</param>
         /// <param name="xPos">X Position to spawn at. Default is 0</param>
         /// <param name="yPos">Y Position to spawn at. Default is 0</param>
-        public void AddPlayerToSpawnQueue(string username, double xPos = 0.0, double yPos = 0.0)
+        public void AddPlayerToSpawnQueue(string username, float xPos = 0f, float yPos = 0f)
         {
+            
+            if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
             var pm = new PlayerModel();
             pm.Username = username;
             pm.XPos = xPos;
@@ -292,7 +321,7 @@ namespace ColossalGame.Services
     /// </summary>
     public class CustomEventArgs : EventArgs
     {
-        public CustomEventArgs(List<GameObjectModel> objectList, Dictionary<string, PlayerModel> playerDict)
+        public CustomEventArgs(List<GameObjectModel> objectList, Dictionary<string, Body> playerDict)
         {
             ObjectList = objectList;
             PlayerDict = playerDict;
@@ -300,6 +329,6 @@ namespace ColossalGame.Services
 
         public List<GameObjectModel> ObjectList { get; set; }
 
-        public Dictionary<string, PlayerModel> PlayerDict { get; set; }
+        public Dictionary<string, Body> PlayerDict { get; set; }
     }
 }

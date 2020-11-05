@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using tainicom.Aether.Physics2D.Dynamics;
 
 namespace ColossalGame.Models.DTO
 {
@@ -9,6 +10,6 @@ namespace ColossalGame.Models.DTO
     {
         public List<GameObjectModel> ObjectList { get; set; }
 
-        public Dictionary<string, PlayerModel> PlayerDict { get; set; }
+        public Dictionary<string, Body> PlayerDict { get; set; }
     }
 }
