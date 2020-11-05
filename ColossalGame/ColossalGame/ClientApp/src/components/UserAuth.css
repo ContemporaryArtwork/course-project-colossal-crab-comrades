@@ -1,0 +1,32 @@
+﻿h1{
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -200%);
+    color: white;
+}
+
+
+.usernameTextbox {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+}
+
+.passwordTextbox {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    color: white;
+}
+
+.btn {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, 120%);
+    color: white;
+}

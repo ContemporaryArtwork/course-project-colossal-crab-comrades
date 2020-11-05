@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace ColossalGame.Models
 {
-    public abstract class ASignalRDTO : IPayload
+    public class ShootingAction : AUserAction
     {
-        public string type { get; set; }
-
+        public Angle ShootingAngle { get; set; }
+        public double Speed { get; set; }
     }
 }

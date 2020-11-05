@@ -10,13 +10,13 @@ import getCookie from "../Helpers/GetCookies"
 
 export interface GameObjectModel {
 
-    YPos: number,
-    XPos: number
+    yPos: number,
+    xPos: number
 }
 export interface PlayerModel {
     Username: string,
-    YPos: number,
-    XPos: number
+    yPos: number,
+    xPos: number
 }
 
 export interface GameLogicMessage {
@@ -59,7 +59,7 @@ export interface GameDataState {
     token?: string,
     connection?: HubConnection,
     playerData: PlayerData,
-    currentGameState?: GameLogicMessage
+    currentGameState: GameLogicMessage
 }
 
 // -----------------
@@ -141,7 +141,7 @@ export const actionCreators = {
             //TEMPORARY
             //let cookieVal = getCookie("auth-token") as string;
             // tokenString = (cookieVal !== undefined) ? cookieVal : "";
-            console.log("about to send movement");
+            //console.log("about to send movement");
 
             const movementActionDTO: MovementAction = {
                 Username: "admin1"/*appState.gameData.playerData.username*/,
@@ -160,8 +160,13 @@ export const actionCreators = {
 
 const unloadedState: GameDataState = {
     isLoading: false,playerData: {
-        username: "", position: { coords: { x: 0, y: 0 }, direction: Direction.Right }
-    }
+        username: "", position: {
+            coords: { x: 0, y: 0 }, direction: Direction.Right,}
+    },
+    currentGameState: {
+        objectList: [],
+        playerDict: new Map<string,PlayerModel>(),
+    } 
 };
 
 export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined, incomingAction: Action): GameDataState => {
@@ -170,6 +175,11 @@ export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined
     }
 
     const action = incomingAction as KnownAction;
+    if (action.type == "RECEIVE_POSITIONS_UPDATE") {
+        //console.log("HEY GOT THE DICT!");
+        //console.log(action.playerDict);
+        //console.log(action);
+    }
     switch (action.type) {
         case 'INITIALIZED':
             return {
@@ -177,7 +187,11 @@ export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined
                 connection: action.connection,
                 playerData: {
                     username: "", position: { coords: { x: 0, y: 0 }, direction: Direction.Right }
-                }
+                },
+                currentGameState: {
+                    objectList: [],
+                    playerDict: new Map<string, PlayerModel>(),
+                } 
             };
         case 'TEMP_LOGIN_SENT':
             return {
@@ -189,7 +203,7 @@ export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined
             };
         case 'RECEIVE_POSITIONS_UPDATE':
             return {
-                ...state, currentGameState: { playerDict: action.playerDict, objectList: action.objectList }
+                ...state, currentGameState: { playerDict: makeMapIfNot(action.playerDict), objectList: action.objectList }
             };
         case 'SEND_MOVEMENT':
             return state;
@@ -202,3 +216,10 @@ export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined
             return state;
     }
 };
+
+function makeMapIfNot(input: Map<string, PlayerModel> | object): Map<string, PlayerModel> {
+    if (typeof (input) == "object") {
+        return new Map<string, PlayerModel>(Object.entries(input));
+    }
+    return input as Map<string, PlayerModel>;
+}

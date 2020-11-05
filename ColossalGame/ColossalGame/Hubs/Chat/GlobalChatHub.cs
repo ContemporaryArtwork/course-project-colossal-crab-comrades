@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
-using ColossalGame.Models.DTO;
-using ColossalGame.Models.Hubs.Clients;
 using Microsoft.AspNetCore.SignalR;
 using ColossalGame.Helpers;
+using ColossalGame.Models;
+using ColossalGame.Hubs.DTO;
 
-namespace ColossalGame.Models.Hubs
+namespace ColossalGame.Hubs.Chat
 {
     public class GlobalChatHub : Hub<IChatClient>
     {

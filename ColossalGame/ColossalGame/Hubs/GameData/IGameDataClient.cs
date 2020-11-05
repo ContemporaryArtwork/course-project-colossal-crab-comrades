@@ -1,10 +1,7 @@
-﻿using ColossalGame.Models.DTO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ColossalGame.Hubs.DTO;
 using System.Threading.Tasks;
 
-namespace ColossalGame.Models.Hubs.Clients
+namespace ColossalGame.Hubs.GameData
 {
     public interface IGameDataClient
     {

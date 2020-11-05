@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ColossalGame.Models;
 
-namespace ColossalGame.Models.Hubs.Clients
+namespace ColossalGame.Hubs.GameData
 {
     public interface IGameDataMessageTypes
     {

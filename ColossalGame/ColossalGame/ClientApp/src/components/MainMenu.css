@@ -241,13 +241,15 @@ input {
 }
 
 .classContainer {
+    display: inline-block;
+    flex-direction: column;
+    flex-wrap: wrap;
     border: 1px solid #e6e6e6;
     border-radius: 5px;
     background: white;
     box-shadow: 0 1px 1px rgb(0,0,0,0.5);
     padding: 5px;
     margin-left: 50px;
-    display: inline-block;
 }
 
 .loadButton {
@@ -265,7 +267,7 @@ input {
     border: solid 1px;
     border-color: black;
     border-radius: 10px;
-    background-color: purple;
+    background-image: url("../assets/Crawl_class_icons/Heavy.png");
 }
 
 .Brawler {
@@ -274,7 +276,7 @@ input {
     border: solid 1px;
     border-color: black;
     border-radius: 10px;
-    background-color: red;
+    background-image: url("../assets/Crawl_class_icons/Brawler.png");
 }
 
 .Builder {
@@ -283,5 +285,5 @@ input {
     border: solid 1px;
     border-color: black;
     border-radius: 10px;
-    background-color: yellowgreen;
+    background-image: url("../assets/Crawl_class_icons/Builder.png");
 }
