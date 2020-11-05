@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { ApplicationState } from '../../store';
 import * as GameDataStore from "../../store/GameData";
-import PlayerModel = GameDataStore.PlayerModel;
+
 
 
 type GameDataProps =
@@ -96,10 +96,10 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
             //console.log("SHIT");
         } else {
             //console.log("GOOD");
-            var dict: Map<string, PlayerModel> = gameState.playerDict;
+            var dict: Map<string, GameDataStore.PlayerModel> = gameState.playerDict;
             //console.log(dict);
-            
-            var admin: PlayerModel = dict["admin1"];
+
+            var admin: GameDataStore.PlayerModel | undefined = dict.get("admin1");
             if (admin !== undefined) {
                 //player.setPosition(admin.XPos, admin.YPos);
                 //console.log(admin);
