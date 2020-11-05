@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  colossalgame:
+    image: colossalcontainerregistry.azurecr.io/colossalgame
+    build:
+      context: .
+      dockerfile: ColossalGame/DockerfileHosted
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+    depends_on: 
+        - "db"
+    ports:
+      - "80:80"
+  db:
+      container_name: mongo
+      image: mongo

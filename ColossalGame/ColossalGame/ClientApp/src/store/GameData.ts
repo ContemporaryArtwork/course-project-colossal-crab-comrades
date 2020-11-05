@@ -10,13 +10,13 @@ import getCookie from "../Helpers/GetCookies"
 
 export interface GameObjectModel {
 
-    YPos: number,
-    XPos: number
+    yPos: number,
+    xPos: number
 }
 export interface PlayerModel {
     Username: string,
-    YPos: number,
-    XPos: number
+    yPos: number,
+    xPos: number
 }
 
 export interface GameLogicMessage {
@@ -141,7 +141,7 @@ export const actionCreators = {
             //TEMPORARY
             //let cookieVal = getCookie("auth-token") as string;
             // tokenString = (cookieVal !== undefined) ? cookieVal : "";
-            console.log("about to send movement");
+            //console.log("about to send movement");
 
             const movementActionDTO: MovementAction = {
                 Username: "admin1"/*appState.gameData.playerData.username*/,

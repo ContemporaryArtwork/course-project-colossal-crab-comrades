@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 using ColossalGame.Models;
 
 namespace ColossalGame.Services
@@ -38,13 +39,16 @@ namespace ColossalGame.Services
         /// Creates an account for the desired username and password
         /// </summary>
         /// <param name="username">The user's desired username</param>
-        /// <param name="password">The user's desired password</param>
+        /// <param name="password">The user's desired password. Must have 8 characters, 1 uppercase character, 1 lowercase character, 1 special character and 1 numerical character</param>
         /// <returns>A boolean representing whether the account was created successfully or not</returns>
         public bool SignUp(string username, string password)
         {
             if (string.IsNullOrEmpty(username)) throw new BadUsernameException();
             if (string.IsNullOrEmpty(password)) throw new BadPasswordException();
             if (_us.UserExistsByUsername(username)) throw new UserAlreadyExistsException();
+            string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$";
+            Regex rg = new Regex(pattern);
+            if (!rg.IsMatch(password)) throw new BadPasswordException("Password is not sufficiently complicated");
 
 
             var insertUser = new User();

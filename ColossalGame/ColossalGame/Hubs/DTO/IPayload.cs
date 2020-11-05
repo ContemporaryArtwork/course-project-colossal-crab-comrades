@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ColossalGame.Models
+namespace ColossalGame.Hubs.DTO
 {
     interface IPayload
     {

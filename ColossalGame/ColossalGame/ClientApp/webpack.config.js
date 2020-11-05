@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 /*
  * SplitChunksPlugin is enabled by default and replaced
@@ -25,16 +26,63 @@ const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
-	mode: 'development',
+	mode: process.env.ASPNETCORE_ENVIRONMENT == "Development" ? "development" : "production",
 	entry: './src/index.tsx', //used to be index.ts. index.ts might still be the correct choice.
-	plugins: [new webpack.ProgressPlugin()],
+	plugins: [new webpack.ProgressPlugin(),
+
+		new HtmlWebpackPlugin({
+			template: path.resolve(__dirname, "public", "index.html"),
+		}),
+	
+
+	
+	],
+	output: {
+		path: path.resolve(__dirname, "build"),
+		filename: "bundle.js",
+		sourceMapFilename: "bundle.js.map"
+	  },
+	devtool: "source-map",
+	devServer: {
+		contentBase: path.resolve(__dirname, "build"),
+		port:3000
+	},
 	module: {
 		rules: [
 			{
+				test: /\.(ts|js)x?$/,
+				exclude: /node_modules/,
+				use: {
+				  loader: "babel-loader",
+				  options: {
+					presets: [
+					  ["@babel/preset-env",
+					{
+						targets: {
+							esmodules: true,
+						},
+					},
+					],
+					  "@babel/preset-react",
+					  "@babel/preset-typescript",
+					],
+					"plugins": [
+						"@babel/proposal-class-properties",
+						"@babel/proposal-object-rest-spread"
+					]
+				  },
+				},
+			  },
+			  {
 				test: /\.(ts|tsx)$/,
 				loader: 'ts-loader',
 				include: [path.resolve(__dirname, 'src')],
 				exclude: [/node_modules/],
+				options: {
+					compilerOptions: {
+						"noEmit": false
+                    },
+				},
 			},
 			{
 				test: /.css$/,
@@ -61,6 +109,10 @@ module.exports = {
 					},
 				],
 			},
+			{
+				test: /\.mp4$/,
+				use: 'file-loader?name=videos/[name].[ext]',
+		 },
 		],
 	},
 
