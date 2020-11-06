@@ -46,7 +46,7 @@ namespace ColossalGame.Services
             if (string.IsNullOrEmpty(username)) throw new BadUsernameException();
             if (string.IsNullOrEmpty(password)) throw new BadPasswordException();
             if (_us.UserExistsByUsername(username)) throw new UserAlreadyExistsException();
-            string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$";
+            string pattern = @"^.*(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!*@#$%^&+=]).*$";
             Regex rg = new Regex(pattern);
             if (!rg.IsMatch(password)) throw new BadPasswordException("Password is not sufficiently complicated");
 
