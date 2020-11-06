@@ -27,6 +27,13 @@ namespace ColossalGame.Controllers
     {
         private LoginService _ls;
 
+        public enum ErrorTypes
+        {
+            UserAlreadyExists,
+            BadPassword,
+            BadUsername,
+            Unknown
+        }
         public LoginController(LoginService ls)
         {
             _ls = new LoginService(new UserService());
@@ -34,93 +41,86 @@ namespace ColossalGame.Controllers
 
 
         [HttpPost("/api/login")]
-        public string[] login([FromForm] Models.FormModel user)
+        public string login([FromForm] Models.FormModel user)
         {
-            //_ls = new LoginService(new UserService());
+            var output = new Dictionary<string, string>();
             try
             {
-
-                string username = user.Username;
-                string password = user.Password;
+                //Define credentials
+                var username = user.Username;
+                var password = user.Password;
+                //Try login service method
+                var token = _ls.SignIn(username, password);
+                //If successful
+                var usernameCookieOptions = new CookieOptions {SameSite = SameSiteMode.Strict};
+                var authTokenCookieOptions = new CookieOptions {HttpOnly = true, SameSite = SameSiteMode.Strict};
                 
-                var response = _ls.SignIn(username, password);
-                Response.Cookies.Append("auth-token", response);
-
-                string[] output = new string[]
-                    {
-                        "You are now signed in as ",
-                        username,
-                        "your authentication token is",
-                        response
-                    };
-                return output;
+                Response.Cookies.Append("username", username,usernameCookieOptions);
+                Response.Cookies.Append("auth-token", token,authTokenCookieOptions);
+                output["status"] = "ok";
+                output["message"] = "Sign in successful";
             }
-            catch(UserDoesNotExistException e){
-
-                string[] output = new string[]
-                    {
-                        "User does not exists"
-                    };
-                return output;
+            catch(UserDoesNotExistException){
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.BadUsername.ToString("G");
+                output["message"] = "Username does not exist";
             }
-            catch(IncorrectPasswordException e)
+            catch(IncorrectPasswordException)
             {
-                string[] output = new string[]
-                   {
-                        "Incorrect Password"
-                   };
-                return output;
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.BadPassword.ToString("G");
+                output["message"] = "Incorrect or otherwise bad password";
             }
-           
-            
+            catch (Exception e)
+            {
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.Unknown.ToString("G");
+                output["message"] = "Unknown Error Encountered of type: " + e.GetType();
+            }
+
+            return JsonConvert.SerializeObject(output, Formatting.Indented);
         }
+
         [HttpPost("/api/signup")]
-        public string[] signup([FromForm] Models.FormModel user)
+        public string signup([FromForm] Models.FormModel user)
         {
-            //_ls = new LoginService(new UserService());
+            var output = new Dictionary<string, string>();
+            
             try
             {
-                string username = user.Username;
-                string password = user.Password;
-
+                var username = user.Username;
+                var password = user.Password;
                 _ls.SignUp(username, password);
 
-                string[] output = new string[]
-                  {
-                        "You are now signed in as ",
-                        username,
-                        " with the password ",
-                        password
-                  };
-                
-                return output;
+                output["status"] = "ok";
+                output["message"] = "Sign up successful";
             }
-            catch (UserAlreadyExistsException e)
+            catch (UserAlreadyExistsException)
             {
-                string[] output = new string[]
-              {
-                    "User already exists"
-              };
-                return output;
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.UserAlreadyExists.ToString("G");
+                output["message"] = "Username already exists";
             }
-            catch (BadPasswordException e)
+            catch (BadPasswordException)
             {
-                string[] output = new string[]
-              {
-                    "Bad password"
-              };
-                return output;
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.BadPassword.ToString("G");
+                output["message"] = "Password is formatted poorly. Password requirements: 8 characters, 1 uppercase, 1 lowercase, 1 special character.";
             }
-            catch (BadUsernameException e)
+            catch (BadUsernameException)
             {
-                string[] output = new string[]
-              {
-                    "Bad username"
-              };
-                return output;
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.BadUsername.ToString("G");
+                output["message"] = "Username is formatted poorly";
+            }
+            catch (Exception e)
+            {
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.Unknown.ToString("G");
+                output["message"] = "Unknown Error Encountered of type: " + e.GetType();
             }
 
-
+            return JsonConvert.SerializeObject(output, Formatting.Indented);
         }
 
 
