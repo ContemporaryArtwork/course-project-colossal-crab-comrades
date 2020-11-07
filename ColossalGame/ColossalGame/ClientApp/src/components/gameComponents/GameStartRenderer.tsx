@@ -19,6 +19,7 @@ var game: Phaser.Game;
 var cursors: any;
 var player: any;
 var text: any;
+var container: any;
 
 class GameStartRenderer extends React.PureComponent<GameDataProps> {
 
@@ -64,15 +65,23 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
 
         cursors = this.input.keyboard.createCursorKeys();
         this.add.image(100, 300, "ground");
-        player = this.physics.add.sprite(100, 450, "playerThing");
+
+        container = this.add.container(100, 450);
+
+       
+        player = this.physics.add.sprite(0, 0, "playerThing");
         player.collideWorldBounds = true;
         player.enableBody = true;
-        player.x = 50;
-        player.y = 50;
-        text = this.add.text(0, 0, "admin1", { font: "16px Arial", fill: "#ffffff" });
+
+        text = this.add.text(0, 0 - (player.height / 2), "admin1", { font: "16px Arial", fill: "#ffffff", backgroundColor: "#ffff00", align: "center" });
+        text.x = text.x - (text.width / 2);
+        text.y = text.y - 20;
+        container.add(player);
+        container.add(text);
+        //text.anchor.set(0.5);
         //this.add.image(54, 0, "playerThing");
        
-        this.cameras.main.startFollow(player);
+        this.cameras.main.startFollow(container);
 
         this.add.text(
             500,
@@ -114,13 +123,11 @@ class GameStartRenderer extends React.PureComponent<GameDataProps> {
                     //console.log(admin);
                     var xpos = admin.xPos;
                     var ypos = admin.yPos;
-                    xpos = Phaser.Math.Interpolation.Bezier([xpos, player.body.x], .8);
-                    ypos = Phaser.Math.Interpolation.Bezier([ypos, player.body.y], .8);
+                    xpos = Phaser.Math.Interpolation.Bezier([xpos, container.x], .8);
+                    ypos = Phaser.Math.Interpolation.Bezier([ypos, container.y], .8);
                     //console.log(xpos);
-                    player.body.x = xpos;
-                    player.body.y = ypos;
-                    text.x = xpos - player.width / 2 + 100;
-                    text.y = ypos + player.height / 2 - 115;
+                    container.x = xpos;
+                    container.y = ypos;
 
 
                 }
