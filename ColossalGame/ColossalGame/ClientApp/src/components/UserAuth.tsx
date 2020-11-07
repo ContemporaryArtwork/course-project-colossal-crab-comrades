@@ -27,6 +27,7 @@ interface IProps {
 
 interface IState {
     loginPageVisible?: boolean;
+    statusMSG?: string;
 }
 
 
@@ -34,7 +35,7 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
     
     constructor(props: any) {
         super(props);
-        this.state = { loginPageVisible: false }
+        this.state = { loginPageVisible: false, statusMSG: ""}
     }
     
 
@@ -67,15 +68,26 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
 
             console.log(form);
 
+            //FETCH CALL
             const result = fetch(form.action, {
-                method: form.method,                
+                method: form.method,
                 body: new FormData(form) as any,
-            })
-                .then((response: Response) => { console.log("Logging in..."); response.json()})
-                .then(json => json)
-                .catch(error => console.log(error));
+            }).then((response: Response) => { return response.json(); })
+                .catch(error => {
+                    console.log(error);
+                });
+            result.then(output => {
+
+                //----------------------AFTER THE FETCH CALL-------------------->>>
+                console.log(output);
+
+                console.log(output.message);
+                console.log(sessionStorage.getItem("username"));
+                //----------------------AFTER THE FETCH CALL-------------------->>>
+            });
         }
         this.props.toggleLoggedIn();
+        
     }
 
     submitSignUp = (e: React.FormEvent<HTMLElement>): void => {
@@ -89,15 +101,29 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
 
             const form = tempElement as HTMLFormElement;
 
-            console.log(form);
-
+            
+            //FETCH CALL
             const result = fetch(form.action, {
                 method: form.method,
                 body: new FormData(form) as any,
-            })
-                .then((response: Response) => { console.log("Signing Up..."); response.json() })
-                .then(json => json)
-                .catch(error => console.log(error));
+            }).then((response: Response) => {  return response.json(); } )
+                .catch(error => {
+                    console.log(error);
+                });
+                result.then(output => {
+
+//----------------------AFTER THE FETCH CALL-------------------->>>
+                console.log(output);
+
+                    if (output.message == "Username already exists") {
+                        console.log("nope nope nope");
+                    }
+
+                console.log(output.message);
+//----------------------AFTER THE FETCH CALL-------------------->>>
+                });
+
+
         }
         this.props.toggleLoggedIn();
     }
@@ -119,8 +145,8 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
                 <h1>Create an Account</h1>
                 <form id="signUpForm" action="api/signup" method="post" onSubmit={this.submitSignUp}>
 
-                    <input type="text" id="Username" name="Username" value="testAccount" />
-                    <input type="text" id="Password" name="Password" value="12345" />
+                    <input type="text" id="Username" name="Username"  />
+                    <input type="password" id="Password" name="Password"  />
 
                     <button type="submit" name="" value="Create Account" >Submit</button>
 
@@ -137,8 +163,8 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
                 <h1>Login</h1>
                 <form id="logInForm" action="api/login" method="post" onSubmit={this.submitLogIn}>
 
-                    <input type="text" id="Username" name="Username" value="testAccount" />
-                    <input type="text" id="Password" name="Password" value="12345" />
+                    <input type="text" id="Username" name="Username"  />
+                    <input type="password" id="Password" name="Password"  />
 
                     <button type="submit" name="" value="Log In" >Submit</button>
 
