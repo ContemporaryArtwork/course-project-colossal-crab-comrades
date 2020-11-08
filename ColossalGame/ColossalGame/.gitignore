@@ -252,3 +252,8 @@ ClientApp/src/Store/**/*.js
 ClientApp/src/Store/**/*.js.map
 !ClientApp/src/Store/**/js/*.js
 !ClientApp/src/Store/**/js/*.js.map
+
+ClientApp/src/Phaser/**/*.js
+ClientApp/src/Phaser/**/*.js.map
+!ClientApp/src/Phaser/**/js/*.js
+!ClientApp/src/Phaser/**/js/*.js.map
