@@ -21,9 +21,7 @@ type GameMainMenuTogglerProps =
     RouteComponentProps<{}>;
 
 
-interface IProps {
 
-}
 
 interface IState {
     loginPageVisible?: boolean;
@@ -84,6 +82,10 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
                 console.log(output.message);
                 console.log(sessionStorage.getItem("username"));
                 //----------------------AFTER THE FETCH CALL-------------------->>>
+                let z = document.cookie;
+                let carr = z.split(';');
+                let firstElement = carr[0];
+                console.log(firstElement.split("=")[1]);
             });
         }
         this.props.toggleLoggedIn();
@@ -121,6 +123,7 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
 
                 console.log(output.message);
 //----------------------AFTER THE FETCH CALL-------------------->>>
+                
                 });
 
 
