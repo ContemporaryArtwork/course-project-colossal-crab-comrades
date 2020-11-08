@@ -35,11 +35,13 @@
 
   <ItemGroup>
     <None Remove="ClientApp\Signalr\SingalR.js" />
-    <None Remove="ClientApp\src\components\gameComponents\GameStartRenderer.tsx" />
+    <None Remove="ClientApp\src\components\gameComponents\GameStartRenderer2.tsx" />
     <None Remove="ClientApp\src\components\GameMainMenuToggler.tsx" />
     <None Remove="ClientApp\src\components\GlobalChat.tsx" />
     <None Remove="ClientApp\src\components\UserAuth.tsx" />
     <None Remove="ClientApp\src\Helpers\GetCookies.ts" />
+    <None Remove="ClientApp\src\Phaser\Game.ts" />
+    <None Remove="ClientApp\src\Phaser\scenes\MainScene.ts" />
     <None Remove="ClientApp\src\store\GameData.ts" />
     <None Remove="ClientApp\src\store\GameMainMenuToggler.ts" />
     <None Remove="ClientApp\src\store\GlobalChat.ts" />

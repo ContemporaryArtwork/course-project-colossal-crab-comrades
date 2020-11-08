@@ -5,7 +5,7 @@ import { ApplicationState } from '../store';
 import * as Phaser from 'phaser';
 import * as GameMainMenuTogglerStore from "../store/GameMainMenuToggler";
 import MainMenu from './MainMenu';
-import GameStartRenderer from './gameComponents/GameStartRenderer';
+import GameStartRenderer2 from './gameComponents/GameStartRenderer2';
 import UserAuth from './UserAuth';
 
 type GameMainMenuTogglerProps =
@@ -27,7 +27,7 @@ class GameMainMenuToggler extends React.PureComponent<GameMainMenuTogglerProps> 
         
 
         if (this.props.loggedIn) {
-            return (this.props.inGame ? <GameStartRenderer /> : <MainMenu />);
+            return (this.props.inGame ? <GameStartRenderer2 /> : <MainMenu />);
         } else {
             return (<UserAuth/>);
         }
