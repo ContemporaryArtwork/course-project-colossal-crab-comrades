@@ -105,7 +105,7 @@ class Signup extends React.PureComponent<GameMainMenuTogglerProps, IState> {
             <div>
                 <input type="button" value="Switch to Log In" onClick={this.doRedirect} />
                 <div className="signupBox" />
-                <h1>Create an Account</h1>
+                <h1 className = "userAuthH1">Create an Account</h1>
                 <form id="signUpForm" action="api/signup" method="post" onSubmit={this.submitSignUp}>
 
                     <input type="text" id="Username" name="Username" />

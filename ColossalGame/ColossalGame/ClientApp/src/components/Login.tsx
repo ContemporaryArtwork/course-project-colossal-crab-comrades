@@ -85,7 +85,6 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
             this.setState({ errorText: message });
             return false;
         }
-
     }
 
 
@@ -103,7 +102,7 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
               
                 <input type="button" value="Switch to Create an Account" onClick={this.doRedirect} />
                 <div className="loginBox" />
-                <h1>Login</h1>
+                <h1 className="userAuthH1">Login</h1>
                 <form id="logInForm" action="api/login" method="post" onSubmit={this.submitLogIn}>
 
                     <input type="text" id="Username" name="Username" />
