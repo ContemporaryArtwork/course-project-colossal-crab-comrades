@@ -15,7 +15,12 @@ import SettingsPanel from "../assets/mainMenu/SettingsPanel.png";
 import LoginButton from "../assets/mainMenu/GoogleIcon.png";
 
 //Cookie Import
-import  getCookie from "../Helpers/GetCookies"
+import getCookie from "../Helpers/GetCookies"
+
+
+//Router Import
+import { Redirect } from "react-router-dom";
+
 
 type GameMainMenuTogglerProps =
     GameMainMenuTogglerStore.GameMainMenuTogglerState &
@@ -101,8 +106,8 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps> {
 
     render() {
 
-        if (document.cookie == null) {
-            return <div>hi</div>
+        if (document.cookie == "") {
+            return <Redirect to="/signup" />
         } else {
             return (
                 <body>
