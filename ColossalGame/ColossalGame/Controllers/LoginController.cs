@@ -56,7 +56,7 @@ namespace ColossalGame.Controllers
                 var authTokenCookieOptions = new CookieOptions {HttpOnly = true, SameSite = SameSiteMode.Strict};
                 
                 Response.Cookies.Append("username", username,usernameCookieOptions);
-                Response.Cookies.Append("auth-token", token,authTokenCookieOptions);
+                Response.Cookies.Append("auth-token", token, usernameCookieOptions); //**Note** As of now the frontend needs the authtoken to not be HttpOnly. If we have the time available research ways we can use this cookie in frontend while set to httpOnly=true.
                 output["status"] = "ok";
                 output["message"] = "Sign in successful";
             }
