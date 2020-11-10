@@ -90,27 +90,30 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
 
 
     render() {
-            return (<div>
-                {this.renderLogIn()}
-                <p style={{ color: '#FF0008' }}>{this.state.errorText}</p>
-            </div>);        
+        return (<div>
+            {this.renderLogIn()}
+            <p style={{ color: '#FF0008' }}>{this.state.errorText}</p>
+        </div>);        
     }
 
     renderLogIn() {
         return (
-            <div>
-              
-                <input type="button" value="Switch to Create an Account" onClick={this.doRedirect} />
-                <div className="loginBox" />
-                <h1 className="userAuthH1">Login</h1>
-                <form id="logInForm" action="api/login" method="post" onSubmit={this.submitLogIn}>
+            <div className="logSign">
+                <ul className="switchUp">
+                    <li value="Log In" > Log In</li>
+                    <li value="Register" onClick={this.doRedirect}> Register</li>
+                </ul>
 
-                    <input type="text" id="Username" name="Username" />
-                    <input type="password" id="Password" name="Password" />
+                <div className="container">
+                    <form id="logInForm" action="api/login" method="post" onSubmit={this.submitLogIn}>
 
-                    <button type="submit" name="" value="Log In" >Submit</button>
+                        <input type="text" id="Username" name="Username" placeholder="Username" />
+                        <input type="password" id="Password" name="Password" placeholder="Password" />
 
-                </form>
+                        <button type="submit" name="" value="Log In" >Log In</button>
+
+                    </form>
+                </div>
             </div>
         );
     }
