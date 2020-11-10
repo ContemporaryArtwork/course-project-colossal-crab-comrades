@@ -95,7 +95,6 @@ class Signup extends React.PureComponent<GameMainMenuTogglerProps, IState> {
     render() {
         return (<div>
             {this.renderSignUp()}
-            <p style={{ color: '#FF0008' }}>{this.state.errorText}</p>
         </div>);
     }
 
@@ -117,6 +116,9 @@ class Signup extends React.PureComponent<GameMainMenuTogglerProps, IState> {
                         <button type="submit" name="" value="Create Account" >Create Account</button>
 
                     </form>
+
+                    <p style={{ color: '#FF0008' }}>{this.state.errorText}</p>
+
                 </div>
             </div>
         );

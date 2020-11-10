@@ -82,6 +82,10 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
         if (status == "ok") {
             return true;
         } else {
+
+
+            if (code == "BadUsername")
+
             this.setState({ errorText: message });
             return false;
         }
@@ -92,7 +96,6 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
     render() {
         return (<div>
             {this.renderLogIn()}
-            <p style={{ color: '#FF0008' }}>{this.state.errorText}</p>
         </div>);        
     }
 
@@ -113,6 +116,9 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
                         <button type="submit" name="" value="Log In" >Log In</button>
 
                     </form>
+
+                    <p style={{ color: '#FF0008' }}>{this.state.errorText}</p>
+
                 </div>
             </div>
         );
