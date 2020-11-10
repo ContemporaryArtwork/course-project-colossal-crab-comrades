@@ -93,7 +93,7 @@ class Signup extends React.PureComponent<GameMainMenuTogglerProps, IState> {
 
 
     render() {
-        return (<div>
+        return (<div className="logSignEnclosing">
             {this.renderSignUp()}
         </div>);
     }
@@ -104,16 +104,16 @@ class Signup extends React.PureComponent<GameMainMenuTogglerProps, IState> {
             <div className="logSign">
                 <ul className="switchUp">
                     <li value="Log In" onClick={this.doRedirect}> Log In</li>
-                    <li value="Register" > Register</li>
+                    <li value="Register" style={{ background: '#008000', color: '#FFFFFF'}}> Register</li>
                 </ul>
 
-                <div className="container">
+                <div className="formContainer">
                     <form id="signUpForm" action="api/signup" method="post" onSubmit={this.submitSignUp}>
 
                         <input type="text" id="Username" name="Username" placeholder="Username" />
                         <input type="password" id="Password" name="Password" placeholder="Password" />
 
-                        <button type="submit" name="" value="Create Account" >Create Account</button>
+                        <button className="logSignBut" type="submit" name="" value="Create Account" >Create Account</button>
 
                     </form>
 

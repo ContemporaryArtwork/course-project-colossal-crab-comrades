@@ -121,8 +121,6 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps> {
                             <button className="settingsButton" onClick={this.ToggleSettings}>
                                 <img src={SettingsButton} />
                             </button>
-
-                            <button className="loginOpen" onClick={this.SignIn}> Login </button>
                         </div>
 
                         <div className="containMain">
@@ -187,44 +185,6 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps> {
                         </div>
 
                         <div className="settings"> <img src={SettingsPanel} />  </div>
-
-                        <div className="loginPanel">
-                            <div className="signContainer">
-                                <label>Email</label><br></br>
-                                <input
-                                    type="text"
-                                    placeholder="Email"
-                                ></input><br></br>
-                                <label>Password</label><br></br>
-                                <input
-                                    type="text"
-                                    placeholder="Password"
-                                ></input><br></br>
-                                <button className="loginButton" onClick={this.SendData}> LOGIN </button>
-                                <button className="registerButton" onClick={this.SignUp}>Don't have an account? Click here to register</button>
-                            </div>
-                        </div>
-
-                        <div className="registerPanel">
-                            <div className="signContainer">
-                                <label>Email</label><br></br>
-                                <input
-                                    type="text"
-                                    placeholder="Email"
-                                ></input><br></br>
-                                <label>Password</label><br></br>
-                                <input
-                                    type="text"
-                                    placeholder="Password"
-                                ></input><br></br>
-                                <label>Confirm Password</label><br></br>
-                                <input
-                                    type="text"
-                                    placeholder="Repeat Password"
-                                ></input><br></br>
-                                <button className="loginButton" onClick={this.SendData}> REGISTER </button>
-                            </div>
-                        </div>
                     </div>
                 </body>
             );
