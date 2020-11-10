@@ -84,7 +84,7 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
         } else {
 
 
-            if (code == "BadUsername")
+
 
             this.setState({ errorText: message });
             return false;
