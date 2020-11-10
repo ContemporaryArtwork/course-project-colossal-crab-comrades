@@ -38,6 +38,10 @@ export interface MovementAction {
     Token: string,
     Direction: Direction
 }
+export interface SpawnAction {
+    Username: string,
+    Token: string
+}
 
 export interface Coordinates {
     x: number,
@@ -75,6 +79,9 @@ export interface SendMovementAction {
     type: 'SEND_MOVEMENT';
     direction: Direction;
 }
+export interface SpawnPlayerRequestAction {
+    type: 'SPAWN_PLAYER_REQUEST';
+}
 export interface SetUsernameAction {
     type: 'SET_USERNAME';
     username: string;
@@ -94,15 +101,10 @@ export interface ReceivePositionsUpdateAction {
     playerDict: Map<string, PlayerModel>
 }
 
-/*export interface ReceivedPostionalUpdatesAction {
-    type: 'RECEIVED_MESSAGE';
-    message: Message;
-}*/
-
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-export type KnownAction = InitializeAction | SendMovementAction | SetUsernameAction | TempLoginAction | ReceivedTokenAction | ReceivePositionsUpdateAction;
+export type KnownAction = InitializeAction | SendMovementAction | SpawnPlayerRequestAction | SetUsernameAction | TempLoginAction | ReceivedTokenAction | ReceivePositionsUpdateAction;
 
 const SignalRActionsList: string[] = ["RECEIVED_STRING", "RECEIVE_TOKEN", "RECEIVE_POSITIONS_UPDATE"];
 // ----------------
@@ -113,20 +115,19 @@ export const actionCreators = {
 
     setUsername: (name: string) => ({ type: 'SET_USERNAME', username: name } as SetUsernameAction),
 
-    initialize: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    initialize: (): AppThunkAction<KnownAction> => async (dispatch, getState) => { //Made method Async so game would wait for the signalr connection to be established.
         // Only load data if it's something we don't already have (and are not already loading)
         const appState = getState();
         console.log(appState);
         if (appState && appState.gameData) {                               // might be caps
-            const setupEventsHub: HubConnection = setupSignalRConnection('/hubs/gamedata', SignalRActionsList)(dispatch);
+            const setupEventsHub: HubConnection = await (await setupSignalRConnection('/hubs/gamedata', SignalRActionsList))(dispatch);
             dispatch({ type: 'INITIALIZED', connection: setupEventsHub });
         }
     },
 
-    tempLogin: (username: string, password: string): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    tempLogin: (username: string, password: string): AppThunkAction<KnownAction> => (dispatch, getState) => { //get rid of this once login functionality is verified to work through frontend.
         const appState = getState();
         if (appState && appState.gameData && appState.gameData.connection) {
-
 
             appState.gameData.connection && appState.gameData.connection.invoke("TempLogin", username,password)
 
@@ -136,21 +137,31 @@ export const actionCreators = {
 
     sendMovementAction: (direction: Direction): AppThunkAction<KnownAction> => (dispatch, getState) => {
         const appState = getState();
-        if (appState && appState.gameData && appState.gameData.connection && appState.gameData.token) {
-
-            //TEMPORARY
-            //let cookieVal = getCookie("auth-token") as string;
-            // tokenString = (cookieVal !== undefined) ? cookieVal : "";
-            //console.log("about to send movement");
+        let token = getCookie("auth-token");
+        if (appState && appState.gameData && appState.gameData.connection && appState.gameData.playerData.username && token) {
 
             const movementActionDTO: MovementAction = {
-                Username: "admin1"/*appState.gameData.playerData.username*/,
-                Token: appState.gameData.token,
+                Username: appState.gameData.playerData.username,
+                Token: token,
                 Direction: direction
             }
             appState.gameData.connection && appState.gameData.connection.invoke("SendMovement", movementActionDTO)
 
             dispatch({ type: 'SEND_MOVEMENT', direction: direction });
+        }
+    },
+    spawnPlayerAction: (): AppThunkAction<KnownAction> => (dispatch, getState) => { //Used to request to spawn the player. This method attempts to spawn the player using the username and auth-token cookies.
+        const appState = getState();
+        let token = getCookie("auth-token");
+        if (appState && appState.gameData && appState.gameData.connection && appState.gameData.playerData.username && token) {
+
+            const spawnActionDTO: SpawnAction = {
+                Username: appState.gameData.playerData.username,
+                Token: token,
+            }
+            appState.gameData.connection && appState.gameData.connection.invoke("SpawnPlayer", spawnActionDTO)
+
+            dispatch({ type: 'SPAWN_PLAYER_REQUEST' });
         }
     }
 };
@@ -175,11 +186,6 @@ export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined
     }
 
     const action = incomingAction as KnownAction;
-    if (action.type == "RECEIVE_POSITIONS_UPDATE") {
-        //console.log("HEY GOT THE DICT!");
-        //console.log(action.playerDict);
-        //console.log(action);
-    }
     switch (action.type) {
         case 'INITIALIZED':
             return {
@@ -207,7 +213,8 @@ export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined
             };
         case 'SEND_MOVEMENT':
             return state;
-
+        case 'SPAWN_PLAYER_REQUEST':
+            return state;
         case 'SET_USERNAME':
             return {
                 ...state, playerData: { ...state.playerData, username: action.username }

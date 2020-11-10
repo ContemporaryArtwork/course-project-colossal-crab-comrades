@@ -61,12 +61,12 @@ export const actionCreators = {
     setUsername: (name: string) => ({ type: 'SET_USERNAME', username: name } as SetUsernameAction),
     setInputMessage: (inputMessage: string) => ({ type: 'SET_INPUT_MESSAGE', inputmessage: inputMessage } as SetInputMessageAction),
 
-    initialize: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    initialize: (): AppThunkAction<KnownAction> => async (dispatch, getState) => {
         // Only load data if it's something we don't already have (and are not already loading)
         const appState = getState();
         console.log(appState);
         if (appState && appState.globalchat) {
-            const setupEventsHub: HubConnection = setupSignalRConnection('/hubs/globalChat', SignalRActionsList)(dispatch);
+            const setupEventsHub: HubConnection = await (await setupSignalRConnection('/hubs/globalChat', SignalRActionsList))(dispatch);
             dispatch({ type: 'INITIALIZED', connection: setupEventsHub });
         }
     },
