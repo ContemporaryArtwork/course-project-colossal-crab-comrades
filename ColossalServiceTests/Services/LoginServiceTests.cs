@@ -28,7 +28,7 @@ namespace ColossalServiceTests.Services
             var bytes = new byte[32];
             rand.NextBytes(bytes);
             string username = Convert.ToBase64String(bytes);
-            string password = "123456";
+            string password = "Password123$";
             return (username, password);
         }
 
@@ -41,7 +41,7 @@ namespace ColossalServiceTests.Services
             var bytes = new byte[32];
             rand.NextBytes(bytes);
             string username = Convert.ToBase64String(bytes);
-            string password = "test";
+            string password = "Password123$";
             service.DeleteUser(username);
             service.SignUp(username, password);
 
@@ -65,7 +65,7 @@ namespace ColossalServiceTests.Services
             var bytes = new byte[32];
             rand.NextBytes(bytes);
             string username = Convert.ToBase64String(bytes);
-            string password = "test";
+            string password = "Password123$";
             service.DeleteUser(username);
             service.SignUp(username, password);
 
@@ -98,7 +98,7 @@ namespace ColossalServiceTests.Services
             var bytes = new byte[32];
             rand.NextBytes(bytes);
             string username = Convert.ToBase64String(bytes);
-            string password = "test";
+            string password = "Password123$";
             service.DeleteUser(username);
             service.SignUp(username, password);
 
@@ -154,7 +154,7 @@ namespace ColossalServiceTests.Services
             var bytes = new byte[32];
             rand.NextBytes(bytes);
             string username = Convert.ToBase64String(bytes);
-            string password = "test";
+            string password = "Password123$";
             service.DeleteUser(username);
 
 
@@ -171,7 +171,7 @@ namespace ColossalServiceTests.Services
             // Arrange
             var service = this.CreateService();
             string username = null;
-            string password = "test";
+            string password = "Password123$";
 
             // Act
             bool throws = false;

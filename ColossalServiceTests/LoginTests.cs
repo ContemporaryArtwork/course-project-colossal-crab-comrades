@@ -19,17 +19,17 @@ namespace ColossalServiceTests
         public void TestSignUp()
         {
             Console.WriteLine(_loginService.DeleteUser("coolAccount"));
-            bool createdSuccessfully = _loginService.SignUp("coolAccount", "coolpassword");
+            bool createdSuccessfully = _loginService.SignUp("coolAccount", "Password123$");
             Assert.True(createdSuccessfully);
-            Assert.Throws<UserAlreadyExistsException>((() => _loginService.SignUp("coolAccount","coolpassword")));
+            Assert.Throws<UserAlreadyExistsException>((() => _loginService.SignUp("coolAccount", "Password123$")));
         }
 
         [Test]
         public void TestSignIn()
         {
             Console.WriteLine(_loginService.DeleteUser("coolAccount"));
-            Assert.True( _loginService.SignUp("coolAccount", "coolpassword"));
-            Assert.NotNull( _loginService.SignIn("coolAccount", "coolpassword"));
+            Assert.True( _loginService.SignUp("coolAccount", "Password123$"));
+            Assert.NotNull( _loginService.SignIn("coolAccount", "Password123$"));
         }
 
         

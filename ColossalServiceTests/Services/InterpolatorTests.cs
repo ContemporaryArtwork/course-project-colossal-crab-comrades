@@ -4,6 +4,7 @@ using NUnit.Framework;
 using System;
 using ColossalGame.Models;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace ColossalServiceTests.Services
 {
@@ -18,8 +19,10 @@ namespace ColossalServiceTests.Services
         public void SetUp()
         {
             this.subUserService = Substitute.For<UserService>("mongodb://localhost:27017/");
-            this.subLoginService = Substitute.For<LoginService>(subUserService);
+            this.subLoginService = Substitute.For<LoginService>(this.subUserService);
             this.subGameLogic = Substitute.For<GameLogic>(this.subLoginService,this.subUserService);
+            this.subLoginService.DeleteUser("testUser");
+            this.subLoginService.SignUp("testUser", "Testpassword123$");
             this.subGameLogic.AddPlayerToSpawnQueue("testUser");
         }
 
@@ -36,11 +39,11 @@ namespace ColossalServiceTests.Services
             var interpolator = this.CreateInterpolator();
             MovementAction action = new MovementAction();
 
-            subLoginService.DeleteUser("testUser");
-            subLoginService.SignUp("testUser", "testPassword");
-            string token = subLoginService.SignIn("testUser", "testPassword");
-
+            //this.subLoginService.DeleteUser("testUser");
+            //this.subLoginService.SignUp("testUser", "Testpassword123$");
             
+            string token = this.subLoginService.SignIn("testUser", "Testpassword123$");
+
             action.Username = "testUser";
             action.Token = token;
 
@@ -52,7 +55,7 @@ namespace ColossalServiceTests.Services
             Assert.True(result);
 
         }
-
+        
         [Test]
         public void ParseAction_ValidLoginButSecondActionTooFast_ReturnFalse()
         {
@@ -60,9 +63,9 @@ namespace ColossalServiceTests.Services
             var interpolator = this.CreateInterpolator();
             MovementAction action = new MovementAction();
 
-            subLoginService.DeleteUser("testUser");
-            subLoginService.SignUp("testUser", "testPassword");
-            string token = subLoginService.SignIn("testUser", "testPassword");
+            //subLoginService.DeleteUser("testUser");
+            //subLoginService.SignUp("testUser", "Testpassword123$");
+            string token = subLoginService.SignIn("testUser", "Testpassword123$");
 
 
             action.Username = "testUser";
@@ -70,7 +73,7 @@ namespace ColossalServiceTests.Services
 
             // Act
             Assert.True( interpolator.ParseAction(action));
-            System.Threading.Thread.Sleep(5);
+            Thread.Sleep(5);
             bool result = interpolator.ParseAction(action);
 
             //Assert
@@ -85,9 +88,9 @@ namespace ColossalServiceTests.Services
             var interpolator = this.CreateInterpolator();
             MovementAction action = new MovementAction();
 
-            subLoginService.DeleteUser("testUser");
-            subLoginService.SignUp("testUser", "testPassword");
-            string token = subLoginService.SignIn("testUser", "testPassword");
+            //subLoginService.DeleteUser("testUser");
+            //subLoginService.SignUp("testUser", "Password123$");
+            string token = subLoginService.SignIn("testUser", "Testpassword123$");
 
 
             action.Username = "testUser";
@@ -95,12 +98,13 @@ namespace ColossalServiceTests.Services
 
             // Act
             Assert.True(interpolator.ParseAction(action));
-            System.Threading.Thread.Sleep(55);
+            Thread.Sleep(55);
             bool result = interpolator.ParseAction(action);
 
             //Assert
             Assert.True(result);
 
         }
+        
     }
 }
