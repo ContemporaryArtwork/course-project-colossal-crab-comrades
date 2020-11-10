@@ -6,7 +6,7 @@ import { RouteComponentProps } from 'react-router';
 import { ApplicationState } from '../store';
 import * as GameMainMenuTogglerStore from "../store/GameMainMenuToggler";
 import MainMenu from './MainMenu';
-import GameStartRenderer from './gameComponents/GameStartRenderer';
+import GameStartRenderer from './gameComponents/GameStartRenderer2';
 import "./UserAuth.css";
 import BGVideo from "../assets/mainMenu/BGVideo.mp4";
 //import BG from "../assets/mainMenu/mainBackground.jpg";
