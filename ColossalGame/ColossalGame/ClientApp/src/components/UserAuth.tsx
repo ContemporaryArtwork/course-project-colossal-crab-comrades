@@ -134,7 +134,7 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
 
     render() {
 
-        return (<div>  
+        return (<div className="enclosing">  
             {this.state.loginPageVisible ? this.renderLogIn() : this.renderSignUp()}
         </div>);
     }
@@ -142,36 +142,46 @@ class UserAuth extends React.PureComponent<GameMainMenuTogglerProps, IState> {
 
     renderSignUp() {
         return (
-            <div>
-                <input type="button" value="Switch to Log In" onClick={this.flipLogInPage}/>
-                <div className="signupBox" />
-                <h1>Create an Account</h1>
-                <form id="signUpForm" action="api/signup" method="post" onSubmit={this.submitSignUp}>
+            <div className="logSign">
+                <ul className="switchUp">
+                    <li value="Log In" onClick={this.flipLogInPage}> Log In</li>
+                    <li value="Register" onClick={this.flipLogInPage}> Register</li>
+                </ul>   
+                
+                <div className="container">
+                    <div className="signupBox" />
+                    <form id="signUpForm" action="api/signup" method="post" onSubmit={this.submitSignUp}>
 
-                    <input type="text" id="Username" name="Username"  />
-                    <input type="password" id="Password" name="Password"  />
+                        <input type="text" id="Username" name="Username" placeholder="Username" />
+                        <input type="password" id="Password" name="Password" placeholder="Password" />
 
-                    <button type="submit" name="" value="Create Account" >Submit</button>
+                        <button type="submit" name="" value="Create Account" >Create Account</button>
 
-                </form>
+                    </form>
+                </div>
             </div>
         );
     }
 
     renderLogIn() {
         return (
-            <div>
-                <input type="button" value="Switch to Create an Account" onClick={this.flipLogInPage} />
-                <div className="loginBox" />
-                <h1>Login</h1>
-                <form id="logInForm" action="api/login" method="post" onSubmit={this.submitLogIn}>
+            <div className="logSign">
+                <ul className="switchUp">
+                    <li value="Log In" onClick={this.flipLogInPage}> Log In</li>
+                    <li value="Register" onClick={this.flipLogInPage}> Register</li>
+                </ul>  
 
-                    <input type="text" id="Username" name="Username"  />
-                    <input type="password" id="Password" name="Password"  />
+                <div className="container">
+                    <div className="loginBox" />
+                    <form id="logInForm" action="api/login" method="post" onSubmit={this.submitLogIn}>
 
-                    <button type="submit" name="" value="Log In" >Submit</button>
+                        <input type="text" id="Username" name="Username" placeholder="Username" />
+                        <input type="password" id="Password" name="Password" placeholder="Password" />
 
-                </form>
+                        <button type="submit" name="" value="Log In" >Log In</button>
+
+                    </form>
+                </div>
             </div>
         );
     }
