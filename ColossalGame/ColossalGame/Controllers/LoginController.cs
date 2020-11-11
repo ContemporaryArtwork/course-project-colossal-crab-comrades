@@ -71,6 +71,12 @@ namespace ColossalGame.Controllers
                 output["errorCode"] = ErrorTypes.BadPassword.ToString("G");
                 output["message"] = "Incorrect or otherwise bad password";
             }
+            catch (BadUsernameException)
+            {
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.BadUsername.ToString("G");
+                output["message"] = "Username is formatted poorly";
+            }
             catch (Exception e)
             {
                 output["status"] = "error";
