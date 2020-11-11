@@ -111,8 +111,8 @@ namespace ColossalServiceTests.Services
             Assert.True(a.IsNullOrEmpty());
             Assert.True(b.Count == 1);
             Assert.True(b.ElementAt(0).Key == "realUser");
-            //Assert.True(b.ElementAt(0).Value);
-            //Assert.True(b.Count == 1 && b.ElementAt(0).Key == "realUser" && b.ElementAt(0).Value.Username == "realUser" && b.ElementAt(0).Value.XPos == 1.0 && b.ElementAt(0).Value.YPos == 2.0);
+            Assert.AreEqual(1.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).X);
+            Assert.AreEqual(2.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).Y);
             gameLogic.AddPlayerToDespawnQueue("realUser");
             Thread.Sleep(100);
             (a, b) = gameLogic.GetState();
