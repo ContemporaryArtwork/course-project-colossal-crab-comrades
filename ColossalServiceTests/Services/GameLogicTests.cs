@@ -156,12 +156,9 @@ namespace ColossalServiceTests.Services
             ma.Username = username;
             gameLogic.AddActionToQueue(ma);
 
-            MovementAction ma2 = new MovementAction();
-            //ma2.Direction = null;
-            ma2.Token = null;
-            ma2.Username = username;
+            
             // Assert
-            gameLogic.AddActionToQueue(ma2);
+            
             Thread.Sleep(100);
             var (a, b) = gameLogic.GetState();
 
@@ -172,6 +169,7 @@ namespace ColossalServiceTests.Services
             //Assert.AreEqual(-10.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).X,.2);
             //Temporary because inconsistent results
             Assert.True(100.0f > b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).X);
+            Thread.Sleep(100);
             Assert.AreEqual(0.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).Y);
         }
 
