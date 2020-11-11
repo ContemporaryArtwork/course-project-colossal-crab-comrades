@@ -83,10 +83,18 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
             return true;
         } else {
 
+            if (code == "BadUsername") {
+                this.setState({ errorText: "Username or password is incorrect." });
+            }
+            if (code == "BadPassword") {
+                this.setState({ errorText: "Username or password is incorrect." });
+            }
+            if (code == "Unknown") {
+                this.setState({ errorText: "It appears that we have encountered an unknown problem. Please try again. (Ah, the mysterious unknown!)" });
+            }
 
 
-
-            this.setState({ errorText: message });
+           // this.setState({ errorText: message });
             return false;
         }
     }

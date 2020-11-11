@@ -84,7 +84,24 @@ class Signup extends React.PureComponent<GameMainMenuTogglerProps, IState> {
         if (status == "ok") {
             return true;
         } else {
-            this.setState({ errorText: message });
+
+
+            if (code == "UserAlreadyExists") {
+                this.setState({ errorText: "This user already exists. Try submitting a unique username."});
+            }
+            if (code == "BadPassword") {
+                this.setState({ errorText: "Your password is not strong enough. Your password must contain: 8 characters, 1 uppercase, 1 lowercase, 1 special character." });
+            }
+            if (code == "BadUsername") {
+                this.setState({ errorText: "Try using a different username."});
+            }
+            if (code == "Unknown") {
+                this.setState({ errorText: "It appears that we have encountered an unknown problem. Please try again. (Ah, the mysterious unknown!)" });
+            }
+
+
+
+            //this.setState({ errorText: message });
             return false;
         }
 
