@@ -86,10 +86,19 @@ export default class MainScene extends Phaser.Scene {
 
 
         //SEND Keyboard Presses To Server
-        if (cursors.up && cursors.up.isDown) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Up); }
-        if (cursors.left && cursors.left.isDown) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Left); }
-        if (cursors.down && cursors.down.isDown) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Down); }
-        if (cursors.right && cursors.right.isDown) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Right); }
+        const up = cursors.up && cursors.up.isDown;
+        const left = cursors.left && cursors.left.isDown;
+        const down = cursors.down && cursors.down.isDown;
+        const right = cursors.right && cursors.right.isDown;
+        if (up) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Up); }
+        if (left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Left); }
+        if (down) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Down); }
+        if (right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Right); }
+        if (up&&left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft); }
+        if (up&&right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpRight); }
+        if (down&&left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownLeft); }
+        if (down&&right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownRight); }
+
 
 
         //Update Position of all entities in the game using the current data in playerDict
