@@ -97,9 +97,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
                         </div>
 
                         <div className="containMain">
-                            <button className="settingsButton" onClick={this.ToggleSettings}>
-                                <img src={SettingsButton} />
-                            </button>
+                            <img src={SettingsButton} className="settingsButton" onClick={this.ToggleSettings}/>
                         </div>
 
                         <div className="containMain">
