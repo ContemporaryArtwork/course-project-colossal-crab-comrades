@@ -180,7 +180,9 @@ namespace ColossalGame.Services
             PlayerDictionary[username] = pm;
         }
 
-        private void SpawnBall(float xPos = 0f, float yPos = 0f)
+        private List<Body> BodyObjectList = new List<Body>();
+
+        private void SpawnProjectile(float forceX,float forceY,float xPos = 0f, float yPos = 0f)
         {
             
 
@@ -192,6 +194,9 @@ namespace ColossalGame.Services
             pm.SetFriction(.3f);
             pm.Mass = .1f;
             pm.LinearDamping = 1f;
+            pm.IsBullet = true;
+            pm.ApplyLinearImpulse(new Vector2(forceX,forceY));
+            BodyObjectList.Add(pm);
 
         }
 
