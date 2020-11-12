@@ -64,7 +64,7 @@ export default class MainScene extends Phaser.Scene {
 
             curPlayer.setName("playerSprite"); //Set name of entities in container. Perhaps this will be useful later for changing image of sprite.
 
-            let curText = this.add.text(0, 0 - (curPlayer.height / 2), key, { font: "16px Arial", fill: "#ffffff", backgroundColor: "#ffff00", align: "center" });
+            let curText = this.add.text(0, 0 - (curPlayer.height / 2), key, { font: "16px Arial", fill: "#ffffff", backgroundColor: "#808080", align: "center"});
             curText.x = curText.x - (curText.width / 2);
             curText.y = curText.y - 20;
 
@@ -118,7 +118,7 @@ export default class MainScene extends Phaser.Scene {
 
                     curPlayer.setName("playerSprite");
 
-                    let curText = this.add.text(0, 0 - (curPlayer.height / 2), key, { font: "16px Arial", fill: "#ffffff", backgroundColor: "#ffff00", align: "center" });
+                    let curText = this.add.text(0, 0 - (curPlayer.height / 2), key, { font: "16px Arial", fill: "#ffffff", backgroundColor: "#808080", align: "center" });
                     curText.x = curText.x - (curText.width / 2);
                     curText.y = curText.y - 20;
 
