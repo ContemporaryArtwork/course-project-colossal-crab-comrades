@@ -105,20 +105,33 @@ namespace ColossalGame.Services
                     throw new Exception("NULL VALUE IN DICTIONARY");
                 }
 
+                float linearImpulseForce = 100f;
                 switch (m.Direction)
                 {
                     case EDirection.Down:
                         
-                        pm.ApplyLinearImpulse(new Vector2(0,20f));
+                        pm.ApplyLinearImpulse(new Vector2(0,linearImpulseForce));
                         break;
                     case EDirection.Up:
-                        pm.ApplyLinearImpulse(new Vector2(0, -20f));
+                        pm.ApplyLinearImpulse(new Vector2(0, -linearImpulseForce));
                         break;
                     case EDirection.Left:
-                        pm.ApplyLinearImpulse(new Vector2(-20f, 0));
+                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, 0));
                         break;
                     case EDirection.Right:
-                        pm.ApplyLinearImpulse(new Vector2(20f, 0));
+                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, 0));
+                        break;
+                    case EDirection.UpLeft:
+                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, -linearImpulseForce));
+                        break;
+                    case EDirection.UpRight:
+                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, -linearImpulseForce));
+                        break;
+                    case EDirection.DownLeft:
+                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, linearImpulseForce));
+                        break;
+                    case EDirection.DownRight:
+                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, linearImpulseForce));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -277,7 +290,7 @@ namespace ColossalGame.Services
                    // Console.WriteLine("GameLogic: " + DateTime.Now.Second);
                    // Console.WriteLine("ts: " + ts.Milliseconds);
                     simulateOneServerTick();
-                    for (int i = 0; i < 3; i++)
+                    for (int i = 0; i < 7; i++)
                     {
                         _world.Step(1/60f);
                         
@@ -323,11 +336,7 @@ namespace ColossalGame.Services
         /// <param name="action">Action to be added</param>
         public void AddActionToQueue(AUserAction action)
         {
-           if (ActionQueue.Count<10) ActionQueue.Enqueue(action);
-           else
-           {
-               return;
-           }
+           ActionQueue.Enqueue(action);
         }
 
         /// <summary>

@@ -30,7 +30,11 @@ export enum Direction {
     Down = 0,
     Up,
     Left,
-    Right
+    Right,
+    UpLeft,
+    UpRight,
+    DownLeft,
+    DownRight
 }
 
 export interface MovementAction {
