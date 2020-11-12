@@ -13,10 +13,10 @@ import MainMenu from './components/MainMenu';
 import GameMainMenuToggler from './components/GameMainMenuToggler';
 
 export default () => (
-    <body>
+    <React.Fragment>
         <Route exact path='/' component={GameMainMenuToggler} />
         <Route exact path='/globalchat' component={GlobalChat} />
         <Route path='/login' component={Login} />
         <Route path='/signup' component={Signup} />
-    </body>
+    </React.Fragment>
 );
