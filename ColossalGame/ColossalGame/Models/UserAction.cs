@@ -27,5 +27,10 @@ namespace ColossalGame.Models
 
     }
 
+    public class SpawnAction: AUserAction
+    {
+        
+    }
+
     
 }

@@ -22,7 +22,7 @@ const startSignalRConnection = async connection => {
 // Set up a SignalR connection to the specified hub URL, and actionEventMap.
 // actionEventMap should be an object mapping event names, to eventHandlers that will
 // be dispatched with the message body.
-export const setupSignalRConnection = (connectionHub, actionEventList) => (dispatch) => {
+export const setupSignalRConnection = async (connectionHub, actionEventList) => async (dispatch) => {
     const options = {
         logMessageContent: isDev,
         logger: isDev ? LogLevel.Warning : LogLevel.Error,
@@ -60,7 +60,7 @@ export const setupSignalRConnection = (connectionHub, actionEventList) => (dispa
         console.log('Connection reestablished. Connected with connectionId', connectionId);
     });
 
-    startSignalRConnection(connection);
+    await startSignalRConnection(connection);
 
     connection.on('ReceiveMessage', res => {
         //const eventHandler = actionEventMap[res.type];

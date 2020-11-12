@@ -76,12 +76,12 @@ namespace ColossalGame.Hubs.GameData
         {
             bool res = false;
             
-
+            
             if (_interpolator != null)
             {
                 try
                 {
-                    if (!_gameLogic.IsPlayerSpawned(movementAction.Username))
+                    if (!_gameLogic.IsPlayerSpawned(movementAction.Username)) //Should Deprecate this in favor of requiring the player to call the SpawnPlayer action.
                     {
                         _gameLogic.AddPlayerToSpawnQueue(movementAction.Username);
                     }
@@ -99,6 +99,40 @@ namespace ColossalGame.Hubs.GameData
                                         "Action rejected by interpolator. Action sent too close to previous action.";
             await Clients.Caller.ReceiveString(responseString);
         }
-        
+
+        public async Task SpawnPlayer(SpawnAction spawnAction)
+        {
+            bool res;
+            string responseString;
+
+            if (_interpolator != null)
+            {
+                try
+                {
+                    res = _gameLogic.IsPlayerSpawned(spawnAction.Username);
+                    if (!res)
+                    {
+                        _gameLogic.AddPlayerToSpawnQueue(spawnAction.Username);
+                    }
+                    responseString = res ? "Player Already Spawned." :
+                                        "Player wasnt already spawned. Added Player to spawn queue.";
+                    
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    responseString = e.ToString();
+                }
+
+            }
+            else
+            {
+                responseString = "Error: Interpolator not setup";
+            }
+
+            
+            await Clients.Caller.ReceiveString(responseString);
+        }
+
     }
 }
