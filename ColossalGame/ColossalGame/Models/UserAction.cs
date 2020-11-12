@@ -10,10 +10,14 @@ namespace ColossalGame.Models
         Down,
         Up,
         Left,
-        Right
+        Right,
+        UpLeft,
+        UpRight,
+        DownLeft,
+        DownRight
     }
 
-    public abstract class AUserAction
+    public class AUserAction
     {
         public string Username { get; set; }
         public string Token { get; set; }

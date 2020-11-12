@@ -92,8 +92,9 @@ namespace ColossalGame.Services
         ///     Void method which handles actions. Currently only handles movement actions
         /// </summary>
         /// <param name="action">Object representing various user actions. Currently only MovementAction will have functionality</param>
-        private void HandleAction(AUserAction action)
+        private void HandleAction(Object action)
         {
+            
             if (action is MovementAction m)
             {
                 if (!PlayerDictionary.ContainsKey(m.Username)) throw new Exception("Player must be spawned first!");
@@ -104,20 +105,33 @@ namespace ColossalGame.Services
                     throw new Exception("NULL VALUE IN DICTIONARY");
                 }
 
+                float linearImpulseForce = 100f;
                 switch (m.Direction)
                 {
                     case EDirection.Down:
                         
-                        pm.ApplyLinearImpulse(new Vector2(0,20f));
+                        pm.ApplyLinearImpulse(new Vector2(0,linearImpulseForce));
                         break;
                     case EDirection.Up:
-                        pm.ApplyLinearImpulse(new Vector2(0, -20f));
+                        pm.ApplyLinearImpulse(new Vector2(0, -linearImpulseForce));
                         break;
                     case EDirection.Left:
-                        pm.ApplyLinearImpulse(new Vector2(-20f, 0));
+                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, 0));
                         break;
                     case EDirection.Right:
-                        pm.ApplyLinearImpulse(new Vector2(20f, 0));
+                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, 0));
+                        break;
+                    case EDirection.UpLeft:
+                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, -linearImpulseForce));
+                        break;
+                    case EDirection.UpRight:
+                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, -linearImpulseForce));
+                        break;
+                    case EDirection.DownLeft:
+                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, linearImpulseForce));
+                        break;
+                    case EDirection.DownRight:
+                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, linearImpulseForce));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -166,6 +180,21 @@ namespace ColossalGame.Services
             PlayerDictionary[username] = pm;
         }
 
+        private void SpawnBall(float xPos = 0f, float yPos = 0f)
+        {
+            
+
+            Vector2 ballPosition = new Vector2(xPos, yPos);
+
+            var pm = _world.CreateCircle(.5f, 1f, ballPosition);
+            pm.BodyType = BodyType.Dynamic;
+            pm.SetRestitution(0.3f);
+            pm.SetFriction(.3f);
+            pm.Mass = .1f;
+            pm.LinearDamping = 1f;
+
+        }
+
         /// <summary>
         ///     Despawn a player
         /// </summary>
@@ -201,6 +230,8 @@ namespace ColossalGame.Services
 
             while (ActionQueue.Count != 0)
             {
+                //Thread t = new Thread(new ParameterizedThreadStart(HandleAction));
+                //t.Start(ActionQueue.Dequeue());
                 HandleAction(ActionQueue.Dequeue());
                 somethingChanged = true;
             }
@@ -223,7 +254,8 @@ namespace ColossalGame.Services
         public (List<GameObjectModel>, Dictionary<string, PlayerModel>) GetStatePM()
         {
             Dictionary<string,PlayerModel> oPD = new Dictionary<string, PlayerModel>();
-            foreach (string p in PlayerDictionary.Keys)
+            var localDict = PlayerDictionary;
+            foreach (string p in localDict.Keys)
             {
                 var temp = PlayerDictionary[p];
                 PlayerModel tempPlayerModel = new PlayerModel();
@@ -258,12 +290,15 @@ namespace ColossalGame.Services
                    // Console.WriteLine("GameLogic: " + DateTime.Now.Second);
                    // Console.WriteLine("ts: " + ts.Milliseconds);
                     simulateOneServerTick();
-                    for (int i = 0; i < 3; i++)
+                    for (int i = 0; i < 7; i++)
                     {
                         _world.Step(1/60f);
                         
                     }
-                PublishState();
+                    var instanceCaller = new Thread(
+                        PublishState);
+                    instanceCaller.Start();
+                //PublishState();
                 tickCounter++;
                     ts = DateTime.Now - lastTick;
                     
@@ -301,11 +336,7 @@ namespace ColossalGame.Services
         /// <param name="action">Action to be added</param>
         public void AddActionToQueue(AUserAction action)
         {
-           if (ActionQueue.Count<1) ActionQueue.Enqueue(action);
-           else
-           {
-               return;
-           }
+           ActionQueue.Enqueue(action);
         }
 
         /// <summary>
