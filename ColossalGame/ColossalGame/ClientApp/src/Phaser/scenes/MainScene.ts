@@ -4,6 +4,13 @@ import Game from '../Game'
 import * as GameDataStore from "../../store/GameData";
 
 
+
+//Test Big Bug
+//import testBugJson from "../../assets/gameAssets/animation/TentacleMothSheet.json";
+import testBug from "../../assets/gameAssets/animation/Spritesheet.png";
+ 
+
+
 type GameDataProps = //Rather than defining her, perhaps grab straight from the GameStartRenderer2 page.
     GameDataStore.GameDataState &
     typeof GameDataStore.actionCreators &
@@ -29,15 +36,23 @@ export default class MainScene extends Phaser.Scene {
     preload() {
         this.load.image('ground', require("../../components/gameComponents/testGround.jpg").default);
         this.load.image('playerThing', require("../../components/gameComponents/testBuilder.png").default);
+
+
+        //this.load.atlas("tentacleBug", require(testBug).default ,  require(testBugJson).default);
+        this.load.spritesheet("testBug", testBug, { frameWidth: 400, frameHeight: 400 });
+
+
     }
 
     create() {
+ 
+
         cursors = this.input.keyboard.createCursorKeys();
         this.add.image(100, 300, "ground");
         this.add.text(
             500,
             550,
-            "*Test Grounds*", {
+            "*Test Grounds YESyesyes*", {
             font: "40px Arial",
             fill: "#001DFF"
         }
@@ -80,6 +95,19 @@ export default class MainScene extends Phaser.Scene {
 
             this._playerNameToContainerMap.set(key, curPlayerContainer); //Add player's container to a dictionary of usernames-> player containers.
         });
+
+        //For testing bugs!
+        var testingBug: any;
+        testingBug = this.add.sprite(10, 10, "testBug", 0);
+        this.anims.create({
+
+            key: 'fly',
+            repeat: -1,
+            frames: this.anims.generateFrameNames('testBug', { start: 1, end: 23 })
+
+        });
+        testingBug.play('fly');
+        //For testing bugs!
     }
 
     update() {
