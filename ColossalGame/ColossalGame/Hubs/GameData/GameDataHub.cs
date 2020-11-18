@@ -33,13 +33,13 @@ namespace ColossalGame.Hubs.GameData
         private DateTime lastUpdate = DateTime.Now;
          public async void HandleCustomEvent(object sender, CustomEventArgs e)
          {
-             
+             var (ol, pd) = GameLogic.GetStatePM(e.PlayerDict, e.ObjectList);
                  
                  PositionUpdateDTO positionUpdateDTO = new PositionUpdateDTO
                  {
                      type = "RECEIVE_POSITIONS_UPDATE",
-                     ObjectList = e.ObjectList,
-                     PlayerDict = e.PlayerDict
+                     ObjectList = ol,
+                     PlayerDict = pd
                  };
                  await _hubContext.Clients.All.ReceiveMessage(positionUpdateDTO);
                  lastUpdate = DateTime.Now;

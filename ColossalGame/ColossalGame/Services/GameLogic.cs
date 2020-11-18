@@ -251,20 +251,20 @@ namespace ColossalGame.Services
             return (ObjectList, PlayerDictionary);
         }
 
-        public (List<GameObjectModel>, Dictionary<string, PlayerModel>) GetStatePM()
+        public static (List<GameObjectModel>, Dictionary<string, PlayerModel>) GetStatePM(Dictionary<string,Body> playerDictionary,List<GameObjectModel> objectList)
         {
             Dictionary<string,PlayerModel> oPD = new Dictionary<string, PlayerModel>();
-            var localDict = PlayerDictionary;
+            var localDict = playerDictionary;
             foreach (string p in localDict.Keys)
             {
-                var temp = PlayerDictionary[p];
+                var temp = playerDictionary[p];
                 PlayerModel tempPlayerModel = new PlayerModel();
                 tempPlayerModel.Username = p;
                 tempPlayerModel.XPos = temp.GetWorldPoint(Vector2.Zero).X;
                 tempPlayerModel.YPos = temp.GetWorldPoint(Vector2.Zero).Y;
                 oPD[p] = tempPlayerModel;
             }
-            return (ObjectList, oPD);
+            return (objectList, oPD);
         }
 
         /// <summary>
@@ -282,6 +282,7 @@ namespace ColossalGame.Services
         /// </summary>
         private void RunServer()
         {
+            
             var ts = new TimeSpan();
             while (KeepGoing)
             {
@@ -313,8 +314,8 @@ namespace ColossalGame.Services
         private void PublishState()
         {
             //Console.WriteLine("Publish: " + DateTime.Now.Second);
-            var (returnedList, returnedDictionary) = GetStatePM();
-            var e = new CustomEventArgs(returnedList, returnedDictionary);
+            
+            var e = new CustomEventArgs(ObjectList, PlayerDictionary);
             OnRaiseCustomEvent(e);
         }
 
@@ -377,7 +378,7 @@ namespace ColossalGame.Services
     /// </summary>
     public class CustomEventArgs : EventArgs
     {
-        public CustomEventArgs(List<GameObjectModel> objectList, Dictionary<string, PlayerModel> playerDict)
+        public CustomEventArgs(List<GameObjectModel> objectList, Dictionary<string, Body> playerDict)
         {
             ObjectList = objectList;
             PlayerDict = playerDict;
@@ -385,6 +386,6 @@ namespace ColossalGame.Services
 
         public List<GameObjectModel> ObjectList { get; set; }
 
-        public Dictionary<string, PlayerModel> PlayerDict { get; set; }
+        public Dictionary<string, Body> PlayerDict { get; set; }
     }
 }
