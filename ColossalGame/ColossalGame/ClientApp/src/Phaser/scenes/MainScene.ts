@@ -118,14 +118,15 @@ export default class MainScene extends Phaser.Scene {
         const left = cursors.left && cursors.left.isDown;
         const down = cursors.down && cursors.down.isDown;
         const right = cursors.right && cursors.right.isDown;
-        if (up) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Up); }
-        if (left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Left); }
-        if (down) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Down); }
-        if (right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Right); }
-        if (up&&left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft); }
-        if (up&&right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpRight); }
-        if (down&&left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownLeft); }
-        if (down&&right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownRight); }
+        if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft); }
+        else if (up && right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpRight); }
+        else if (down && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownLeft); }
+        else if (down && right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownRight); }
+        else if (up) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Up); }
+        else if (left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Left); }
+        else if (down) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Down); }
+        else if (right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Right); }
+        
 
 
 
