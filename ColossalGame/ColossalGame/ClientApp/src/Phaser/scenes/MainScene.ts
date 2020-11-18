@@ -34,13 +34,13 @@ export default class MainScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('ground', require("../../components/gameComponents/testGround.jpg").default);
+        this.load.image('ground', require("../../assets/gameAssets/testingGround2.png").default);
         this.load.image('playerThing', require("../../components/gameComponents/testBuilder.png").default);
 
 
         //this.load.atlas("tentacleBug", require(testBug).default ,  require(testBugJson).default);
         this.load.spritesheet("testBug", testBug, { frameWidth: 400, frameHeight: 400 });
-
+        this.load.spritesheet("player", require("../../assets/gameAssets/animation/player/ForwardWalkSpritesheet.png").default, { frameWidth: 300, frameHeight: 300 });
 
     }
 
@@ -48,7 +48,16 @@ export default class MainScene extends Phaser.Scene {
  
 
         cursors = this.input.keyboard.createCursorKeys();
-        this.add.image(100, 300, "ground");
+        this.add.image(0, 0, "ground");
+        this.add.image(1024, 0, "ground");
+        this.add.image(1024, 1024, "ground");
+        this.add.image(0, 1024, "ground");
+        this.add.image(-1024, 0, "ground");
+        this.add.image(-1024, 1024, "ground");
+        this.add.image(0, -1024, "ground");
+        this.add.image(-1024, -1024, "ground");
+        this.add.image(1024, -1024, "ground");
+        
         this.add.text(
             500,
             550,
@@ -73,7 +82,7 @@ export default class MainScene extends Phaser.Scene {
 
             var curPlayer: any;  //This is of type any since this is how Josh had it. collideWorldBounds and enableBody are not part of Phaser.Physics.Arcade.Sprite, maybe thats why.
             //In future we should probably figure out how to set collideWorldBounds and collideBody.
-            curPlayer = this.physics.add.sprite(0, 0, "playerThing");
+            curPlayer = this.physics.add.sprite(0, 0, "player");
             curPlayer.collideWorldBounds = true;
             curPlayer.enableBody = true;
 
@@ -94,6 +103,29 @@ export default class MainScene extends Phaser.Scene {
 
 
             this._playerNameToContainerMap.set(key, curPlayerContainer); //Add player's container to a dictionary of usernames-> player containers.
+
+
+            //Player SPritesheet
+            this.anims.create({
+
+                key: 'playerWalk',
+                repeat: -1,
+                frames: this.anims.generateFrameNames('player', { start: 1, end: 30 })
+
+            });
+            this.anims.create({
+
+                key: 'playerIdle',
+                repeat: -1,
+                frames: this.anims.generateFrameNames('player', { start: 1, end: 1 })
+
+            });
+            curPlayer.play('playerWalk');
+            //Player SPritesheet
+            //And scaling VVV
+            curPlayer.setScale(.5);
+
+
         });
 
         //For testing bugs!
@@ -107,7 +139,13 @@ export default class MainScene extends Phaser.Scene {
 
         });
         testingBug.play('fly');
+        //testingBug.setScale(2);
         //For testing bugs!
+
+
+
+
+
     }
 
     update() {
@@ -149,7 +187,7 @@ export default class MainScene extends Phaser.Scene {
                     let curPlayerContainer = this.add.container(value.xPos, value.yPos);
 
                     var curPlayer: any;
-                    curPlayer = this.physics.add.sprite(0, 0, "playerThing");
+                    curPlayer = this.physics.add.sprite(0, 0, "player");
                     curPlayer.collideWorldBounds = true;
                     curPlayer.enableBody = true;
 
@@ -177,6 +215,18 @@ export default class MainScene extends Phaser.Scene {
                     if (playerContainer) {
                         var xpos = value.xPos;
                         var ypos = value.yPos;
+
+
+                        if (up || down || left || right) {
+                            console.log("MOVING");
+                        } else {
+                            console.log("NOT MOVING");
+                        }
+
+                        //playerContainer.getByName("playerSprite").anims.play('playerIdle');
+                        
+                        
+
                         xpos = Phaser.Math.Interpolation.Bezier([xpos, playerContainer.x], .8);
                         ypos = Phaser.Math.Interpolation.Bezier([ypos, playerContainer.y], .8);
                         playerContainer.x = xpos;
