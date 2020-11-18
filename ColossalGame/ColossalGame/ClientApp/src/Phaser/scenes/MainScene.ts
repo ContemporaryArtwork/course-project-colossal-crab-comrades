@@ -8,6 +8,7 @@ import * as GameDataStore from "../../store/GameData";
 //Test Big Bug
 //import testBugJson from "../../assets/gameAssets/animation/TentacleMothSheet.json";
 import testBug from "../../assets/gameAssets/animation/Spritesheet.png";
+import { Console } from 'console';
  
 
 
@@ -45,7 +46,9 @@ export default class MainScene extends Phaser.Scene {
     }
 
     create() {
- 
+
+        
+        
 
         cursors = this.input.keyboard.createCursorKeys();
         this.add.image(0, 0, "ground");
@@ -120,9 +123,6 @@ export default class MainScene extends Phaser.Scene {
                 frames: this.anims.generateFrameNames('player', { start: 1, end: 1 })
 
             });
-            curPlayer.play('playerWalk');
-            //Player SPritesheet
-            //And scaling VVV
             curPlayer.setScale(.5);
 
 
@@ -191,6 +191,10 @@ export default class MainScene extends Phaser.Scene {
                     curPlayer.collideWorldBounds = true;
                     curPlayer.enableBody = true;
 
+
+
+
+
                     curPlayer.setName("playerSprite");
 
                     let curText = this.add.text(0, 0 - (curPlayer.height / 2), key, { font: "16px Arial", fill: "#ffffff", backgroundColor: "#808080", align: "center" });
@@ -198,6 +202,7 @@ export default class MainScene extends Phaser.Scene {
                     curText.y = curText.y - 20;
 
                     curText = curText.setName("playerText");
+                    
                     curPlayerContainer.add(curPlayer);
                     curPlayerContainer.add(curText);
 
@@ -216,16 +221,50 @@ export default class MainScene extends Phaser.Scene {
                         var xpos = value.xPos;
                         var ypos = value.yPos;
 
+                        var p = <Phaser.Physics.Arcade.Sprite>playerContainer.getByName("playerSprite");
+                       
+                        
+                        if (this._hostingComponent.props.playerData.username == key) {
+                           
+                            if (up || down || left || right) {
+                                //console.log("MOVING");
+                                //p.tint = 0xFF000C;
 
-                        if (up || down || left || right) {
-                            console.log("MOVING");
+                            } else {
+                                //console.log("NOT MOVING");
+                                //p.tint = 0xffffff;
+                                p.play('playerWalk');
+                                //^^^ THIS MAKES NO SENSE. WHEN ITS NOT MOVING, PLAY THE ANIMATION...OKAY!
+                            }
                         } else {
-                            console.log("NOT MOVING");
-                        }
 
-                        //playerContainer.getByName("playerSprite").anims.play('playerIdle');
-                        
-                        
+                            if (xpos - playerContainer.x != 0 && ypos - playerContainer.y) {
+                                p.play('playerWalk');
+                            } else {
+                                
+                            }
+
+                            /*
+                            if (xpos - playerContainer.x > 0) {
+                                //Moving right
+                                p.tint = 0xFF000C;
+                                p.play('playerWalk');
+
+                            } else if (xpos - playerContainer.x < 0) {
+                                p.tint = 0xFF000C;
+                                p.play('playerWalk');
+                            }
+
+                            if (ypos - playerContainer.y > 0) {
+                                p.tint = 0xFF000C;
+                                p.play('playerWalk');
+                            } else if (ypos - playerContainer.y < 0) {
+                                p.tint = 0xFF000C;
+                                p.play('playerWalk');
+                            }
+                            */
+
+                        }
 
                         xpos = Phaser.Math.Interpolation.Bezier([xpos, playerContainer.x], .8);
                         ypos = Phaser.Math.Interpolation.Bezier([ypos, playerContainer.y], .8);
