@@ -175,7 +175,7 @@ namespace ColossalGame.Services
             pm.SetRestitution(0.3f);
             pm.SetFriction(1f);
             //pm.Mass = .001f;
-            //pm.LinearDamping = 1f;
+            pm.LinearDamping = 1f;
 
             
             
@@ -268,9 +268,9 @@ namespace ColossalGame.Services
                 var temp = playerDictionary[p];
                 PlayerModel tempPlayerModel = new PlayerModel();
                 tempPlayerModel.Username = p;
-                tempPlayerModel.XPos = temp.GetWorldPoint(Vector2.Zero).X*conversionFactor;
+                tempPlayerModel.XPos = temp.WorldCenter.X*conversionFactor;
                 
-                tempPlayerModel.YPos = temp.GetWorldPoint(Vector2.Zero).Y*conversionFactor;
+                tempPlayerModel.YPos = temp.WorldCenter.Y*conversionFactor;
                 oPD[p] = tempPlayerModel;
             }
             return (objectList, oPD);
@@ -305,7 +305,7 @@ namespace ColossalGame.Services
                 // Console.WriteLine("ts: " + ts.Milliseconds);
                 simulateOneServerTick();
                 var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
-                _world.Step((float)1/(float)tickRate,ref a);
+                _world.Step((float)tickRate/(float)1000,ref a);
                 ts = DateTime.Now - lastTick;
 
                 
