@@ -15,6 +15,7 @@
   <ItemGroup>
     <PackageReference Include="Aether.Physics2D" Version="1.5.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
+    <PackageReference Include="GameTimers" Version="1.0.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.7" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.0.3">
