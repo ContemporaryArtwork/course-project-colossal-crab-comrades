@@ -69,7 +69,7 @@ namespace ColossalGame.Services
         /// <summary>
         ///     Queue of Player Actions
         /// </summary>
-        private ConcurrentQueue<AUserAction> ActionQueue { get; } = new ConcurrentQueue<AUserAction>();
+        private ConcurrentDictionary<string,Vector2> MovementDictonary = new ConcurrentDictionary<string, Vector2>();
 
         /// <summary>
         ///     Queue of players to spawn in the next tick
@@ -92,62 +92,63 @@ namespace ColossalGame.Services
         }
 
 
-        /// <summary>
-        ///     Void method which handles actions. Currently only handles movement actions
-        /// </summary>
-        /// <param name="action">Object representing various user actions. Currently only MovementAction will have functionality</param>
-        private void HandleAction(Object action)
+        
+        
+
+        private Vector2 ConvertMovementActionToVector2(MovementAction action)
         {
+            if (!PlayerDictionary.ContainsKey(action.Username)) throw new Exception("Player must be spawned first!");
+            var pm = PlayerDictionary.GetValueOrDefault(action.Username);
+            if (pm == null)
+            {
+                //THIS SHOULD NOT BE ABLE TO HAPPEN!!!
+                throw new Exception("NULL VALUE IN DICTIONARY");
+            }
+            float linearImpulseForce = 15f;
+            float movementRate = linearImpulseForce/2;
+
             
-            if (action is MovementAction m)
+
+            Vector2 desiredVelocity;
+            float leftHorizontalVelocity = Math.Max(pm.LinearVelocity.X - movementRate, -linearImpulseForce);
+            float rightHorizontalVelocity = Math.Min(pm.LinearVelocity.X + movementRate, linearImpulseForce);
+            float upVerticalVelocity = Math.Max(pm.LinearVelocity.Y - movementRate, -linearImpulseForce);
+            float downVerticalVelocity = Math.Min(pm.LinearVelocity.Y + movementRate, linearImpulseForce);
+
+            switch (action.Direction)
             {
-                if (!PlayerDictionary.ContainsKey(m.Username)) throw new Exception("Player must be spawned first!");
-                var pm = PlayerDictionary.GetValueOrDefault(m.Username);
-                if (pm == null)
-                {
-                    //THIS SHOULD NOT BE ABLE TO HAPPEN!!!
-                    throw new Exception("NULL VALUE IN DICTIONARY");
-                }
-
-                float linearImpulseForce = 100f;
-                switch (m.Direction)
-                {
-                    case EDirection.Down:
-                        pm.ApplyLinearImpulse(new Vector2(0, linearImpulseForce),pm.WorldCenter);
-                        break;
-                    case EDirection.Up:
-                        pm.ApplyLinearImpulse(new Vector2(0, -linearImpulseForce), pm.WorldCenter);
-                        break;
-                    case EDirection.Left:
-                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, 0), pm.WorldCenter);
-                        break;
-                    case EDirection.Right:
-                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, 0), pm.WorldCenter);
-                        break;
-                    case EDirection.UpLeft:
-                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce/2, -linearImpulseForce / 2), pm.WorldCenter);
-                        break;
-                    case EDirection.UpRight:
-                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce / 2, -linearImpulseForce / 2), pm.WorldCenter);
-                        break;
-                    case EDirection.DownLeft:
-                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce / 2, linearImpulseForce / 2), pm.WorldCenter);
-                        break;
-                    case EDirection.DownRight:
-                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce / 2, linearImpulseForce / 2), pm.WorldCenter);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                //PlayerDictionary.Add(m.Username, pm);
-                PlayerDictionary[m.Username] = pm;
+                case EDirection.Down:
+                    desiredVelocity = new Vector2(0, downVerticalVelocity);
+                    break;
+                case EDirection.Up:
+                    desiredVelocity = new Vector2(0, upVerticalVelocity);
+                    break;
+                case EDirection.Left:
+                    
+                    desiredVelocity = new Vector2(leftHorizontalVelocity, 0);
+                    break;
+                case EDirection.Right:
+                    
+                    desiredVelocity = new Vector2(rightHorizontalVelocity, 0);
+                    break;
+                case EDirection.UpLeft:
+                    desiredVelocity = new Vector2(leftHorizontalVelocity, upVerticalVelocity);
+                    break;
+                case EDirection.UpRight:
+                    desiredVelocity = new Vector2(rightHorizontalVelocity, upVerticalVelocity);
+                    break;
+                case EDirection.DownLeft:
+                    desiredVelocity = new Vector2(leftHorizontalVelocity, downVerticalVelocity);
+                    break;
+                case EDirection.DownRight:
+                    desiredVelocity = new Vector2(rightHorizontalVelocity, downVerticalVelocity);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-
-            else if (action is ShootingAction s)
-            {
-                if (!PlayerDictionary.ContainsKey(s.Username)) throw new Exception("Player must be spawned first!");
-            }
+            Vector2 velChange = desiredVelocity - pm.LinearVelocity;
+            Vector2 impulse = pm.Mass * velChange;
+            return impulse;
         }
 
         public bool IsPlayerSpawned(string username)
@@ -170,12 +171,17 @@ namespace ColossalGame.Services
 
             Vector2 playerPosition = new Vector2(xPos, yPos);
 
-            var pm = _world.CreateCircle(4f, 1f, playerPosition);
+            var pm = _world.CreateCircle(.4f, 1f, playerPosition);
+            //Can do all the cool physics stuff
             pm.BodyType = BodyType.Dynamic;
+            //Bounciness?
             pm.SetRestitution(0.3f);
+            //Friction for touching other bodies
             pm.SetFriction(1f);
-            pm.Mass = .001f;
-            pm.LinearDamping = 1f;
+            //Just your standard mass
+            pm.Mass = 1f;
+            //Friction for moving around
+            pm.LinearDamping = 10f;
 
             
             
@@ -190,7 +196,9 @@ namespace ColossalGame.Services
             Vector2 ballPosition = new Vector2(xPos, yPos);
 
             var pm = _world.CreateCircle(1.5f, 1f, ballPosition);
+            
             pm.BodyType = BodyType.Dynamic;
+            
             pm.SetRestitution(0.3f);
             pm.SetFriction(.3f);
             pm.Mass = .1f;
@@ -219,6 +227,9 @@ namespace ColossalGame.Services
             while (PlayerDespawnQueue.Count != 0)
             {
                 var p = PlayerDespawnQueue.Dequeue();
+                Body pm;
+                PlayerDictionary.TryGetValue(p, out pm);
+                _world.Remove(pm);
                 var successRemove = PlayerDictionary.TryRemove(p,out _);
                 
                 //Console.WriteLine(successRemove);
@@ -233,14 +244,29 @@ namespace ColossalGame.Services
                 somethingChanged = true;
             }
 
-            while (ActionQueue.Count != 0)
-            {
-                //Thread t = new Thread(new ParameterizedThreadStart(HandleAction));
-                //t.Start(ActionQueue.Dequeue());
-                ActionQueue.TryDequeue(out var action);
-                HandleAction(action);
+
+            //while (ActionQueue.Count != 0)
+            //{
+            //    //Thread t = new Thread(new ParameterizedThreadStart(HandleAction));
+            //    //t.Start(ActionQueue.Dequeue());
+            //    ActionQueue.TryDequeue(out var action);
+            //    HandleAction(action);
                     
-                somethingChanged = true;
+            //    somethingChanged = true;
+            //}
+
+            foreach (string username in MovementDictonary.Keys)
+            {
+                Vector2 impulse;
+                MovementDictonary.TryGetValue(username, out impulse);
+                Body pm;
+                if (PlayerDictionary.TryGetValue(username, out pm))
+                {
+                    pm.ApplyLinearImpulse(impulse, pm.WorldCenter);
+                }
+
+                MovementDictonary.TryRemove(username, out _);
+
             }
 
 
@@ -259,7 +285,7 @@ namespace ColossalGame.Services
 
         public static (List<GameObjectModel>, Dictionary<string, PlayerModel>) GetStatePM(ConcurrentDictionary<string,Body> playerDictionary,List<GameObjectModel> objectList)
         {
-            float conversionFactor = 4.0f;
+            float conversionFactor = 64.0f;
             Dictionary<string,PlayerModel> oPD = new Dictionary<string, PlayerModel>();
             
             var localDict = playerDictionary;
@@ -363,7 +389,10 @@ namespace ColossalGame.Services
         /// <param name="action">Action to be added</param>
         public void AddActionToQueue(AUserAction action)
         {
-           ActionQueue.Enqueue(action);
+            if (action is MovementAction m)
+            {
+                MovementDictonary.TryAdd(action.Username,ConvertMovementActionToVector2(m));
+            }
         }
 
         /// <summary>
