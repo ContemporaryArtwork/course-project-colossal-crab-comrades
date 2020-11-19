@@ -109,7 +109,7 @@ namespace ColossalGame.Services
                     throw new Exception("NULL VALUE IN DICTIONARY");
                 }
 
-                float linearImpulseForce = 10f;
+                float linearImpulseForce = 100f;
                 switch (m.Direction)
                 {
                     case EDirection.Down:
@@ -170,11 +170,11 @@ namespace ColossalGame.Services
 
             Vector2 playerPosition = new Vector2(xPos, yPos);
 
-            var pm = _world.CreateCircle(1f, 1f, playerPosition);
+            var pm = _world.CreateCircle(4f, 1f, playerPosition);
             pm.BodyType = BodyType.Dynamic;
             pm.SetRestitution(0.3f);
             pm.SetFriction(1f);
-            //pm.Mass = .001f;
+            pm.Mass = .001f;
             pm.LinearDamping = 1f;
 
             
@@ -189,7 +189,7 @@ namespace ColossalGame.Services
 
             Vector2 ballPosition = new Vector2(xPos, yPos);
 
-            var pm = _world.CreateCircle(.5f, 1f, ballPosition);
+            var pm = _world.CreateCircle(1.5f, 1f, ballPosition);
             pm.BodyType = BodyType.Dynamic;
             pm.SetRestitution(0.3f);
             pm.SetFriction(.3f);
