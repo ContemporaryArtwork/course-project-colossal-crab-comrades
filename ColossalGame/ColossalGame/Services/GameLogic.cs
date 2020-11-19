@@ -109,32 +109,32 @@ namespace ColossalGame.Services
                     throw new Exception("NULL VALUE IN DICTIONARY");
                 }
 
-                float linearImpulseForce = 100f;
+                float linearImpulseForce = 10f;
                 switch (m.Direction)
                 {
                     case EDirection.Down:
-                        pm.ApplyLinearImpulse(new Vector2(0,linearImpulseForce));
+                        pm.ApplyLinearImpulse(new Vector2(0, linearImpulseForce),pm.WorldCenter);
                         break;
                     case EDirection.Up:
-                        pm.ApplyLinearImpulse(new Vector2(0, -linearImpulseForce));
+                        pm.ApplyLinearImpulse(new Vector2(0, -linearImpulseForce), pm.WorldCenter);
                         break;
                     case EDirection.Left:
-                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, 0));
+                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, 0), pm.WorldCenter);
                         break;
                     case EDirection.Right:
-                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, 0));
+                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, 0), pm.WorldCenter);
                         break;
                     case EDirection.UpLeft:
-                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, -linearImpulseForce));
+                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce/2, -linearImpulseForce / 2), pm.WorldCenter);
                         break;
                     case EDirection.UpRight:
-                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce/2, -linearImpulseForce/2));
+                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce / 2, -linearImpulseForce / 2), pm.WorldCenter);
                         break;
                     case EDirection.DownLeft:
-                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce/2, linearImpulseForce/2));
+                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce / 2, linearImpulseForce / 2), pm.WorldCenter);
                         break;
                     case EDirection.DownRight:
-                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce/2, linearImpulseForce/2));
+                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce / 2, linearImpulseForce / 2), pm.WorldCenter);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -173,9 +173,9 @@ namespace ColossalGame.Services
             var pm = _world.CreateCircle(1f, 1f, playerPosition);
             pm.BodyType = BodyType.Dynamic;
             pm.SetRestitution(0.3f);
-            pm.SetFriction(.5f);
-            pm.Mass = .3f;
-            pm.LinearDamping = 2f;
+            pm.SetFriction(1f);
+            //pm.Mass = .001f;
+            //pm.LinearDamping = 1f;
 
             
             
