@@ -37,7 +37,7 @@ export default class MainScene extends Phaser.Scene {
     preload() {
         this.load.image('ground', require("../../assets/gameAssets/testingGround2.png").default);
         this.load.image('playerThing', require("../../components/gameComponents/testBuilder.png").default);
-
+        this.load.image('spawnPad', require("../../assets/gameAssets/SpawnPlatform.png").default);
 
         //this.load.atlas("tentacleBug", require(testBug).default ,  require(testBugJson).default);
         this.load.spritesheet("testBug", testBug, { frameWidth: 400, frameHeight: 400 });
@@ -60,6 +60,8 @@ export default class MainScene extends Phaser.Scene {
         this.add.image(0, -1024, "ground");
         this.add.image(-1024, -1024, "ground");
         this.add.image(1024, -1024, "ground");
+        var pad = this.add.image(0, 0, "spawnPad");
+        pad.setScale(.5);
         
         this.add.text(
             500,
@@ -131,7 +133,7 @@ export default class MainScene extends Phaser.Scene {
 
         //For testing bugs!
         var testingBug: any;
-        testingBug = this.add.sprite(10, 10, "testBug", 0);
+        testingBug = this.add.sprite(10, -500, "testBug", 0);
         this.anims.create({
 
             key: 'fly',

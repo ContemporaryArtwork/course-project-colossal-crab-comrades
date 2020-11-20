@@ -8,6 +8,7 @@ import * as GameMainMenuTogglerStore from "../store/GameMainMenuToggler";
 import MainMenu from './MainMenu';
 import GameStartRenderer from './gameComponents/GameStartRenderer2';
 import "./UserAuth.css";
+import BGIMG from "../assets/Login_Signup/CityRuins.png";
 
 import BGVideo from "../assets/mainMenu/BGVideo.mp4";
 //import BG from "../assets/mainMenu/mainBackground.jpg";
@@ -111,6 +112,9 @@ class Signup extends React.PureComponent<GameMainMenuTogglerProps, IState> {
 
     render() {
         return (<div className="logSignEnclosing">
+            <div className="bg-container">
+                <img src={BGIMG} />
+            </div>
             {this.renderSignUp()}
         </div>);
     }

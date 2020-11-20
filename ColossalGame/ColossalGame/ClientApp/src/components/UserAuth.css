@@ -14,6 +14,26 @@
     padding: 0 20px;
 }
 
+.bg-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--primary-color) url("../assets/Login_Signup/CityRuins.png") no-repeat center center/cover;
+}
+
+    .bg-container img {
+        min-width: 100%;
+        min-height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
 /*---------------------
 
     Login/Signin Form
