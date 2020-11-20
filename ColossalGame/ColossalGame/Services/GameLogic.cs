@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ColossalGame.Models;
 using Microsoft.Xna.Framework;
+using tainicom.Aether.Physics2D.Collision.Shapes;
 using tainicom.Aether.Physics2D.Dynamics;
 using Vector2 = tainicom.Aether.Physics2D.Common.Vector2;
 
@@ -46,18 +47,7 @@ namespace ColossalGame.Services
         /// </summary>
         private const float ConversionFactor = 64.0f;
 
-        /// <summary>
-        ///     Constructor for GameLogic class
-        /// </summary>
-        /// <param name="ls">LoginService of server</param>
-        /// <param name="us">UserService of server</param>
-        public GameLogic(LoginService ls, UserService us)
-        {
-            _ls = ls;
-            _us = us;
-            //TODO: Separate constructor and Start method
-            Start();
-        }
+        
 
         /// <summary>
         ///     Dictionary of usernames to PlayerModels.
@@ -89,11 +79,45 @@ namespace ColossalGame.Services
         /// </summary>
         public event EventHandler<CustomEventArgs> RaiseCustomEvent;
 
+        /// <summary>
+        ///     Constructor for GameLogic class
+        /// </summary>
+        /// <param name="ls">LoginService of server</param>
+        /// <param name="us">UserService of server</param>
+        public GameLogic(LoginService ls, UserService us)
+        {
+            _ls = ls;
+            _us = us;
+
+            SetupWorld();
+            Start();
+        }
+
+        /// <summary>
+        /// Resets listeners for publishing the state
+        /// </summary>
         public void ClearEh()
         {
+            //TODO: Change the names of event listener stuff to better reflect what's actually happening
             RaiseCustomEvent = null;
         }
 
+        private void SetupWorld()
+        {
+            float widthInMeters = 1024*1.5f / ConversionFactor;
+            float heightInMeters = 1024*1.5f / ConversionFactor;
+            Vector2 lowerLeftCorner = new Vector2(-widthInMeters, -heightInMeters);
+            Vector2 lowerRightCorner = new Vector2(widthInMeters, -heightInMeters);
+            Vector2 upperLeftCorner = new Vector2(-widthInMeters, heightInMeters);
+            Vector2 upperRightCorner = new Vector2(widthInMeters, heightInMeters);
+            var edge = _world.CreateBody();
+            edge.SetRestitution(0f);
+            edge.CreateEdge(lowerLeftCorner, lowerRightCorner);
+            edge.CreateEdge(lowerRightCorner, upperRightCorner);
+            edge.CreateEdge(upperRightCorner, upperLeftCorner);
+            edge.CreateEdge(upperLeftCorner, lowerLeftCorner);
+
+        }
 
         
         
@@ -198,7 +222,7 @@ namespace ColossalGame.Services
 
             Vector2 ballPosition = new Vector2(xPos, yPos);
 
-            var pm = _world.CreateCircle(1.5f, 1f, ballPosition);
+            var pm = _world.CreateCircle(.3f, 1f, ballPosition);
             
             pm.BodyType = BodyType.Dynamic;
             
