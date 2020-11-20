@@ -1,5 +1,6 @@
 ﻿using ColossalGame.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +12,6 @@ namespace ColossalGame.Hubs.DTO
     {
         public List<GameObjectModel> ObjectList { get; set; }
 
-        public Dictionary<string, PlayerModel> PlayerDict { get; set; }
+        public ConcurrentDictionary<string, PlayerModel> PlayerDict { get; set; }
     }
 }

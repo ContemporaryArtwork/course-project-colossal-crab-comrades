@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ColossalGame.Models;
@@ -29,19 +31,20 @@ namespace ColossalGame.Services
         /// </summary>
         private bool KeepGoing = true;
 
-        private DateTime lastTick = DateTime.Now;
+        /// <summary>
+        ///     Lower bound on milliseconds per world step, can be higher if inputs are sufficiently high
+        /// </summary>
+        private const double TickRate = 50.0;
 
         /// <summary>
-        ///     variable that keeps track of the current tick
+        /// Amount of milliseconds to wait until publishing the newest game state to clients
         /// </summary>
-        private int tickCounter;
+        private const double PublishRate = 30.0;
 
         /// <summary>
-        ///     Amount of seconds per tick
+        /// The ratio of meters in the physics engine to pixels in the game world, i.e. a conversion factor of 64 means that 1 meter in engine is 64 pixels
         /// </summary>
-        private readonly double tickRate = 50.0;
-
-        private readonly double publishRate = 30.0;
+        private const float ConversionFactor = 64.0f;
 
         /// <summary>
         ///     Constructor for GameLogic class
@@ -69,7 +72,7 @@ namespace ColossalGame.Services
         /// <summary>
         ///     Queue of Player Actions
         /// </summary>
-        private ConcurrentDictionary<string,Vector2> MovementDictonary = new ConcurrentDictionary<string, Vector2>();
+        private readonly ConcurrentDictionary<string,Vector2> _movementDictionary = new ConcurrentDictionary<string, Vector2>();
 
         /// <summary>
         ///     Queue of players to spawn in the next tick
@@ -156,7 +159,7 @@ namespace ColossalGame.Services
             return PlayerDictionary.ContainsKey(username);
         }
 
-        private World _world = new World(Vector2.Zero);
+        private readonly World _world = new World(Vector2.Zero);
 
         /// <summary>
         ///     Spawns a player based on input username, subject to change.
@@ -180,7 +183,7 @@ namespace ColossalGame.Services
             pm.SetFriction(1f);
             //Just your standard mass
             pm.Mass = 1f;
-            //Friction for moving around
+            //Friction for moving around in space
             pm.LinearDamping = 10f;
 
             
@@ -223,7 +226,6 @@ namespace ColossalGame.Services
         /// </summary>
         private void simulateOneServerTick()
         {
-            var somethingChanged = false;
             while (PlayerDespawnQueue.Count != 0)
             {
                 var p = PlayerDespawnQueue.Dequeue();
@@ -233,7 +235,6 @@ namespace ColossalGame.Services
                 var successRemove = PlayerDictionary.TryRemove(p,out _);
                 
                 //Console.WriteLine(successRemove);
-                somethingChanged = true;
             }
 
             while (PlayerSpawnQueue.Count != 0)
@@ -241,7 +242,6 @@ namespace ColossalGame.Services
                 var p = PlayerSpawnQueue.Dequeue();
                 //PlayerDictionary.Add(p.Username, p);
                 SpawnPlayer(p.Username,p.XPos,p.YPos);
-                somethingChanged = true;
             }
 
 
@@ -255,17 +255,15 @@ namespace ColossalGame.Services
             //    somethingChanged = true;
             //}
 
-            foreach (string username in MovementDictonary.Keys)
+            foreach (string username in _movementDictionary.Keys)
             {
-                Vector2 impulse;
-                MovementDictonary.TryGetValue(username, out impulse);
-                Body pm;
-                if (PlayerDictionary.TryGetValue(username, out pm))
+                _movementDictionary.TryGetValue(username, out var impulse);
+                if (PlayerDictionary.TryGetValue(username, out var pm))
                 {
                     pm.ApplyLinearImpulse(impulse, pm.WorldCenter);
                 }
 
-                MovementDictonary.TryRemove(username, out _);
+                _movementDictionary.TryRemove(username, out _);
 
             }
 
@@ -283,23 +281,27 @@ namespace ColossalGame.Services
             return (ObjectList, PlayerDictionary);
         }
 
-        public static (List<GameObjectModel>, Dictionary<string, PlayerModel>) GetStatePM(ConcurrentDictionary<string,Body> playerDictionary,List<GameObjectModel> objectList)
+        public static (List<GameObjectModel>, ConcurrentDictionary<string, PlayerModel>) GetStatePM(ConcurrentDictionary<string,Body> playerDictionary,List<GameObjectModel> objectList)
         {
-            float conversionFactor = 64.0f;
-            Dictionary<string,PlayerModel> oPD = new Dictionary<string, PlayerModel>();
             
-            var localDict = playerDictionary;
-            foreach (string p in localDict.Keys)
+            var returnDictionary = new ConcurrentDictionary<string, PlayerModel>();
+            
+            
+            Parallel.ForEach(playerDictionary, (pair) =>
             {
-                var temp = playerDictionary[p];
-                PlayerModel tempPlayerModel = new PlayerModel();
-                tempPlayerModel.Username = p;
-                tempPlayerModel.XPos = temp.WorldCenter.X*conversionFactor;
-                
-                tempPlayerModel.YPos = temp.WorldCenter.Y*conversionFactor;
-                oPD[p] = tempPlayerModel;
-            }
-            return (objectList, oPD);
+                var (name, body) = pair;
+                var tempPlayerModel = new PlayerModel
+                {
+                    Username = name,
+                    XPos = body.WorldCenter.X * ConversionFactor,
+                    YPos = body.WorldCenter.Y * ConversionFactor
+                };
+
+                returnDictionary[name] = tempPlayerModel;
+            });
+
+            
+            return (objectList, returnDictionary);
         }
 
         /// <summary>
@@ -322,7 +324,8 @@ namespace ColossalGame.Services
         private void RunServer()
         {
             
-            var ts = new TimeSpan();
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             while (KeepGoing)
             {
                     
@@ -330,16 +333,16 @@ namespace ColossalGame.Services
                 // Console.WriteLine("GameLogic: " + DateTime.Now.Second);
                 // Console.WriteLine("ts: " + ts.Milliseconds);
                 simulateOneServerTick();
-                var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
-                _world.Step((float)tickRate/(float)1000,ref a);
-                ts = DateTime.Now - lastTick;
+                if (stopwatch.ElapsedMilliseconds >= TickRate)
+                {
+                    stopwatch.Stop();
+                    var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
+                    //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
+                    _world.Step(stopwatch.ElapsedMilliseconds/1000f, ref a);
+                    stopwatch.Reset();
+                    stopwatch.Start();
+                }
 
-                
-                    
-                //PublishState();
-                tickCounter++;
-                
-                Thread.Sleep((int)tickRate);
             }
             
         }
@@ -348,10 +351,16 @@ namespace ColossalGame.Services
 
         public void StartPublishing()
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             while (true)
             {
+                if (!(stopwatch.ElapsedMilliseconds >= PublishRate)) continue;
+                stopwatch.Stop();
                 PublishState();
-                Thread.Sleep((int)publishRate);
+                stopwatch.Reset();
+                stopwatch.Start();
+
             }
 
         }
@@ -391,7 +400,7 @@ namespace ColossalGame.Services
         {
             if (action is MovementAction m)
             {
-                MovementDictonary.TryAdd(action.Username,ConvertMovementActionToVector2(m));
+                _movementDictionary.TryAdd(action.Username,ConvertMovementActionToVector2(m));
             }
         }
 
