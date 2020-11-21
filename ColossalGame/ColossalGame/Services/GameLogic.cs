@@ -377,38 +377,15 @@ namespace ColossalGame.Services
         private void RunWorld()
         {
             
-            var worldTimer = new Stopwatch();
-            worldTimer.Start();
-            //var inputTimer = new Stopwatch();
-            //inputTimer.Start();
+            
             while (KeepGoing)
             {
-                    
-                //lastTick = DateTime.Now;
-                // Console.WriteLine("GameLogic: " + DateTime.Now.Second);
-                // Console.WriteLine("ts: " + ts.Milliseconds);
                 
-                if (worldTimer.ElapsedMilliseconds >= TickRate)
-                {
-                    worldTimer.Stop();
-                    var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
-                    //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
-                    _world.Step(worldTimer.ElapsedMilliseconds/1000f, ref a);
-                    
-                    worldTimer.Reset();
-                    worldTimer.Start();
-                }
+                var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
+                //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
+                _world.Step((float)TickRate/1000f, ref a);
 
-                /*
-                if (inputTimer.ElapsedMilliseconds >= TickRate / 2)
-                {
-                    inputTimer.Stop();
-                    simulateOneServerTick();
-                    inputTimer.Reset();
-                    inputTimer.Start();
-                }*/
-                
-
+                Thread.Sleep((int)TickRate);
             }
             
         }
@@ -417,15 +394,12 @@ namespace ColossalGame.Services
 
         public void StartPublishing()
         {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            
             while (true)
             {
                 
                 PublishState();
                 Thread.Sleep((int)PublishRate);
-                
-
             }
 
         }
