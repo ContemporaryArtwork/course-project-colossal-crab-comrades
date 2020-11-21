@@ -348,8 +348,10 @@ namespace ColossalGame.Services
         private void RunServer()
         {
             
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            var worldTimer = new Stopwatch();
+            var inputTimer = new Stopwatch();
+            worldTimer.Start();
+            inputTimer.Start();
             while (KeepGoing)
             {
                     
@@ -357,16 +359,24 @@ namespace ColossalGame.Services
                 // Console.WriteLine("GameLogic: " + DateTime.Now.Second);
                 // Console.WriteLine("ts: " + ts.Milliseconds);
                 
-                if (stopwatch.ElapsedMilliseconds >= TickRate)
+                if (worldTimer.ElapsedMilliseconds >= TickRate)
                 {
-                    stopwatch.Stop();
+                    worldTimer.Stop();
                     var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
                     //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
-                    _world.Step(stopwatch.ElapsedMilliseconds/1000f, ref a);
-                    stopwatch.Reset();
-                    stopwatch.Start();
+                    _world.Step(worldTimer.ElapsedMilliseconds/1000f, ref a);
+                    worldTimer.Reset();
+                    worldTimer.Start();
                 }
-                simulateOneServerTick();
+
+                if (inputTimer.ElapsedMilliseconds >= TickRate / 2)
+                {
+                    inputTimer.Stop();
+                    simulateOneServerTick();
+                    inputTimer.Reset();
+                    inputTimer.Start();
+                }
+                
 
             }
             
