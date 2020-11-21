@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ColossalGame.Models;
@@ -57,7 +58,7 @@ namespace ColossalGame.Services
         /// <summary>
         ///     List of non-player GameObjectModels
         /// </summary>
-        private List<GameObjectModel> ObjectList { get; } = new List<GameObjectModel>();
+        private ConcurrentQueue<GameObjectModel> ObjectList { get; } = new ConcurrentQueue<GameObjectModel>();
 
         /// <summary>
         ///     Queue of Player Actions
@@ -116,6 +117,7 @@ namespace ColossalGame.Services
             edge.CreateEdge(lowerRightCorner, upperRightCorner);
             edge.CreateEdge(upperRightCorner, upperLeftCorner);
             edge.CreateEdge(upperLeftCorner, lowerLeftCorner);
+            
 
         }
 
@@ -198,11 +200,13 @@ namespace ColossalGame.Services
 
             Vector2 playerPosition = new Vector2(xPos, yPos);
 
-            var pm = _world.CreateCircle(.4f, 1f, playerPosition);
+            Body pm = new Body();
+            pm.CreateCircle(.4f, 1f, playerPosition);
+            
             //Can do all the cool physics stuff
             pm.BodyType = BodyType.Dynamic;
             //Bounciness?
-            pm.SetRestitution(0.3f);
+            pm.SetRestitution(0f);
             //Friction for touching other bodies
             pm.SetFriction(1f);
             //Just your standard mass
@@ -210,26 +214,39 @@ namespace ColossalGame.Services
             //Friction for moving around in space
             pm.LinearDamping = 10f;
 
+            SpinWait.SpinUntil(() => !_world.IsLocked);
+            _world.Add(pm);
+
             
             
             //PlayerDictionary.Add(username, pm);
             PlayerDictionary[username] = pm;
         }
 
-        private void SpawnBall(float xPos = 0f, float yPos = 0f)
+        private void SpawnBullet(float angle,float xPos, float yPos)
         {
             
 
             Vector2 ballPosition = new Vector2(xPos, yPos);
 
-            var pm = _world.CreateCircle(.3f, 1f, ballPosition);
+            var bullet = new Body {BodyType = BodyType.Dynamic};
+
+            var bulletFixture = bullet.CreateCircle(.3f, 1);
             
-            pm.BodyType = BodyType.Dynamic;
+            bullet.SetRestitution(0.3f);
+            bullet.SetFriction(.3f);
+            bullet.Mass = .1f;
+            bullet.IsBullet = true;
+
+            const float magnitude = 20f;
+            var bulletForce = new Vector2((float)Math.Cos(angle)*magnitude,(float)Math.Sin(angle)*magnitude);
+
+            SpinWait.SpinUntil(() => !_world.IsLocked);
+            _world.Add(bullet);
+            SpinWait.SpinUntil(() => !_world.IsLocked);
+            bullet.ApplyForce(bulletForce,bullet.WorldCenter);
+
             
-            pm.SetRestitution(0.3f);
-            pm.SetFriction(.3f);
-            pm.Mass = .1f;
-            pm.LinearDamping = 1f;
 
         }
 
@@ -243,6 +260,29 @@ namespace ColossalGame.Services
             if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
             //PlayerDictionary.Remove(username);
             PlayerDespawnQueue.Enqueue(username);
+        }
+
+        /// <summary>
+        ///     Add action to server action queue
+        /// </summary>
+        /// <param name="action">Action to be added</param>
+        public void AddActionToQueue(AUserAction action)
+        {
+            
+            if (PlayerDictionary.TryGetValue(action.Username, out var pm) && action is MovementAction m)
+            {
+                var impulse = ConvertMovementActionToVector2(m);
+
+                SpinWait.SpinUntil(() => !_world.IsLocked);
+                pm.ApplyLinearImpulse(impulse, pm.WorldCenter); 
+                
+            }
+
+            /*
+            if (action is MovementAction m)
+            {
+                _movementDictionary.TryAdd(action.Username, ConvertMovementActionToVector2(m));
+            }*/
         }
 
         /// <summary>
@@ -268,23 +308,12 @@ namespace ColossalGame.Services
                 SpawnPlayer(p.Username,p.XPos,p.YPos);
             }
 
-
-            //while (ActionQueue.Count != 0)
-            //{
-            //    //Thread t = new Thread(new ParameterizedThreadStart(HandleAction));
-            //    //t.Start(ActionQueue.Dequeue());
-            //    ActionQueue.TryDequeue(out var action);
-            //    HandleAction(action);
-                    
-            //    somethingChanged = true;
-            //}
-
             foreach (string username in _movementDictionary.Keys)
             {
                 _movementDictionary.TryGetValue(username, out var impulse);
                 if (PlayerDictionary.TryGetValue(username, out var pm))
                 {
-                    pm.ApplyLinearImpulse(impulse, pm.WorldCenter);
+                     pm.ApplyLinearImpulse(impulse, pm.WorldCenter);
                 }
 
                 _movementDictionary.TryRemove(username, out _);
@@ -300,12 +329,12 @@ namespace ColossalGame.Services
         ///     Returns the current game state
         /// </summary>
         /// <returns></returns>
-        public (List<GameObjectModel>, ConcurrentDictionary<string, Body>) GetState()
+        public (ConcurrentQueue<GameObjectModel>, ConcurrentDictionary<string, Body>) GetState()
         {
             return (ObjectList, PlayerDictionary);
         }
 
-        public static (List<GameObjectModel>, ConcurrentDictionary<string, PlayerModel>) GetStatePM(ConcurrentDictionary<string,Body> playerDictionary,List<GameObjectModel> objectList)
+        public static (ConcurrentQueue<GameObjectModel>, ConcurrentDictionary<string, PlayerModel>) GetStatePM(ConcurrentDictionary<string,Body> playerDictionary,ConcurrentQueue<GameObjectModel> objectList)
         {
             
             var returnDictionary = new ConcurrentDictionary<string, PlayerModel>();
@@ -334,7 +363,7 @@ namespace ColossalGame.Services
         private void Start()
         {
             var instanceCaller = new Thread(
-                RunServer);
+                RunWorld);
             
             var instanceCaller2 = new Thread(
                 StartPublishing);
@@ -345,13 +374,13 @@ namespace ColossalGame.Services
         /// <summary>
         ///     Keeps looping every {tickRate} milliseconds, simulating a new server tick every time
         /// </summary>
-        private void RunServer()
+        private void RunWorld()
         {
             
             var worldTimer = new Stopwatch();
-            var inputTimer = new Stopwatch();
             worldTimer.Start();
-            inputTimer.Start();
+            //var inputTimer = new Stopwatch();
+            //inputTimer.Start();
             while (KeepGoing)
             {
                     
@@ -365,17 +394,19 @@ namespace ColossalGame.Services
                     var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
                     //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
                     _world.Step(worldTimer.ElapsedMilliseconds/1000f, ref a);
+                    
                     worldTimer.Reset();
                     worldTimer.Start();
                 }
 
+                /*
                 if (inputTimer.ElapsedMilliseconds >= TickRate / 2)
                 {
                     inputTimer.Stop();
                     simulateOneServerTick();
                     inputTimer.Reset();
                     inputTimer.Start();
-                }
+                }*/
                 
 
             }
@@ -427,17 +458,7 @@ namespace ColossalGame.Services
             RaiseCustomEvent?.Invoke(this, e);
         }
 
-        /// <summary>
-        ///     Add action to server action queue
-        /// </summary>
-        /// <param name="action">Action to be added</param>
-        public void AddActionToQueue(AUserAction action)
-        {
-            if (action is MovementAction m)
-            {
-                _movementDictionary.TryAdd(action.Username,ConvertMovementActionToVector2(m));
-            }
-        }
+        
 
         /// <summary>
         ///     Add a new player to the spawn queue
@@ -449,11 +470,12 @@ namespace ColossalGame.Services
         {
             
             if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
+            /*
             var pm = new PlayerModel();
             pm.Username = username;
             pm.XPos = xPos;
-            pm.YPos = yPos;
-            PlayerSpawnQueue.Enqueue(pm);
+            pm.YPos = yPos;*/
+            SpawnPlayer(username);
         }
 
         /// <summary>
@@ -477,13 +499,13 @@ namespace ColossalGame.Services
     /// </summary>
     public class CustomEventArgs : EventArgs
     {
-        public CustomEventArgs(List<GameObjectModel> objectList, ConcurrentDictionary<string, Body> playerDict)
+        public CustomEventArgs(ConcurrentQueue<GameObjectModel> objectList, ConcurrentDictionary<string, Body> playerDict)
         {
             ObjectList = objectList;
             PlayerDict = playerDict;
         }
 
-        public List<GameObjectModel> ObjectList { get; set; }
+        public ConcurrentQueue<GameObjectModel> ObjectList { get; set; }
 
         public ConcurrentDictionary<string, Body> PlayerDict { get; set; }
     }

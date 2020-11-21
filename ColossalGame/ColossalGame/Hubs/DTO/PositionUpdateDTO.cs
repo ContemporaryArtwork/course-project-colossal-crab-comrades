@@ -10,7 +10,7 @@ namespace ColossalGame.Hubs.DTO
 {
     public class PositionUpdateDTO : ASignalRDTO
     {
-        public List<GameObjectModel> ObjectList { get; set; }
+        public ConcurrentQueue<GameObjectModel> ObjectList { get; set; }
 
         public ConcurrentDictionary<string, PlayerModel> PlayerDict { get; set; }
     }
