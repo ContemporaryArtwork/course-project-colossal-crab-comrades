@@ -421,11 +421,13 @@ namespace ColossalGame.Services
             stopwatch.Start();
             while (true)
             {
-                if (!(stopwatch.ElapsedMilliseconds >= PublishRate)) continue;
-                stopwatch.Stop();
-                PublishState();
-                stopwatch.Reset();
-                stopwatch.Start();
+                if (stopwatch.ElapsedMilliseconds >= PublishRate)
+                {
+                    stopwatch.Stop();
+                    PublishState();
+                    stopwatch.Reset();
+                    stopwatch.Start();
+                }
 
             }
 
