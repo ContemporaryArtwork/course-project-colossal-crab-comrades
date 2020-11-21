@@ -356,7 +356,7 @@ namespace ColossalGame.Services
                 //lastTick = DateTime.Now;
                 // Console.WriteLine("GameLogic: " + DateTime.Now.Second);
                 // Console.WriteLine("ts: " + ts.Milliseconds);
-                simulateOneServerTick();
+                
                 if (stopwatch.ElapsedMilliseconds >= TickRate)
                 {
                     stopwatch.Stop();
@@ -366,6 +366,7 @@ namespace ColossalGame.Services
                     stopwatch.Reset();
                     stopwatch.Start();
                 }
+                simulateOneServerTick();
 
             }
             
