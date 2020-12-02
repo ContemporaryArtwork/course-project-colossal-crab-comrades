@@ -80,6 +80,10 @@ namespace ColossalGame.Services
         /// </summary>
         public event EventHandler<CustomEventArgs> RaiseCustomEvent;
 
+        private System.Threading.Timer _worldTimer;
+
+        private System.Threading.Timer _publishTimer;
+
         /// <summary>
         ///     Constructor for GameLogic class
         /// </summary>
@@ -362,47 +366,38 @@ namespace ColossalGame.Services
         /// </summary>
         private void Start()
         {
-            var instanceCaller = new Thread(
-                RunWorld);
+            //Old method:
+            //var instanceCaller = new Thread(RunWorld);
+            //var instanceCaller2 = new Thread(StartPublishing);
+            //instanceCaller.Start();
+            //instanceCaller2.Start();
+
+            //New method (using timers) (more efficient!)
+            //Start world stepping
+            _worldTimer = new System.Threading.Timer(o => StepWorld(), null,0 , (int)TickRate);
+            //Start publishing states
+            _publishTimer = new System.Threading.Timer(o => PublishState(), null, 0, (int)PublishRate);
+
             
-            var instanceCaller2 = new Thread(
-                StartPublishing);
-            instanceCaller.Start();
-            instanceCaller2.Start();
+            //Thread.Sleep(Timeout.Infinite);
+            
         }
 
         /// <summary>
         ///     Keeps looping every {tickRate} milliseconds, simulating a new server tick every time
         /// </summary>
-        private void RunWorld()
+        private void StepWorld()
         {
             
             
-            while (KeepGoing)
-            {
-                
-                var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
-                //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
-                _world.Step((float)TickRate/1000f, ref a);
-
-                Thread.Sleep((int)TickRate);
-            }
-            
+            var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
+            //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
+            _world.Step((float)TickRate/1000f, ref a);
         }
 
 
 
-        public void StartPublishing()
-        {
-            
-            while (true)
-            {
-                
-                PublishState();
-                Thread.Sleep((int)PublishRate);
-            }
-
-        }
+        
 
        
 
@@ -414,7 +409,7 @@ namespace ColossalGame.Services
         private void PublishState()
         {
             //Console.WriteLine("Publish: " + DateTime.Now.Second);
-            
+            Console.WriteLine("publish");
             var e = new CustomEventArgs(ObjectList, PlayerDictionary);
             OnRaiseCustomEvent(e);
         }
