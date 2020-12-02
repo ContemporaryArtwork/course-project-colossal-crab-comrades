@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ColossalGame.Models;
+using ColossalGame.Models.GameModels;
 using Microsoft.Xna.Framework;
 using tainicom.Aether.Physics2D.Collision.Shapes;
 using tainicom.Aether.Physics2D.Dynamics;
@@ -80,8 +81,14 @@ namespace ColossalGame.Services
         /// </summary>
         public event EventHandler<CustomEventArgs> RaiseCustomEvent;
 
+        /// <summary>
+        /// Object which steps the world every {tickRate} milliseconds
+        /// </summary>
         private System.Threading.Timer _worldTimer;
 
+        /// <summary>
+        /// Object which publishes the states
+        /// </summary>
         private System.Threading.Timer _publishTimer;
 
         /// <summary>
