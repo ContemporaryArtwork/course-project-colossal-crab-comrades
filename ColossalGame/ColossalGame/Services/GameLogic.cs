@@ -392,7 +392,11 @@ namespace ColossalGame.Services
             
             var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
             //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
-            _world.Step((float)TickRate/1000f, ref a);
+            //lock because sometimes world stepping will take too long
+            lock (_world)
+            {
+                _world.Step((float) TickRate / 1000f, ref a);
+            }
         }
 
 
