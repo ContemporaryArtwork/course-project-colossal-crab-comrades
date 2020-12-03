@@ -48,7 +48,7 @@ namespace ColossalServiceTests.Services
             float yPos = 2.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -77,7 +77,7 @@ namespace ColossalServiceTests.Services
 
             gameLogic.StopServer();
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -99,7 +99,7 @@ namespace ColossalServiceTests.Services
             float yPos = 2.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -113,7 +113,7 @@ namespace ColossalServiceTests.Services
             Assert.True(b.ElementAt(0).Key == "realUser");
             Assert.AreEqual(1.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).X);
             Assert.AreEqual(2.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).Y);
-            gameLogic.AddPlayerToDespawnQueue("realUser");
+            gameLogic.DespawnPlayer("realUser");
             Thread.Sleep(100);
             (a, b) = gameLogic.GetState();
             Assert.True(a.IsNullOrEmpty() && b.IsNullOrEmpty());
@@ -129,7 +129,7 @@ namespace ColossalServiceTests.Services
 
             Assert.Throws<UserDoesNotExistException>(delegate
             {
-                gameLogic.AddPlayerToDespawnQueue(null);
+                gameLogic.DespawnPlayer(null);
             });
             Thread.Sleep(100);
             (a, b) = gameLogic.GetState();
@@ -145,7 +145,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -154,7 +154,7 @@ namespace ColossalServiceTests.Services
             ma.Direction = EDirection.Left;
             ma.Token = null;//only relevant for interpolator
             ma.Username = username;
-            gameLogic.AddActionToQueue(ma);
+            gameLogic.HandleAction(ma);
 
             
             // Assert
@@ -184,7 +184,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -192,7 +192,7 @@ namespace ColossalServiceTests.Services
             ma.Direction = EDirection.Right;
             ma.Token = null;
             ma.Username = username;
-            gameLogic.AddActionToQueue(ma);
+            gameLogic.HandleAction(ma);
 
             // Assert
             Thread.Sleep(100);
@@ -218,7 +218,7 @@ namespace ColossalServiceTests.Services
             float yPos = 100.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -226,7 +226,7 @@ namespace ColossalServiceTests.Services
             ma.Direction = EDirection.Up;
             ma.Token = null;
             ma.Username = username;
-            gameLogic.AddActionToQueue(ma);
+            gameLogic.HandleAction(ma);
 
             // Assert
             Thread.Sleep(100);
@@ -252,7 +252,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -260,7 +260,7 @@ namespace ColossalServiceTests.Services
             ma.Direction = EDirection.Down;
             ma.Token = null;
             ma.Username = username;
-            gameLogic.AddActionToQueue(ma);
+            gameLogic.HandleAction(ma);
 
             // Assert
             Thread.Sleep(100);
@@ -285,7 +285,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -293,14 +293,14 @@ namespace ColossalServiceTests.Services
             ma.Direction = EDirection.Right;
             ma.Token = null;
             ma.Username = username;
-            gameLogic.AddActionToQueue(ma);
+            gameLogic.HandleAction(ma);
             Thread.Sleep(300);
 
             MovementAction ma2 = new MovementAction();
             ma2.Direction = EDirection.Up;
             ma2.Token = null;
             ma2.Username = username;
-            gameLogic.AddActionToQueue(ma2);
+            gameLogic.HandleAction(ma2);
 
             // Assert
             Thread.Sleep(300);
@@ -325,7 +325,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -334,7 +334,7 @@ namespace ColossalServiceTests.Services
             ma.Direction = EDirection.Up;
             ma.Token = null;
             ma.Username = username;
-            gameLogic.AddActionToQueue(ma);
+            gameLogic.HandleAction(ma);
 
             // Assert
             Thread.Sleep(100);
@@ -360,7 +360,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -368,7 +368,7 @@ namespace ColossalServiceTests.Services
             ma.Direction = EDirection.Right;
             ma.Token = null;
             ma.Username = username;
-            gameLogic.AddActionToQueue(ma);
+            gameLogic.HandleAction(ma);
 
             // Assert
             Thread.Sleep(100);
@@ -380,7 +380,7 @@ namespace ColossalServiceTests.Services
             Assert.True(0.0f < b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).X);
             Assert.AreEqual(0.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).Y);
 
-            gameLogic.AddPlayerToDespawnQueue("realUser");
+            gameLogic.DespawnPlayer("realUser");
             Thread.Sleep(100);
             (a, b) = gameLogic.GetState();
             Assert.True(a.IsNullOrEmpty() && b.IsNullOrEmpty());
@@ -399,7 +399,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -412,7 +412,7 @@ namespace ColossalServiceTests.Services
             float yPos2 = 0.0f;
 
             // Act 2
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username2,
                 xPos2,
                 yPos2);
@@ -446,7 +446,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -458,7 +458,7 @@ namespace ColossalServiceTests.Services
             float yPos2 = 0.0f;
 
             // Act 2
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username2,
                 xPos2,
                 yPos2);
@@ -492,7 +492,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -505,7 +505,7 @@ namespace ColossalServiceTests.Services
             float yPos2 = 0.0f;
 
             // Act 2
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username2,
                 xPos2,
                 yPos2);
@@ -513,7 +513,7 @@ namespace ColossalServiceTests.Services
             // Assert
             Thread.Sleep(100);
 
-            gameLogic.AddPlayerToDespawnQueue("realUser2");
+            gameLogic.DespawnPlayer("realUser2");
 
             Thread.Sleep(200);
             var (a, b) = gameLogic.GetState();
@@ -540,7 +540,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -553,7 +553,7 @@ namespace ColossalServiceTests.Services
             float yPos2 = 0.0f;
 
             // Act 2
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username2,
                 xPos2,
                 yPos2);
@@ -561,7 +561,7 @@ namespace ColossalServiceTests.Services
             // Assert
             Thread.Sleep(100);
 
-            gameLogic.AddPlayerToDespawnQueue("realUser");
+            gameLogic.DespawnPlayer("realUser");
 
             Thread.Sleep(100);
             var (a, b) = gameLogic.GetState();
@@ -590,7 +590,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -599,7 +599,7 @@ namespace ColossalServiceTests.Services
             ma.Direction = EDirection.Right;
             ma.Token = null;
             ma.Username = username;
-            gameLogic.AddActionToQueue(ma);
+            gameLogic.HandleAction(ma);
 
             Thread.Sleep(200);
             // Arrange 2
@@ -608,7 +608,7 @@ namespace ColossalServiceTests.Services
             float yPos2 = 0.0f;
 
             // Act 2
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username2,
                 xPos2,
                 yPos2);
@@ -643,7 +643,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -657,7 +657,7 @@ namespace ColossalServiceTests.Services
             float yPos2 = 0.0f;
 
             // Act 2
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username2,
                 xPos2,
                 yPos2);
@@ -666,7 +666,7 @@ namespace ColossalServiceTests.Services
             ma.Direction = EDirection.Right;
             ma.Token = null;
             ma.Username = username2;
-            gameLogic.AddActionToQueue(ma);
+            gameLogic.HandleAction(ma);
 
             // Assert
             Thread.Sleep(200);
@@ -696,7 +696,7 @@ namespace ColossalServiceTests.Services
             float yPos = 0.0f;
 
             // Act
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username,
                 xPos,
                 yPos);
@@ -705,7 +705,7 @@ namespace ColossalServiceTests.Services
             ma.Direction = EDirection.Right;
             ma.Token = null;
             ma.Username = username;
-            gameLogic.AddActionToQueue(ma);
+            gameLogic.HandleAction(ma);
 
             Thread.Sleep(200);
             // Arrange 2
@@ -714,7 +714,7 @@ namespace ColossalServiceTests.Services
             float yPos2 = 0.0f;
 
             // Act 2
-            gameLogic.AddPlayerToSpawnQueue(
+            gameLogic.HandleSpawnPlayer(
                 username2,
                 xPos2,
                 yPos2);
@@ -723,7 +723,7 @@ namespace ColossalServiceTests.Services
             ma2.Direction = EDirection.Right;
             ma2.Token = null;
             ma2.Username = username2;
-            gameLogic.AddActionToQueue(ma2);
+            gameLogic.HandleAction(ma2);
 
             // Assert
             Thread.Sleep(200);
