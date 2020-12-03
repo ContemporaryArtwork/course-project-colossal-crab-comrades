@@ -229,6 +229,7 @@ namespace ColossalGame.Services
             
 
             var bullet = new Body {BodyType = BodyType.Dynamic};
+            
 
             var bulletFixture = bullet.CreateCircle(.3f, 1);
             
@@ -291,6 +292,8 @@ namespace ColossalGame.Services
             {
                 SpinWait.SpinUntil(() => !_world.IsLocked);
                 _world.Add(bullet);
+                SpinWait.SpinUntil(() => !_world.IsLocked);
+                bullet.SetTransform(ballPosition, angle);
             }
 
 
