@@ -105,7 +105,8 @@ namespace ColossalGame.Services
             Vector2 upperLeftCorner = new Vector2(-widthInMeters, heightInMeters);
             Vector2 upperRightCorner = new Vector2(widthInMeters, heightInMeters);
             var edge = _world.CreateBody();
-            edge.SetRestitution(0f);
+            edge.SetRestitution(1f);
+            edge.SetFriction(1f);
             edge.CreateEdge(lowerLeftCorner, lowerRightCorner);
             edge.CreateEdge(lowerRightCorner, upperRightCorner);
             edge.CreateEdge(upperRightCorner, upperLeftCorner);
@@ -231,8 +232,8 @@ namespace ColossalGame.Services
 
             var bulletFixture = bullet.CreateCircle(.3f, 1);
             
-            bullet.SetRestitution(0.3f);
-            bullet.SetFriction(.3f);
+            bullet.SetRestitution(1f);
+            bullet.SetFriction(1f);
             bullet.Mass = .1f;
             bullet.IsBullet = true;
 
@@ -248,8 +249,8 @@ namespace ColossalGame.Services
 
             bullet.Tag = bulletModel;
 
-            
-            bullet.OnCollision += (fixtureA, fixtureB, contact) =>
+
+            /*bullet.OnCollision += (fixtureA, fixtureB, contact) =>
             {
                 //TODO: Handle collisions, right now we just destroy the bullets when they hit things
 
@@ -283,12 +284,15 @@ namespace ColossalGame.Services
                     ObjectDictionary.Remove(bm2.ID, out var value);
                 }
 
-                return false;
+                return true;
             };
+*/
+            lock (ObjectDictionary)
+            {
+                SpinWait.SpinUntil(() => !_world.IsLocked);
+                _world.Add(bullet);
+            }
 
-
-            SpinWait.SpinUntil(() => !_world.IsLocked);
-            _world.Add(bullet);
 
             
             ObjectDictionary.TryAdd(bulletModel.ID,bulletModel);
@@ -356,24 +360,38 @@ namespace ColossalGame.Services
             return (ObjectDictionary, PlayerDictionary);
         }
 
-        public static (ConcurrentQueue<ExportModel>, ConcurrentDictionary<string, PlayerExportModel>) GetStatePM(ConcurrentDictionary<string,PlayerModel> playerDictionary,ConcurrentDictionary<int, GameObjectModel> objectDict)
+        public static (ConcurrentQueue<object>, ConcurrentDictionary<string, PlayerExportModel>) GetStatePM(ConcurrentDictionary<string,PlayerModel> playerDictionary,ConcurrentDictionary<int, GameObjectModel> objectDict)
         {
             
             var returnDictionary = new ConcurrentDictionary<string, PlayerExportModel>();
-            var gameObjectQueue = new ConcurrentQueue<ExportModel>();
+            var gameObjectQueue = new ConcurrentQueue<object>();
             
             Parallel.ForEach(playerDictionary, (pair) =>
             {
                 var (name, playerModel) = pair;
                 
-
+                
                 returnDictionary[name] = playerModel.Export();
             });
 
             Parallel.ForEach(objectDict, (pair) =>
             {
                 var (id, model) = pair;
-                gameObjectQueue.Enqueue(model.Export());
+
+                if(model is BulletModel b)
+                {
+                    gameObjectQueue.Enqueue(b.Export());
+                }
+                else if(model is EnemyModel e)
+                {
+                    //gameObjectQueue.Enqueue(e.Export()); TODO
+                }
+                else
+                {
+                    throw new Exception("When casting, to exported model the model type was not supported.");
+                }
+
+                
             });
 
 
