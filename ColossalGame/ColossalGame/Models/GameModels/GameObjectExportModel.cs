@@ -5,19 +5,20 @@ using System.Threading.Tasks;
 
 namespace ColossalGame.Models.GameModels
 {
-    public class ExportModel
+    public abstract class GameObjectExportModel
     {
         public float XPos { get; set; }
         public float YPos { get; set; }
     }
 
-    public class PlayerExportModel : ExportModel
+    public class PlayerExportModel : GameObjectExportModel
     {
         public string Username { get; set; }
     }
 
-    public class BulletExportModel : ExportModel
+    public class BulletExportModel : GameObjectExportModel
     {
         public string BulletType { get; set; }
+        public int ID { get; set; }
     }
 }

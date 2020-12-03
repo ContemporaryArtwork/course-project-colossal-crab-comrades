@@ -11,7 +11,7 @@ namespace ColossalGame.Hubs.DTO
 {
     public class PositionUpdateDTO : ASignalRDTO
     {
-        public ConcurrentQueue<ExportModel> ObjectList { get; set; }
+        public ConcurrentQueue<object> ObjectList { get; set; } //TODO make this GameObjectExportModel again.
 
         public ConcurrentDictionary<string, PlayerExportModel> PlayerDict { get; set; }
     }

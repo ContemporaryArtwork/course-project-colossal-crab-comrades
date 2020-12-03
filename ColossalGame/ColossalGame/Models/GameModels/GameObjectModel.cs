@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Dynamics;
@@ -22,8 +22,10 @@ namespace ColossalGame.Models.GameModels
         {
             var rnd = new Random();
             ObjectBody = b;
-            ID = rnd.Next(1, 100000000);
+            ID = Counter++;
         }
+
+        public static int Counter { get; set; } = 0;
 
         public float YPos
         {
@@ -37,13 +39,13 @@ namespace ColossalGame.Models.GameModels
             set => ObjectBody.SetTransform(new Vector2(value, YPos), ObjectBody.Rotation);
         }
 
-        public ExportModel Export()
+        /*public GameObjectExportModel Export()
         {
-            var retVal = new ExportModel();
+            var retVal = new GameObjectExportModel();
             retVal.XPos = this.XPos;
             retVal.YPos = this.YPos;
             return retVal;
-        }
+        }*/
     }
 
     public class BulletModel : GameObjectModel
@@ -58,9 +60,9 @@ namespace ColossalGame.Models.GameModels
         {
         }
 
-        public new BulletExportModel Export()
+        public BulletExportModel Export()
         {
-            var retVal = new BulletExportModel { XPos = this.XPos, YPos = this.YPos, BulletType = this.BulletType};
+            var retVal = new BulletExportModel { XPos = this.XPos, YPos = this.YPos, BulletType = this.BulletType, ID= this.ID};
             return retVal;
         }
     }

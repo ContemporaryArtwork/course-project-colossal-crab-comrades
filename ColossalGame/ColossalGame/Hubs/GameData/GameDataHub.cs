@@ -1,5 +1,6 @@
 using ColossalGame.Hubs.DTO;
 using ColossalGame.Models;
+using ColossalGame.Models.GameModels;
 using ColossalGame.Services;
 using Microsoft.AspNetCore.SignalR;
 using System;
@@ -57,9 +58,32 @@ namespace ColossalGame.Hubs.GameData
             await Clients.All.ReceiveString("This was your message: " + message);
         }
 
-        public async Task FireWeapon(string message)
+        public async Task FireWeapon(ShootingAction shootingAction)
         {
-            await Clients.All.ReceiveString("This was your message: " + message);
+            bool res = false;
+
+
+            if (_interpolator != null)
+            {
+                try
+                {
+                    if (_gameLogic.IsPlayerSpawned(shootingAction.Username))
+                    {
+                        res = _interpolator.ParseAction(shootingAction);
+                    }
+
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+
+            }
+
+            var responseString = res ? "Fire Weapon Action accepted by interpolator" :
+                                        "Fire Weapon Action rejected by interpolator.";
+            await Clients.Caller.ReceiveString(responseString);
         }
 
         public async Task TempLogin(string username, string password)
