@@ -216,12 +216,14 @@ namespace ColossalGame.Services
 
             var playerModel = new PlayerModel(pm);
             playerModel.Username = username;
+
+            pm.Tag = playerModel;
             
             //PlayerDictionary.Add(username, pm);
             PlayerDictionary[username] = playerModel;
         }
 
-        private void SpawnBullet(float angle,Vector2 ballPosition)
+        private void SpawnBullet(float angle,Vector2 ballPosition, PlayerModel spawner)
         {
             
 
@@ -250,6 +252,23 @@ namespace ColossalGame.Services
             bullet.OnCollision += (fixtureA, fixtureB, contact) =>
             {
                 //TODO: Handle collisions, right now we just destroy the bullets when they hit things
+
+                if (fixtureA.Tag is PlayerModel a)
+                {
+                    if (a.Username == spawner.Username)
+                    {
+                        return false;
+                    }
+                }
+
+                if (fixtureB.Tag is PlayerModel b)
+                {
+                    if (b.Username == spawner.Username)
+                    {
+                        return false;
+                    }
+                }
+
                 if (fixtureA.Tag is BulletModel bm)
                 {
                     SpinWait.SpinUntil(() => !_world.IsLocked);
@@ -316,7 +335,7 @@ namespace ColossalGame.Services
                 {
 
                     
-                    SpawnBullet(s.Angle,playerBody.WorldCenter);
+                    SpawnBullet(s.Angle,playerBody.WorldCenter,playerModel);
                     
                     break;
                 }
