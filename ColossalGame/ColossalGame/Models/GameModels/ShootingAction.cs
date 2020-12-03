@@ -2,6 +2,9 @@
 {
     public class ShootingAction : AUserAction
     {
-        public double Speed { get; set; }
+        /// <summary>
+        /// Angle of shot. Needs to be in RADIANS!!
+        /// </summary>
+        public float Angle { get; set; }
     }
 }

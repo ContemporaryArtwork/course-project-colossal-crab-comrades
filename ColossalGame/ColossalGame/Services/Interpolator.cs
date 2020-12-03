@@ -46,7 +46,7 @@ namespace ColossalGame.Services
                 
                 PlayerTimings.Add(action.Username, DateTime.Now);
                 //Run relevant method to update game state
-                _gl.AddActionToQueue(action);
+                _gl.HandleAction(action);
                 //
                 return true;
             }
@@ -61,7 +61,7 @@ namespace ColossalGame.Services
             {
                 PlayerTimings[action.Username] = DateTime.Now;
                 //Run relevant method to update game state
-                _gl.AddActionToQueue(action);
+                _gl.HandleAction(action);
                 //
                 return true;
             }

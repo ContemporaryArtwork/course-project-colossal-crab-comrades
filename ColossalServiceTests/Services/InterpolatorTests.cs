@@ -23,7 +23,7 @@ namespace ColossalServiceTests.Services
             this.subGameLogic = Substitute.For<GameLogic>(this.subLoginService,this.subUserService);
             this.subLoginService.DeleteUser("testUser");
             this.subLoginService.SignUp("testUser", "Testpassword123$");
-            this.subGameLogic.AddPlayerToSpawnQueue("testUser");
+            this.subGameLogic.HandleSpawnPlayer("testUser");
         }
 
         private Interpolator CreateInterpolator()
