@@ -10,6 +10,7 @@ using ColossalGame.Models;
 using ColossalGame.Models.GameModels;
 using Microsoft.Xna.Framework;
 using tainicom.Aether.Physics2D.Collision.Shapes;
+using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Dynamics;
 using Vector2 = tainicom.Aether.Physics2D.Common.Vector2;
 
@@ -30,7 +31,7 @@ namespace ColossalGame.Services
         /// <summary>
         ///     Lower bound on milliseconds per world step, can be higher if inputs are sufficiently high
         /// </summary>
-        private const double TickRate = 50.0;
+        private const double TickRate = 30.0;
 
         /// <summary>
         /// Amount of milliseconds to wait until publishing the newest game state to clients
@@ -68,6 +69,13 @@ namespace ColossalGame.Services
         /// Object which publishes the states
         /// </summary>
         private System.Threading.Timer _publishTimer;
+
+        private Mutex _data = new Mutex();
+
+        private Mutex _nextToAccess = new Mutex();
+
+        private Mutex _lowPriority = new Mutex();
+
 
         /// <summary>
         ///     Constructor for GameLogic class
@@ -107,11 +115,20 @@ namespace ColossalGame.Services
             var edge = _world.CreateBody();
             edge.SetRestitution(1f);
             edge.SetFriction(1f);
+            Vertices v = new Vertices();
+            v.Add(lowerLeftCorner);
+            v.Add(lowerRightCorner);
+            v.Add(upperLeftCorner);
+            v.Add(upperRightCorner);
+
+            //edge.CreateLoopShape(v);
+            
             edge.CreateEdge(lowerLeftCorner, lowerRightCorner);
             edge.CreateEdge(lowerRightCorner, upperRightCorner);
             edge.CreateEdge(upperRightCorner, upperLeftCorner);
             edge.CreateEdge(upperLeftCorner, lowerLeftCorner);
             
+
 
         }
 
@@ -238,8 +255,8 @@ namespace ColossalGame.Services
             bullet.Mass = .1f;
             bullet.IsBullet = true;
 
-            const float magnitude = 20f;
-            var bulletForce = new Vector2((float)Math.Cos(angle)*magnitude,(float)Math.Sin(angle)*magnitude);
+            const float magnitude = 30f;
+            var bulletForce = new Vector2((float)Math.Cos(angle)*magnitude,(float)-Math.Sin(angle)*magnitude);
             bullet.ApplyForce(bulletForce, bullet.WorldCenter);
 
             var bulletModel = new BulletModel(bullet)
@@ -288,13 +305,19 @@ namespace ColossalGame.Services
                 return true;
             };
 */
-            lock (ObjectDictionary)
+            Action A = () =>
             {
-                SpinWait.SpinUntil(() => !_world.IsLocked);
                 _world.Add(bullet);
-                SpinWait.SpinUntil(() => !_world.IsLocked);
                 bullet.SetTransform(ballPosition, angle);
-            }
+            };
+
+
+            LowPriority(A);
+                
+            
+
+            
+            
 
 
             
@@ -315,6 +338,47 @@ namespace ColossalGame.Services
             //TODO: Implement this
         }
 
+        private bool LowPriority(Action action)
+        {
+            /*if (_lowPriority.WaitOne(50))
+            {
+                _nextToAccess.WaitOne();
+                _data.WaitOne();
+                _nextToAccess.ReleaseMutex();
+                action();
+                _data.ReleaseMutex();
+                _lowPriority.ReleaseMutex();
+                return true;
+            }
+            return false
+             */
+
+            _nextToAccess.WaitOne();
+            _nextToAccess.ReleaseMutex();
+            action();
+            return true;
+
+            
+
+
+        }
+
+        private void HighPriorityLock()
+        {
+            _nextToAccess.WaitOne();
+            
+            
+        }
+
+        private void HighPriorityUnlock()
+        {
+            _nextToAccess.ReleaseMutex();
+        }
+
+
+
+
+
         /// <summary>
         ///     Add action to server action queue
         /// </summary>
@@ -334,9 +398,16 @@ namespace ColossalGame.Services
                 {
                     var impulse = ConvertMovementActionToVector2(m);
 
-                    SpinWait.SpinUntil(() => !_world.IsLocked);
-                    playerBody.ApplyLinearImpulse(impulse, playerBody.WorldCenter);
-                    break;
+
+                        void A()
+                        {
+                            playerBody.ApplyLinearImpulse(impulse, playerBody.WorldCenter);
+                        }
+
+
+                        LowPriority(A);
+
+                        break;
                 }
                 case ShootingAction s:
                 {
@@ -422,6 +493,8 @@ namespace ColossalGame.Services
             
         }
 
+        
+
         /// <summary>
         ///     Keeps looping every {tickRate} milliseconds, simulating a new server tick every time
         /// </summary>
@@ -429,13 +502,16 @@ namespace ColossalGame.Services
         {
             
             
-            var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
+            var a = new SolverIterations {PositionIterations = 2, VelocityIterations = 4};
             //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
             //lock because sometimes world stepping will take too long
-            lock (_world)
-            {
-                _world.Step((float) TickRate / 1000f, ref a);
-            }
+            
+            HighPriorityLock();
+            _world.Step((float) TickRate / 1000f, ref a);
+            HighPriorityUnlock();
+
+           
+            
         }
 
 

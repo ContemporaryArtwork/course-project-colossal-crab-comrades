@@ -190,6 +190,7 @@ export default class MainScene extends Phaser.Scene {
         const left = cursors.left && cursors.left.isDown;
         const down = cursors.down && cursors.down.isDown;
         const right = cursors.right && cursors.right.isDown;
+        const spacebarPressed = spacebar.isDown;
         if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft); }
         else if (up && right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpRight); }
         else if (down && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownLeft); }
@@ -199,8 +200,8 @@ export default class MainScene extends Phaser.Scene {
         else if (down) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Down); }
         else if (right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Right); }
         
-        const spacebarPressed = spacebar.isDown;
-        if (spacebarPressed) { this._hostingComponent.props.fireWeaponAction(45 * (Math.PI/180)); }
+        
+        else if (spacebarPressed) { this._hostingComponent.props.fireWeaponAction(90 * (Math.PI/180)); }
 
 
         //Update Position of all entities in the game using the current data in playerDict
