@@ -88,6 +88,8 @@ export default class MainScene extends Phaser.Scene {
             var curPlayer: any;  //This is of type any since this is how Josh had it. collideWorldBounds and enableBody are not part of Phaser.Physics.Arcade.Sprite, maybe thats why.
             //In future we should probably figure out how to set collideWorldBounds and collideBody.
             curPlayer = this.physics.add.sprite(0, 0, "player");
+            //.5 because .5 is in the middle of the sprite. And we need that for rotation.
+            curPlayer.setOrigin(.5, .5);curPlayer.setOrigin(.5, .5);
             curPlayer.collideWorldBounds = true;
             curPlayer.enableBody = true;
 
@@ -192,6 +194,7 @@ export default class MainScene extends Phaser.Scene {
 
                     var curPlayer: any;
                     curPlayer = this.physics.add.sprite(0, 0, "player");
+                    curPlayer.setOrigin(.5, .5);
                     curPlayer.collideWorldBounds = true;
                     curPlayer.enableBody = true;
 
@@ -274,6 +277,25 @@ export default class MainScene extends Phaser.Scene {
                         ypos = Phaser.Math.Interpolation.Bezier([ypos, playerContainer.y], .8);
                         playerContainer.x = xpos;
                         playerContainer.y = ypos;
+
+
+                        //For rotating toward pointer
+                        var mouseInput = this.input;
+                        let angle = Phaser.Math.Angle.Between(p.x, p.y, mouseInput.x, mouseInput.y);
+                        //p.setRotation(angle);
+
+                        console.log("P X " + p.x);
+                        console.log("P Y " + p.y);
+
+                        console.log("M X " + mouseInput.x);
+                        console.log("M Y " + mouseInput.y);
+
+                        let newAngle =  (angle + Math.PI / 2);
+
+                        p.setRotation(newAngle);
+                        //console.log(newAngle);
+                        //console.log("X " + p.originX);
+                        //console.log("Y " + p.originY);
                     }
                 }
 
