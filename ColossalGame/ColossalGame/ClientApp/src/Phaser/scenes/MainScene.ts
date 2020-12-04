@@ -19,6 +19,10 @@ type GameDataProps = //Rather than defining her, perhaps grab straight from the 
     RouteComponentProps<{}>;
 
 var cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+var w: Phaser.Input.Keyboard.Key;
+var a: Phaser.Input.Keyboard.Key;
+var s: Phaser.Input.Keyboard.Key;
+var d: Phaser.Input.Keyboard.Key;
 var spacebar: Phaser.Input.Keyboard.Key;
 
 export default class MainScene extends Phaser.Scene {
@@ -57,7 +61,12 @@ export default class MainScene extends Phaser.Scene {
         
 
         cursors = this.input.keyboard.createCursorKeys();
+        w = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        a = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        s = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        d = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
         spacebar = this.input.keyboard.addKey('SPACE');
+        
         this.add.image(0, 0, "ground");
         this.add.image(1024, 0, "ground");
         this.add.image(1024, 1024, "ground");
@@ -186,10 +195,11 @@ export default class MainScene extends Phaser.Scene {
 
 
         //SEND Keyboard Presses To Server
-        const up = cursors.up && cursors.up.isDown;
-        const left = cursors.left && cursors.left.isDown;
-        const down = cursors.down && cursors.down.isDown;
-        const right = cursors.right && cursors.right.isDown;
+        const up = w.isDown;
+        
+        const left = a.isDown;
+        const down = s.isDown;
+        const right = d.isDown;
         const spacebarPressed = spacebar.isDown;
         
         if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft); }
