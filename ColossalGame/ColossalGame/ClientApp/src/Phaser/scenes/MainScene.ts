@@ -191,6 +191,7 @@ export default class MainScene extends Phaser.Scene {
         const down = cursors.down && cursors.down.isDown;
         const right = cursors.right && cursors.right.isDown;
         const spacebarPressed = spacebar.isDown;
+        
         if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft); }
         else if (up && right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpRight); }
         else if (down && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownLeft); }
@@ -199,9 +200,9 @@ export default class MainScene extends Phaser.Scene {
         else if (left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Left); }
         else if (down) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Down); }
         else if (right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Right); }
+        else if (spacebarPressed) { this._hostingComponent.props.fireWeaponAction(90 * (Math.PI / 180)); }
         
         
-        else if (spacebarPressed) { this._hostingComponent.props.fireWeaponAction(90 * (Math.PI/180)); }
 
 
         //Update Position of all entities in the game using the current data in playerDict
@@ -364,12 +365,27 @@ export default class MainScene extends Phaser.Scene {
                 }
 
             });
+
+            //Cleanup loop
+            var ids: number[] = [];
+            this._gameObjectsOnScreen.forEach((value: Phaser.GameObjects.Container, key: number) => {
+                let item = gameobjList.find(i => isProjectile(i) && i.id === key);
+                if (item == undefined) {
+                    value.destroy();
+                    ids.push(key);
+                }
+            });
+            ids.forEach((key: number) => {
+                this._gameObjectsOnScreen.delete(key);
+            });
         }
 
         /*this._gameObjectsOnScreen.forEach((value, key) => {
             
             console.log("Key:"+key+ " Pos:"+value.x +","+ value.y);
         });*/
+
+
     }
 }
 

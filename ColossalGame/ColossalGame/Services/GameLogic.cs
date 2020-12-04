@@ -36,7 +36,7 @@ namespace ColossalGame.Services
         /// <summary>
         /// Amount of milliseconds to wait until publishing the newest game state to clients
         /// </summary>
-        private const double PublishRate = 30.0;
+        private const double PublishRate = 10.0;
 
         /// <summary>
         /// The ratio of meters in the physics engine to pixels in the game world, i.e. a conversion factor of 64 means that 1 meter in engine is 64 pixels
@@ -75,6 +75,8 @@ namespace ColossalGame.Services
         private Mutex _nextToAccess = new Mutex();
 
         private Mutex _lowPriority = new Mutex();
+
+        private Mutex worldMutex = new Mutex();
 
 
         /// <summary>
@@ -241,6 +243,22 @@ namespace ColossalGame.Services
             PlayerDictionary[username] = playerModel;
         }
 
+        private void DestroyBullet(BulletModel b)
+        {
+            
+            var bulletBody = b.ObjectBody;
+            
+            Action A = () =>
+            {
+                SpinWait.SpinUntil(() => !_world.IsLocked);
+                if (!_world.BodyList.Contains(b.ObjectBody)) return;
+                _world.Remove(bulletBody);
+            };
+            LowPriority(A);
+            ObjectDictionary.Remove(b.ID, out var _);
+
+        }
+
         private void SpawnBullet(float angle,Vector2 ballPosition, PlayerModel spawner)
         {
             
@@ -267,52 +285,58 @@ namespace ColossalGame.Services
 
             bullet.Tag = bulletModel;
 
+            
+            
 
-            /*bullet.OnCollision += (fixtureA, fixtureB, contact) =>
-            {
-                //TODO: Handle collisions, right now we just destroy the bullets when they hit things
+            
 
-                if (fixtureA.Tag is PlayerModel a)
-                {
-                    if (a.Username == spawner.Username)
-                    {
-                        return false;
-                    }
-                }
-
-                if (fixtureB.Tag is PlayerModel b)
-                {
-                    if (b.Username == spawner.Username)
-                    {
-                        return false;
-                    }
-                }
-
-                if (fixtureA.Tag is BulletModel bm)
-                {
-                    SpinWait.SpinUntil(() => !_world.IsLocked);
-                    _world.Remove(bm.ObjectBody);
-                    ObjectDictionary.Remove(bm.ID, out var value);
-                }
-
-                if (fixtureB.Tag is BulletModel bm2)
-                {
-                    SpinWait.SpinUntil(() => !_world.IsLocked);
-                    _world.Remove(bm2.ObjectBody);
-                    ObjectDictionary.Remove(bm2.ID, out var value);
-                }
-
-                return true;
-            };
-*/
             Action A = () =>
             {
                 _world.Add(bullet);
                 bullet.SetTransform(ballPosition, angle);
+                bulletFixture.OnCollision += (fixtureA, fixtureB, contact) =>
+                {
+                    if (fixtureA.Body.Tag is PlayerModel playerA)
+                    {
+                        if (playerA.Username == spawner.Username)
+                        {
+                            return false;
+                        }
+                    }
+                    if (fixtureB.Body.Tag is PlayerModel playerB)
+                    {
+                        if (playerB.Username == spawner.Username)
+                        {
+                            return false;
+                        }
+                    }
+
+                    if (fixtureA.Body.Tag is BulletModel b1)
+                    {
+                        if (b1.ID == bulletModel.ID)
+                        {
+                            Task.Run((() => DestroyBullet(bulletModel)));
+                            
+                            return false;
+                        }
+                    }
+
+                    if (fixtureB.Body.Tag is BulletModel b2)
+                    {
+                        if (b2.ID == bulletModel.ID)
+                        {
+                            Task.Run((() => DestroyBullet(bulletModel)));
+                            return false;
+                        }
+                    }
+
+
+                    return true;
+                };
             };
 
-
             LowPriority(A);
+            
                 
             
 
@@ -353,9 +377,14 @@ namespace ColossalGame.Services
             return false
              */
 
+            _lowPriority.WaitOne();
+            
             _nextToAccess.WaitOne();
+            _data.WaitOne();
             _nextToAccess.ReleaseMutex();
             action();
+            _data.ReleaseMutex();
+            _lowPriority.ReleaseMutex();
             return true;
 
             
@@ -366,13 +395,15 @@ namespace ColossalGame.Services
         private void HighPriorityLock()
         {
             _nextToAccess.WaitOne();
-            
-            
+            _data.WaitOne();
+            _nextToAccess.ReleaseMutex();
+
+
         }
 
         private void HighPriorityUnlock()
         {
-            _nextToAccess.ReleaseMutex();
+            _data.ReleaseMutex();
         }
 
 
