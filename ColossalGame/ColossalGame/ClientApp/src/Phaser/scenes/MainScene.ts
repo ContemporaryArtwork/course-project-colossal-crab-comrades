@@ -196,7 +196,6 @@ export default class MainScene extends Phaser.Scene {
 
         //SEND Keyboard Presses To Server
         const up = w.isDown;
-        
         const left = a.isDown;
         const down = s.isDown;
         const right = d.isDown;
