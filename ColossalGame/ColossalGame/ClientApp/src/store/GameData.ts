@@ -8,7 +8,20 @@ import getCookie from "../Helpers/GetCookies"
 // STATE - This defines the type of data maintained in the Redux store.
 
 
-export interface GameObjectModel {
+export interface GameObjectExportModel {
+
+    yPos: number;
+    xPos: number;
+}
+export interface PlayerExportModel extends GameObjectExportModel {
+    username: string
+}
+export interface BulletExportModel extends GameObjectExportModel {
+    bulletType: string,
+    id: number
+}
+
+/*export interface GameObjectModel {
 
     yPos: number,
     xPos: number
@@ -17,11 +30,11 @@ export interface PlayerModel {
     Username: string,
     yPos: number,
     xPos: number
-}
+}*/
 
 export interface GameLogicMessage {
-    objectList: GameObjectModel[],
-    playerDict: Map<string, PlayerModel>
+    objectList: (PlayerExportModel | BulletExportModel)[],
+    playerDict: Map<string, PlayerExportModel>
 }
 
 
@@ -41,6 +54,11 @@ export interface MovementAction {
     Username: string,
     Token: string,
     Direction: Direction
+}
+export interface FireWeaponAction {
+    Username: string,
+    Token: string,
+    Angle: number
 }
 export interface SpawnAction {
     Username: string,
@@ -83,6 +101,10 @@ export interface SendMovementAction {
     type: 'SEND_MOVEMENT';
     direction: Direction;
 }
+export interface SendFireWeaponAction {
+    type: 'SEND_FIRE_WEAPON';
+    angle: number;
+}
 export interface SpawnPlayerRequestAction {
     type: 'SPAWN_PLAYER_REQUEST';
 }
@@ -101,14 +123,14 @@ export interface ReceivedTokenAction {
 }
 export interface ReceivePositionsUpdateAction {
     type: 'RECEIVE_POSITIONS_UPDATE';
-    objectList: GameObjectModel[],
-    playerDict: Map<string, PlayerModel>
+    objectList: (PlayerExportModel | BulletExportModel)[],
+    playerDict: Map<string, PlayerExportModel>
 }
 
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-export type KnownAction = InitializeAction | SendMovementAction | SpawnPlayerRequestAction | SetUsernameAction | TempLoginAction | ReceivedTokenAction | ReceivePositionsUpdateAction;
+export type KnownAction = InitializeAction | SendMovementAction | SendFireWeaponAction | SpawnPlayerRequestAction | SetUsernameAction | TempLoginAction | ReceivedTokenAction | ReceivePositionsUpdateAction;
 
 const SignalRActionsList: string[] = ["RECEIVED_STRING", "RECEIVE_TOKEN", "RECEIVE_POSITIONS_UPDATE"];
 // ----------------
@@ -140,19 +162,42 @@ export const actionCreators = {
     },
 
     sendMovementAction: (direction: Direction): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        const resultPromise = new Promise((resolve, reject) => {
+            const appState = getState();
+            let token = getCookie("auth-token");
+            if (appState &&
+                appState.gameData &&
+                appState.gameData.connection &&
+                appState.gameData.playerData.username &&
+                token) {
+
+                const movementActionDTO: MovementAction = {
+                    Username: appState.gameData.playerData.username,
+                    Token: token,
+                    Direction: direction
+                }
+                appState.gameData.connection && appState.gameData.connection.invoke("SendMovement", movementActionDTO)
+
+                dispatch({ type: 'SEND_MOVEMENT', direction: direction });
+            }
+        });
+    },
+    fireWeaponAction: (angle: number): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        const resultPromise = new Promise((resolve, reject) => {
         const appState = getState();
         let token = getCookie("auth-token");
         if (appState && appState.gameData && appState.gameData.connection && appState.gameData.playerData.username && token) {
 
-            const movementActionDTO: MovementAction = {
+            const fireWeaponActionDTO: FireWeaponAction = {
                 Username: appState.gameData.playerData.username,
                 Token: token,
-                Direction: direction
+                Angle: angle
             }
-            appState.gameData.connection && appState.gameData.connection.invoke("SendMovement", movementActionDTO)
+            appState.gameData.connection && appState.gameData.connection.invoke("FireWeapon", fireWeaponActionDTO)
 
-            dispatch({ type: 'SEND_MOVEMENT', direction: direction });
-        }
+            dispatch({ type: 'SEND_FIRE_WEAPON', angle: angle});
+            }
+        });
     },
     spawnPlayerAction: (): AppThunkAction<KnownAction> => (dispatch, getState) => { //Used to request to spawn the player. This method attempts to spawn the player using the username and auth-token cookies.
         const appState = getState();
@@ -180,7 +225,7 @@ const unloadedState: GameDataState = {
     },
     currentGameState: {
         objectList: [],
-        playerDict: new Map<string,PlayerModel>(),
+        playerDict: new Map<string, PlayerExportModel>(),
     } 
 };
 
@@ -200,7 +245,7 @@ export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined
                 },
                 currentGameState: {
                     objectList: [],
-                    playerDict: new Map<string, PlayerModel>(),
+                    playerDict: new Map<string, PlayerExportModel>(),
                 } 
             };
         case 'TEMP_LOGIN_SENT':
@@ -228,9 +273,9 @@ export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined
     }
 };
 
-function makeMapIfNot(input: Map<string, PlayerModel> | object): Map<string, PlayerModel> {
+function makeMapIfNot(input: Map<string, PlayerExportModel> | object): Map<string, PlayerExportModel> {
     if (typeof (input) == "object") {
-        return new Map<string, PlayerModel>(Object.entries(input));
+        return new Map<string, PlayerExportModel>(Object.entries(input));
     }
-    return input as Map<string, PlayerModel>;
+    return input as Map<string, PlayerExportModel>;
 }

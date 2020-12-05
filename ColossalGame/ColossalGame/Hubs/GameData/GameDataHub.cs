@@ -1,5 +1,6 @@
 using ColossalGame.Hubs.DTO;
 using ColossalGame.Models;
+using ColossalGame.Models.GameModels;
 using ColossalGame.Services;
 using Microsoft.AspNetCore.SignalR;
 using System;
@@ -16,11 +17,11 @@ namespace ColossalGame.Hubs.GameData
         private bool added = false;
         public GameDataHub(Interpolator interpolator, GameLogic gamelogic, LoginService ls, IHubContext<GameDataHub, IGameDataClient> hubContext)
         {
-            Console.WriteLine("Constructor called");
+            //Console.WriteLine("Constructor called");
             _interpolator = interpolator;
             _gameLogic = gamelogic;
             _gameLogic.ClearEh();
-            _gameLogic.RaiseCustomEvent += HandleCustomEvent;
+            _gameLogic.Publisher += HandleCustomEvent;
             
             _ls = ls;
             _hubContext = hubContext;
@@ -31,9 +32,9 @@ namespace ColossalGame.Hubs.GameData
             //Method only exists for Test Client for GameDataHub. Need to find way to simulate interpolator working.
         }*/
         private DateTime lastUpdate = DateTime.Now;
-         public async void HandleCustomEvent(object sender, CustomEventArgs e)
+         public async void HandleCustomEvent(object sender, PublishEvent e)
          {
-             var (ol, pd) = GameLogic.GetStatePM(e.PlayerDict, e.ObjectList);
+             var (ol, pd) = GameLogic.GetStatePM(e.PlayerDict, e.ObjectDict);
                  
                  PositionUpdateDTO positionUpdateDTO = new PositionUpdateDTO
                  {
@@ -57,9 +58,32 @@ namespace ColossalGame.Hubs.GameData
             await Clients.All.ReceiveString("This was your message: " + message);
         }
 
-        public async Task FireWeapon(string message)
+        public async Task FireWeapon(ShootingAction shootingAction)
         {
-            await Clients.All.ReceiveString("This was your message: " + message);
+            bool res = false;
+
+
+            if (_interpolator != null)
+            {
+                try
+                {
+                    if (_gameLogic.IsPlayerSpawned(shootingAction.Username))
+                    {
+                        res = _interpolator.ParseAction(shootingAction);
+                    }
+
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+
+            }
+
+            var responseString = res ? "Fire Weapon Action accepted by interpolator" :
+                                        "Fire Weapon Action rejected by interpolator.";
+            await Clients.Caller.ReceiveString(responseString);
         }
 
         public async Task TempLogin(string username, string password)
@@ -83,7 +107,7 @@ namespace ColossalGame.Hubs.GameData
                 {
                     if (!_gameLogic.IsPlayerSpawned(movementAction.Username)) //Should Deprecate this in favor of requiring the player to call the SpawnPlayer action.
                     {
-                        _gameLogic.AddPlayerToSpawnQueue(movementAction.Username);
+                        _gameLogic.HandleSpawnPlayer(movementAction.Username);
                     }
                     
                     res = _interpolator.ParseAction(movementAction);
@@ -112,7 +136,7 @@ namespace ColossalGame.Hubs.GameData
                     res = _gameLogic.IsPlayerSpawned(spawnAction.Username);
                     if (!res)
                     {
-                        _gameLogic.AddPlayerToSpawnQueue(spawnAction.Username);
+                        _gameLogic.HandleSpawnPlayer(spawnAction.Username);
                     }
                     responseString = res ? "Player Already Spawned." :
                                         "Player wasnt already spawned. Added Player to spawn queue.";

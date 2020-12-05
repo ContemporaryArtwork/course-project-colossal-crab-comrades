@@ -7,8 +7,10 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ColossalGame.Models;
+using ColossalGame.Models.GameModels;
 using Microsoft.Xna.Framework;
 using tainicom.Aether.Physics2D.Collision.Shapes;
+using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Dynamics;
 using Vector2 = tainicom.Aether.Physics2D.Common.Vector2;
 
@@ -16,8 +18,6 @@ namespace ColossalGame.Services
 {
     public class GameLogic
     {
-        private static readonly object _serverLock = new object();
-
         /// <summary>
         ///     Login service to keep track of user's login status
         /// </summary>
@@ -29,60 +29,55 @@ namespace ColossalGame.Services
         private readonly UserService _us;
 
         /// <summary>
-        ///     boolean representing whether the server thread should continue processing new states
-        /// </summary>
-        private bool KeepGoing = true;
-
-        /// <summary>
         ///     Lower bound on milliseconds per world step, can be higher if inputs are sufficiently high
         /// </summary>
-        private const double TickRate = 50.0;
+        private const double TickRate = 30.0;
 
         /// <summary>
         /// Amount of milliseconds to wait until publishing the newest game state to clients
         /// </summary>
-        private const double PublishRate = 30.0;
+        private const double PublishRate = 10.0;
 
         /// <summary>
         /// The ratio of meters in the physics engine to pixels in the game world, i.e. a conversion factor of 64 means that 1 meter in engine is 64 pixels
         /// </summary>
-        private const float ConversionFactor = 64.0f;
+        private static float ConversionFactor = 64.0f;
 
         
-
         /// <summary>
         ///     Dictionary of usernames to PlayerModels.
         /// </summary>
-        private ConcurrentDictionary<string, Body> PlayerDictionary { get; } = new ConcurrentDictionary<string, Body>();
+        private ConcurrentDictionary<string, PlayerModel> PlayerDictionary { get; } = new ConcurrentDictionary<string, PlayerModel>();
 
         /// <summary>
         ///     List of non-player GameObjectModels
         /// </summary>
-        private ConcurrentQueue<GameObjectModel> ObjectList { get; } = new ConcurrentQueue<GameObjectModel>();
+        private ConcurrentDictionary<int,GameObjectModel> ObjectDictionary { get; } = new ConcurrentDictionary<int, GameObjectModel>();
 
-        /// <summary>
-        ///     Queue of Player Actions
-        /// </summary>
-        private readonly ConcurrentDictionary<string,Vector2> _movementDictionary = new ConcurrentDictionary<string, Vector2>();
-
-        /// <summary>
-        ///     Queue of players to spawn in the next tick
-        /// </summary>
-        private Queue<PlayerModel> PlayerSpawnQueue { get; } = new Queue<PlayerModel>();
-
-        /// <summary>
-        ///     Queue of players to despawn in the next tick
-        /// </summary>
-        private Queue<string> PlayerDespawnQueue { get; } = new Queue<string>();
 
         /// <summary>
         ///     Event handler to publish new server states
         /// </summary>
-        public event EventHandler<CustomEventArgs> RaiseCustomEvent;
+        public event EventHandler<PublishEvent> Publisher;
 
+        /// <summary>
+        /// Object which steps the world every {tickRate} milliseconds
+        /// </summary>
         private System.Threading.Timer _worldTimer;
 
+        /// <summary>
+        /// Object which publishes the states
+        /// </summary>
         private System.Threading.Timer _publishTimer;
+
+        private Mutex _data = new Mutex();
+
+        private Mutex _nextToAccess = new Mutex();
+
+        private Mutex _lowPriority = new Mutex();
+
+        private Mutex worldMutex = new Mutex();
+
 
         /// <summary>
         ///     Constructor for GameLogic class
@@ -104,11 +99,15 @@ namespace ColossalGame.Services
         public void ClearEh()
         {
             //TODO: Change the names of event listener stuff to better reflect what's actually happening
-            RaiseCustomEvent = null;
+            Publisher = null;
         }
 
+        /// <summary>
+        /// Add boundaries to the world, among other things (TODO!)
+        /// </summary>
         private void SetupWorld()
         {
+            //TODO: Make the bounds bigger??
             float widthInMeters = 1024*1.5f / ConversionFactor;
             float heightInMeters = 1024*1.5f / ConversionFactor;
             Vector2 lowerLeftCorner = new Vector2(-widthInMeters, -heightInMeters);
@@ -116,12 +115,22 @@ namespace ColossalGame.Services
             Vector2 upperLeftCorner = new Vector2(-widthInMeters, heightInMeters);
             Vector2 upperRightCorner = new Vector2(widthInMeters, heightInMeters);
             var edge = _world.CreateBody();
-            edge.SetRestitution(0f);
+            edge.SetRestitution(1f);
+            edge.SetFriction(1f);
+            Vertices v = new Vertices();
+            v.Add(lowerLeftCorner);
+            v.Add(lowerRightCorner);
+            v.Add(upperLeftCorner);
+            v.Add(upperRightCorner);
+
+            //edge.CreateLoopShape(v);
+            
             edge.CreateEdge(lowerLeftCorner, lowerRightCorner);
             edge.CreateEdge(lowerRightCorner, upperRightCorner);
             edge.CreateEdge(upperRightCorner, upperLeftCorner);
             edge.CreateEdge(upperLeftCorner, lowerLeftCorner);
             
+
 
         }
 
@@ -131,12 +140,16 @@ namespace ColossalGame.Services
         private Vector2 ConvertMovementActionToVector2(MovementAction action)
         {
             if (!PlayerDictionary.ContainsKey(action.Username)) throw new Exception("Player must be spawned first!");
-            var pm = PlayerDictionary.GetValueOrDefault(action.Username);
-            if (pm == null)
+            var playerModel = PlayerDictionary.GetValueOrDefault(action.Username);
+            if (playerModel == null)
             {
                 //THIS SHOULD NOT BE ABLE TO HAPPEN!!!
                 throw new Exception("NULL VALUE IN DICTIONARY");
             }
+
+            var pm = playerModel.ObjectBody;
+
+            //Start calculations
             float linearImpulseForce = 15f;
             float movementRate = linearImpulseForce/2;
 
@@ -221,144 +234,273 @@ namespace ColossalGame.Services
             SpinWait.SpinUntil(() => !_world.IsLocked);
             _world.Add(pm);
 
-            
+            var playerModel = new PlayerModel(pm);
+            playerModel.Username = username;
+
+            pm.Tag = playerModel;
             
             //PlayerDictionary.Add(username, pm);
-            PlayerDictionary[username] = pm;
+            PlayerDictionary[username] = playerModel;
         }
 
-        private void SpawnBullet(float angle,float xPos, float yPos)
+        private void DestroyBullet(BulletModel b)
+        {
+            
+            var bulletBody = b.ObjectBody;
+            
+            Action A = () =>
+            {
+                SpinWait.SpinUntil(() => !_world.IsLocked);
+                if (!_world.BodyList.Contains(b.ObjectBody)) return;
+                _world.Remove(bulletBody);
+            };
+            LowPriority(A);
+            ObjectDictionary.Remove(b.ID, out var _);
+
+        }
+
+        private void SpawnBullet(float angle,Vector2 ballPosition, PlayerModel spawner)
         {
             
 
-            Vector2 ballPosition = new Vector2(xPos, yPos);
-
             var bullet = new Body {BodyType = BodyType.Dynamic};
+            
 
             var bulletFixture = bullet.CreateCircle(.3f, 1);
             
-            bullet.SetRestitution(0.3f);
-            bullet.SetFriction(.3f);
+            bullet.SetRestitution(1f);
+            bullet.SetFriction(1f);
             bullet.Mass = .1f;
             bullet.IsBullet = true;
 
-            const float magnitude = 20f;
-            var bulletForce = new Vector2((float)Math.Cos(angle)*magnitude,(float)Math.Sin(angle)*magnitude);
+            const float magnitude = 30f;
+            var bulletForce = new Vector2((float)Math.Cos(angle)*magnitude,(float)-Math.Sin(angle)*magnitude);
+            bullet.ApplyForce(bulletForce, bullet.WorldCenter);
 
-            SpinWait.SpinUntil(() => !_world.IsLocked);
-            _world.Add(bullet);
-            SpinWait.SpinUntil(() => !_world.IsLocked);
-            bullet.ApplyForce(bulletForce,bullet.WorldCenter);
+            var bulletModel = new BulletModel(bullet)
+            {
+                BulletType = "small",//TODO: Make this better somehow?
+                Damage = 10f
+            };
+
+            bullet.Tag = bulletModel;
+
+            
+            
 
             
 
+            Action A = () =>
+            {
+                _world.Add(bullet);
+                bullet.SetTransform(ballPosition, angle);
+                bulletFixture.OnCollision += (fixtureA, fixtureB, contact) =>
+                {
+                    if (fixtureA.Body.Tag is PlayerModel playerA)
+                    {
+                        if (playerA.Username == spawner.Username)
+                        {
+                            return false;
+                        }
+                    }
+                    if (fixtureB.Body.Tag is PlayerModel playerB)
+                    {
+                        if (playerB.Username == spawner.Username)
+                        {
+                            return false;
+                        }
+                    }
+
+                    if (fixtureA.Body.Tag is BulletModel b1)
+                    {
+                        if (b1.ID == bulletModel.ID)
+                        {
+                            Task.Run((() => DestroyBullet(bulletModel)));
+                            
+                            return false;
+                        }
+                    }
+
+                    if (fixtureB.Body.Tag is BulletModel b2)
+                    {
+                        if (b2.ID == bulletModel.ID)
+                        {
+                            Task.Run((() => DestroyBullet(bulletModel)));
+                            return false;
+                        }
+                    }
+
+
+                    return true;
+                };
+            };
+
+            LowPriority(A);
+            
+                
+            
+
+            
+            
+
+
+            
+            ObjectDictionary.TryAdd(bulletModel.ID,bulletModel);
+            
         }
+
 
         /// <summary>
         ///     Despawn a player
         /// </summary>
         /// <param name="username">Username of player to despawn</param>
-        public void AddPlayerToDespawnQueue(string username)
+        public void DespawnPlayer(string username)
         {
+            throw new NotImplementedException();
+            //if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
 
-            if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
-            //PlayerDictionary.Remove(username);
-            PlayerDespawnQueue.Enqueue(username);
+            //TODO: Implement this
         }
+
+        private bool LowPriority(Action action)
+        {
+            /*if (_lowPriority.WaitOne(50))
+            {
+                _nextToAccess.WaitOne();
+                _data.WaitOne();
+                _nextToAccess.ReleaseMutex();
+                action();
+                _data.ReleaseMutex();
+                _lowPriority.ReleaseMutex();
+                return true;
+            }
+            return false
+             */
+
+            _lowPriority.WaitOne();
+            
+            _nextToAccess.WaitOne();
+            _data.WaitOne();
+            _nextToAccess.ReleaseMutex();
+            action();
+            _data.ReleaseMutex();
+            _lowPriority.ReleaseMutex();
+            return true;
+
+            
+
+
+        }
+
+        private void HighPriorityLock()
+        {
+            _nextToAccess.WaitOne();
+            _data.WaitOne();
+            _nextToAccess.ReleaseMutex();
+
+
+        }
+
+        private void HighPriorityUnlock()
+        {
+            _data.ReleaseMutex();
+        }
+
+
+
+
 
         /// <summary>
         ///     Add action to server action queue
         /// </summary>
         /// <param name="action">Action to be added</param>
-        public void AddActionToQueue(AUserAction action)
+        public void HandleAction(AUserAction action)
         {
-            
-            if (PlayerDictionary.TryGetValue(action.Username, out var pm) && action is MovementAction m)
+            var spawned = PlayerDictionary.TryGetValue(action.Username, out var playerModel);
+            var playerBody = playerModel.ObjectBody;
+            if (!spawned)
             {
-                var impulse = ConvertMovementActionToVector2(m);
-
-                SpinWait.SpinUntil(() => !_world.IsLocked);
-                pm.ApplyLinearImpulse(impulse, pm.WorldCenter); 
-                
+                throw new Exception("Player must be spawned first!");
             }
 
-            /*
-            if (action is MovementAction m)
+            switch (action)
             {
-                _movementDictionary.TryAdd(action.Username, ConvertMovementActionToVector2(m));
-            }*/
-        }
-
-        /// <summary>
-        ///     Will eventually run all user actions and simulate all environmental objects and AI
-        /// </summary>
-        private void simulateOneServerTick()
-        {
-            while (PlayerDespawnQueue.Count != 0)
-            {
-                var p = PlayerDespawnQueue.Dequeue();
-                Body pm;
-                PlayerDictionary.TryGetValue(p, out pm);
-                _world.Remove(pm);
-                var successRemove = PlayerDictionary.TryRemove(p,out _);
-                
-                //Console.WriteLine(successRemove);
-            }
-
-            while (PlayerSpawnQueue.Count != 0)
-            {
-                var p = PlayerSpawnQueue.Dequeue();
-                //PlayerDictionary.Add(p.Username, p);
-                SpawnPlayer(p.Username,p.XPos,p.YPos);
-            }
-
-            foreach (string username in _movementDictionary.Keys)
-            {
-                _movementDictionary.TryGetValue(username, out var impulse);
-                if (PlayerDictionary.TryGetValue(username, out var pm))
+                case MovementAction m:
                 {
-                     pm.ApplyLinearImpulse(impulse, pm.WorldCenter);
+                    var impulse = ConvertMovementActionToVector2(m);
+
+
+                        void A()
+                        {
+                            playerBody.ApplyLinearImpulse(impulse, playerBody.WorldCenter);
+                        }
+
+
+                        LowPriority(A);
+
+                        break;
                 }
+                case ShootingAction s:
+                {
 
-                _movementDictionary.TryRemove(username, out _);
-
+                    
+                    SpawnBullet(s.Angle,playerBody.WorldCenter,playerModel);
+                    
+                    break;
+                }
+                default:
+                    throw new ArgumentException("Unsupported Action Type");
             }
 
-
-
-            //TODO Handle non-player objects
+            
         }
+
 
         /// <summary>
         ///     Returns the current game state
         /// </summary>
         /// <returns></returns>
-        public (ConcurrentQueue<GameObjectModel>, ConcurrentDictionary<string, Body>) GetState()
+        public (ConcurrentDictionary<int,GameObjectModel>, ConcurrentDictionary<string, PlayerModel>) GetState()
         {
-            return (ObjectList, PlayerDictionary);
+            return (ObjectDictionary, PlayerDictionary);
         }
 
-        public static (ConcurrentQueue<GameObjectModel>, ConcurrentDictionary<string, PlayerModel>) GetStatePM(ConcurrentDictionary<string,Body> playerDictionary,ConcurrentQueue<GameObjectModel> objectList)
+        public static (ConcurrentQueue<object>, ConcurrentDictionary<string, PlayerExportModel>) GetStatePM(ConcurrentDictionary<string,PlayerModel> playerDictionary,ConcurrentDictionary<int, GameObjectModel> objectDict)
         {
             
-            var returnDictionary = new ConcurrentDictionary<string, PlayerModel>();
-            
+            var returnDictionary = new ConcurrentDictionary<string, PlayerExportModel>();
+            var gameObjectQueue = new ConcurrentQueue<object>();
             
             Parallel.ForEach(playerDictionary, (pair) =>
             {
-                var (name, body) = pair;
-                var tempPlayerModel = new PlayerModel
-                {
-                    Username = name,
-                    XPos = body.WorldCenter.X * ConversionFactor,
-                    YPos = body.WorldCenter.Y * ConversionFactor
-                };
-
-                returnDictionary[name] = tempPlayerModel;
+                var (name, playerModel) = pair;
+                
+                
+                returnDictionary[name] = playerModel.Export();
             });
 
-            
-            return (objectList, returnDictionary);
+            Parallel.ForEach(objectDict, (pair) =>
+            {
+                var (id, model) = pair;
+
+                if(model is BulletModel b)
+                {
+                    gameObjectQueue.Enqueue(b.Export());
+                }
+                else if(model is EnemyModel e)
+                {
+                    //gameObjectQueue.Enqueue(e.Export()); TODO
+                }
+                else
+                {
+                    throw new Exception("When casting, to exported model the model type was not supported.");
+                }
+
+                
+            });
+
+
+            return (gameObjectQueue, returnDictionary);
         }
 
         /// <summary>
@@ -379,9 +521,10 @@ namespace ColossalGame.Services
             _publishTimer = new System.Threading.Timer(o => PublishState(), null, 0, (int)PublishRate);
 
             
-            //Thread.Sleep(Timeout.Infinite);
             
         }
+
+        
 
         /// <summary>
         ///     Keeps looping every {tickRate} milliseconds, simulating a new server tick every time
@@ -390,9 +533,16 @@ namespace ColossalGame.Services
         {
             
             
-            var a = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
+            var a = new SolverIterations {PositionIterations = 2, VelocityIterations = 4};
             //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
-            _world.Step((float)TickRate/1000f, ref a);
+            //lock because sometimes world stepping will take too long
+            
+            HighPriorityLock();
+            _world.Step((float) TickRate / 1000f, ref a);
+            HighPriorityUnlock();
+
+           
+            
         }
 
 
@@ -409,21 +559,21 @@ namespace ColossalGame.Services
         private void PublishState()
         {
             //Console.WriteLine("Publish: " + DateTime.Now.Second);
-            Console.WriteLine("publish");
-            var e = new CustomEventArgs(ObjectList, PlayerDictionary);
-            OnRaiseCustomEvent(e);
+            //Console.WriteLine("publish");
+            var e = new PublishEvent(ObjectDictionary, PlayerDictionary);
+            HandlePublish(e);
         }
 
         /// <summary>
-        ///     Tells RaiseCustomEvent to publish event to all subscribers
+        ///     Tells Publisher to publish event to all subscribers
         /// </summary>
-        /// <param name="e"></param>
-        protected virtual void OnRaiseCustomEvent(CustomEventArgs e)
+        /// <param name="state"></param>
+        protected virtual void HandlePublish(PublishEvent state)
         {
             // Make a temporary copy of the event to avoid possibility of
             // a race condition if the last subscriber unsubscribes
             // immediately after the null check and before the event is raised.
-            RaiseCustomEvent?.Invoke(this, e);
+            Publisher?.Invoke(this, state);
         }
 
         
@@ -434,15 +584,11 @@ namespace ColossalGame.Services
         /// <param name="username">Username to spawn. Must exist in the user database</param>
         /// <param name="xPos">X Position to spawn at. Default is 0</param>
         /// <param name="yPos">Y Position to spawn at. Default is 0</param>
-        public void AddPlayerToSpawnQueue(string username, float xPos = 0f, float yPos = 0f)
+        public void HandleSpawnPlayer(string username, float xPos = 0f, float yPos = 0f)
         {
             
             if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
-            /*
-            var pm = new PlayerModel();
-            pm.Username = username;
-            pm.XPos = xPos;
-            pm.YPos = yPos;*/
+            //TODO: Get rid of this useless method
             SpawnPlayer(username);
         }
 
@@ -451,7 +597,9 @@ namespace ColossalGame.Services
         /// </summary>
         public void StopServer()
         {
-            KeepGoing = false;
+            //There's pretty much no reason anyone would ever use this?
+            _worldTimer.Dispose();
+            _publishTimer.Dispose();
         }
 
         /// <summary>
@@ -459,22 +607,23 @@ namespace ColossalGame.Services
         /// </summary>
         public void handleGameObjects()
         {
+            //TODO
         }
     }
 
     /// <summary>
     ///     Custom EventArgs class which helps publish new state to subscribers
     /// </summary>
-    public class CustomEventArgs : EventArgs
+    public class PublishEvent : EventArgs
     {
-        public CustomEventArgs(ConcurrentQueue<GameObjectModel> objectList, ConcurrentDictionary<string, Body> playerDict)
+        public PublishEvent(ConcurrentDictionary<int, GameObjectModel> objectDict, ConcurrentDictionary<string, PlayerModel> playerDict)
         {
-            ObjectList = objectList;
+            ObjectDict = objectDict;
             PlayerDict = playerDict;
         }
 
-        public ConcurrentQueue<GameObjectModel> ObjectList { get; set; }
+        public ConcurrentDictionary<int, GameObjectModel> ObjectDict { get; set; }
 
-        public ConcurrentDictionary<string, Body> PlayerDict { get; set; }
+        public ConcurrentDictionary<string, PlayerModel> PlayerDict { get; set; }
     }
 }

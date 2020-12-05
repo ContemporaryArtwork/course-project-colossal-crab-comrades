@@ -9,6 +9,7 @@ import * as GameDataStore from "../../store/GameData";
 //import testBugJson from "../../assets/gameAssets/animation/TentacleMothSheet.json";
 import testBug from "../../assets/gameAssets/animation/Spritesheet.png";
 import { Console } from 'console';
+import { PlayerExportModel, BulletExportModel } from '../../store/GameData';
  
 
 
@@ -18,12 +19,19 @@ type GameDataProps = //Rather than defining her, perhaps grab straight from the 
     RouteComponentProps<{}>;
 
 var cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+var w: Phaser.Input.Keyboard.Key;
+var a: Phaser.Input.Keyboard.Key;
+var s: Phaser.Input.Keyboard.Key;
+var d: Phaser.Input.Keyboard.Key;
+var spacebar: Phaser.Input.Keyboard.Key;
 
 export default class MainScene extends Phaser.Scene {
     private _gameObj: Game;
     private _hostingComponent: React.PureComponent<GameDataProps>;
 
     private _playerNameToContainerMap: Map<string, Phaser.GameObjects.Container>;
+
+    private _gameObjectsOnScreen: Map<number, Phaser.GameObjects.Container>;
 
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig, gameObj:Game) {
@@ -32,12 +40,14 @@ export default class MainScene extends Phaser.Scene {
         this._hostingComponent = this._gameObj.react as React.PureComponent<GameDataProps>; //hostingComponent allows us to access the store of the GameStartRender2 page.
 
         this._playerNameToContainerMap = new Map<string, Phaser.GameObjects.Container>();
+        this._gameObjectsOnScreen = new Map<number, Phaser.GameObjects.Container>();
     }
 
     preload() {
         this.load.image('ground', require("../../assets/gameAssets/testingGround2.png").default);
         this.load.image('playerThing', require("../../components/gameComponents/testBuilder.png").default);
         this.load.image('spawnPad', require("../../assets/gameAssets/SpawnPlatform.png").default);
+        this.load.image('jesse', require("../../assets/gameAssets/Jesse_Hartloff.jpg").default);
 
         //this.load.atlas("tentacleBug", require(testBug).default ,  require(testBugJson).default);
         this.load.spritesheet("testBug", testBug, { frameWidth: 400, frameHeight: 400 });
@@ -51,6 +61,12 @@ export default class MainScene extends Phaser.Scene {
         
 
         cursors = this.input.keyboard.createCursorKeys();
+        w = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        a = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        s = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        d = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+        spacebar = this.input.keyboard.addKey('SPACE');
+        
         this.add.image(0, 0, "ground");
         this.add.image(1024, 0, "ground");
         this.add.image(1024, 1024, "ground");
@@ -74,10 +90,10 @@ export default class MainScene extends Phaser.Scene {
 
         let currGameState = this._hostingComponent.props.currentGameState;
 
-        let dict: Map<string, GameDataStore.PlayerModel> = currGameState.playerDict;
+        let dict: Map<string, GameDataStore.PlayerExportModel> = currGameState.playerDict;
 
         //Populate the scene with the players in the game at this moment in time. If in a future message we receive new players, they will be added to the scene in the update method.
-        dict.forEach((value: GameDataStore.PlayerModel, key: string) => {
+        dict.forEach((value: GameDataStore.PlayerExportModel, key: string) => {
 
             let curPlayerContainer = this.add.container(value.xPos, value.yPos); //Player sprite and text is contained in a container. 
             //This allows for the player sprite and text to move together. Only need to update postion of the container.
@@ -131,6 +147,30 @@ export default class MainScene extends Phaser.Scene {
 
         });
 
+        let gameobjList = currGameState.objectList;
+
+        gameobjList.forEach((value) => {
+
+            if (isProjectile(value)) {
+
+                var projectileObj = value as BulletExportModel;
+
+                let bulletContainer = this.add.container(projectileObj.xPos, projectileObj.yPos);
+
+                var bulletSprite: any;  //This is of type any since this is how Josh had it. collideWorldBounds and enableBody are not part of Phaser.Physics.Arcade.Sprite, maybe thats why.
+                //In future we should probably figure out how to set collideWorldBounds and collideBody.
+                bulletSprite = this.add.sprite(0, 0, "jesse");
+                
+
+                bulletSprite.setName("bulletSprite");
+                bulletSprite.setScale(.1);
+                bulletContainer.add(bulletSprite);
+
+                this._gameObjectsOnScreen.set(projectileObj.id, bulletContainer);
+            }
+
+        });
+
         //For testing bugs!
         var testingBug: any;
         testingBug = this.add.sprite(10, -500, "testBug", 0);
@@ -155,10 +195,13 @@ export default class MainScene extends Phaser.Scene {
 
 
         //SEND Keyboard Presses To Server
-        const up = cursors.up && cursors.up.isDown;
-        const left = cursors.left && cursors.left.isDown;
-        const down = cursors.down && cursors.down.isDown;
-        const right = cursors.right && cursors.right.isDown;
+        const up = w.isDown;
+        
+        const left = a.isDown;
+        const down = s.isDown;
+        const right = d.isDown;
+        const spacebarPressed = spacebar.isDown;
+        
         if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft); }
         else if (up && right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpRight); }
         else if (down && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownLeft); }
@@ -167,8 +210,9 @@ export default class MainScene extends Phaser.Scene {
         else if (left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Left); }
         else if (down) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Down); }
         else if (right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Right); }
+        else if (spacebarPressed) { this._hostingComponent.props.fireWeaponAction(90 * (Math.PI / 180)); }
         
-
+        
 
 
         //Update Position of all entities in the game using the current data in playerDict
@@ -180,9 +224,9 @@ export default class MainScene extends Phaser.Scene {
 
 
             //Loop through the player dict, if the player has already been added to the screen, update their coords, else add new sprite onto the screen for that player.
-            var dict: Map<string, GameDataStore.PlayerModel> = gameState.playerDict;
+            var dict: Map<string, GameDataStore.PlayerExportModel> = gameState.playerDict;
 
-            dict.forEach((value: GameDataStore.PlayerModel, key: string) => {
+            dict.forEach((value: GameDataStore.PlayerExportModel, key: string) => {
 
                 if (!this._playerNameToContainerMap.has(key)) {
                     //This is a new player that is not currently in the scene
@@ -222,8 +266,8 @@ export default class MainScene extends Phaser.Scene {
                     let playerContainer = this._playerNameToContainerMap.get(key)
 
                     if (playerContainer) {
-                        var xpos = value.xPos;
-                        var ypos = value.yPos;
+                        var xPos = value.xPos;
+                        var yPos = value.yPos;
 
                         var p = <Phaser.Physics.Arcade.Sprite>playerContainer.getByName("playerSprite");
                        
@@ -237,32 +281,32 @@ export default class MainScene extends Phaser.Scene {
                             } else {
                                 //console.log("NOT MOVING");
                                 //p.tint = 0xffffff;
-                                p.play('playerWalk');
+                                //p.play('playerWalk');
                                 //^^^ THIS MAKES NO SENSE. WHEN ITS NOT MOVING, PLAY THE ANIMATION...OKAY!
                             }
                         } else {
 
-                            if (xpos - playerContainer.x != 0 && ypos - playerContainer.y) {
-                                p.play('playerWalk');
+                            if (xPos - playerContainer.x != 0 && yPos - playerContainer.y) {
+                                //p.play('playerWalk');
                             } else {
                                 
                             }
 
                             /*
-                            if (xpos - playerContainer.x > 0) {
+                            if (xPos - playerContainer.x > 0) {
                                 //Moving right
                                 p.tint = 0xFF000C;
                                 p.play('playerWalk');
 
-                            } else if (xpos - playerContainer.x < 0) {
+                            } else if (xPos - playerContainer.x < 0) {
                                 p.tint = 0xFF000C;
                                 p.play('playerWalk');
                             }
 
-                            if (ypos - playerContainer.y > 0) {
+                            if (yPos - playerContainer.y > 0) {
                                 p.tint = 0xFF000C;
                                 p.play('playerWalk');
-                            } else if (ypos - playerContainer.y < 0) {
+                            } else if (yPos - playerContainer.y < 0) {
                                 p.tint = 0xFF000C;
                                 p.play('playerWalk');
                             }
@@ -270,15 +314,91 @@ export default class MainScene extends Phaser.Scene {
 
                         }
 
-                        xpos = Phaser.Math.Interpolation.Bezier([xpos, playerContainer.x], .8);
-                        ypos = Phaser.Math.Interpolation.Bezier([ypos, playerContainer.y], .8);
-                        playerContainer.x = xpos;
-                        playerContainer.y = ypos;
+                        xPos = Phaser.Math.Interpolation.Bezier([xPos, playerContainer.x], .8);
+                        yPos = Phaser.Math.Interpolation.Bezier([yPos, playerContainer.y], .8);
+                        playerContainer.x = xPos;
+                        playerContainer.y = yPos;
                     }
                 }
 
 
             });
+
+            let gameobjList = gameState.objectList;
+
+            gameobjList.forEach((value) => {
+
+                if (isProjectile(value)) {
+
+                    
+
+                    var projectileObj = value as BulletExportModel;
+
+
+                    if (!this._gameObjectsOnScreen.has(projectileObj.id)) {
+                        //Does not have this ID rendered yet
+
+                        let bulletContainer = this.add.container(projectileObj.xPos, projectileObj.yPos);
+
+                        var bulletSprite: any;  //This is of type any since this is how Josh had it. collideWorldBounds and enableBody are not part of Phaser.Physics.Arcade.Sprite, maybe thats why.
+                        //In future we should probably figure out how to set collideWorldBounds and collideBody.
+                        bulletSprite = this.add.sprite(0, 0, "jesse");
+
+                        bulletSprite.setName("bulletSprite");
+                        bulletSprite.setScale(.1);
+                        bulletContainer.add(bulletSprite);
+
+                        this._gameObjectsOnScreen.set(projectileObj.id, bulletContainer);
+                    }
+                    else {
+
+                        let bulletContainer =  this._gameObjectsOnScreen.get(projectileObj.id);
+
+                        if (bulletContainer) {
+                            var xPos = projectileObj.xPos;
+                            var yPos = projectileObj.yPos;
+
+                            xPos = Phaser.Math.Interpolation.Bezier([xPos, bulletContainer.x], .8);
+                            yPos = Phaser.Math.Interpolation.Bezier([yPos, bulletContainer.y], .8);
+                            bulletContainer.x = xPos;
+                            bulletContainer.y = yPos;
+                        }
+                        else {
+                            console.log("its null in update. have id but no conainter");
+                        }
+
+                        
+                    }
+
+
+
+                }
+
+            });
+
+            //Cleanup loop
+            var ids: number[] = [];
+            this._gameObjectsOnScreen.forEach((value: Phaser.GameObjects.Container, key: number) => {
+                let item = gameobjList.find(i => isProjectile(i) && i.id === key);
+                if (item == undefined) {
+                    value.destroy();
+                    ids.push(key);
+                }
+            });
+            ids.forEach((key: number) => {
+                this._gameObjectsOnScreen.delete(key);
+            });
         }
+
+        /*this._gameObjectsOnScreen.forEach((value, key) => {
+            
+            console.log("Key:"+key+ " Pos:"+value.x +","+ value.y);
+        });*/
+
+
     }
+}
+
+function isProjectile(gameObj: PlayerExportModel | BulletExportModel): gameObj is BulletExportModel {
+    return (gameObj as BulletExportModel).bulletType !== undefined;
 }
