@@ -206,7 +206,16 @@ export default class MainScene extends Phaser.Scene {
         const spacebarPressed = spacebar.isDown;
         var angle: number;
 
-        
+        this.input.activePointer.updateWorldPoint(this.cameras.main);
+
+        var player: Phaser.GameObjects.Container = this._playerNameToContainerMap.get(this._hostingComponent.props.playerData.username);
+
+
+        angle = Phaser.Math.Angle.Between(player.x, player.y, pointer.worldX, pointer.worldY);
+        //Add 90 degrees because science???
+        angle = Phaser.Math.Angle.CounterClockwise(angle) + 1.5708;
+        var playerSprite = <Phaser.Physics.Arcade.Sprite>player.getByName("playerSprite");
+        playerSprite.setRotation(Phaser.Math.Angle.CounterClockwise(angle) + 1.5708);
 
        
         if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft);  }
@@ -218,15 +227,9 @@ export default class MainScene extends Phaser.Scene {
         else if (down) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Down); }
         else if (right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Right); }
         else if (pointer.isDown) {
-            this.input.activePointer.updateWorldPoint(this.cameras.main);
-            var touchX = pointer.x;
-            var touchY = pointer.y;
-            var ourX = this._playerNameToContainerMap.get(this._hostingComponent.props.playerData.username).x;
-            var ourY = this._playerNameToContainerMap.get(this._hostingComponent.props.playerData.username).y;
-            
-            angle = Phaser.Math.Angle.Between(ourX, ourY, pointer.worldX , pointer.worldY );
+
             //console.log(Phaser.Math.Angle.CounterClockwise(angle));
-            this._hostingComponent.props.fireWeaponAction(Phaser.Math.Angle.CounterClockwise(angle) + 1.5708);
+            this._hostingComponent.props.fireWeaponAction(angle);
 
         }
         
