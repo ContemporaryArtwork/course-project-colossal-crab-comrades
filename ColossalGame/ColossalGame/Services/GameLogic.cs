@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ColossalGame.Models.GameModels;
 using tainicom.Aether.Physics2D.Common;
+using tainicom.Aether.Physics2D.Common.PhysicsLogic;
 using tainicom.Aether.Physics2D.Dynamics;
 
 namespace ColossalGame.Services
@@ -55,7 +57,7 @@ namespace ColossalGame.Services
         /// </summary>
         private System.Threading.Timer _worldTimer;
 
-        private readonly ConcurrentBag<AUserAction> actionBag = new ConcurrentBag<AUserAction>();
+        private readonly ConcurrentQueue<AUserAction> actionQueue = new ConcurrentQueue<AUserAction>();
 
         private Mutex worldMutex = new Mutex();
 
@@ -240,6 +242,7 @@ namespace ColossalGame.Services
         {
             var bulletBody = b.ObjectBody;
             if (!_world.BodyList.Contains(bulletBody)) return;
+            if (cleanupBag.Contains(b)) return;
             cleanupBag.Add(b);
             
         }
@@ -359,35 +362,37 @@ namespace ColossalGame.Services
         {
             var spawned = PlayerDictionary.TryGetValue(action.Username, out var playerModel);
             if (!spawned) throw new Exception("Player must be spawned first!");
-            actionBag.Add(action);
+            actionQueue.Enqueue(action);
         }
 
         private void ProcessActionQueue()
         {
             
-            Parallel.ForEach(actionBag, RunAction);
-            actionBag.Clear();
+            Parallel.ForEach(actionQueue, RunAction);
+            actionQueue.Clear();
         }
 
         private void Cleanup()
         {
-            Parallel.ForEach(cleanupBag, (model) =>
+            foreach (var model in cleanupBag)
             {
                 if (model is BulletModel b)
                 {
                     var bulletBody = b.ObjectBody;
                     if (_world.BodyList.Contains(bulletBody))
                     {
+                        
                         _world.Remove(bulletBody);
+                        ObjectDictionary.Remove(b.ID, out var _);
                     }
 
-                    ObjectDictionary.Remove(b.ID, out var _);
+                    
                 }
                 else
                 {
                     throw new Exception("Trying to cleanup something not supported");
                 }
-            });
+            }
             cleanupBag.Clear();
         }
 

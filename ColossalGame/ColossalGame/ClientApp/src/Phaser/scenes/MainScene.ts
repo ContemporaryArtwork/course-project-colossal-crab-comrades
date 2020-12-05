@@ -24,6 +24,7 @@ var a: Phaser.Input.Keyboard.Key;
 var s: Phaser.Input.Keyboard.Key;
 var d: Phaser.Input.Keyboard.Key;
 var spacebar: Phaser.Input.Keyboard.Key;
+var pointer: Phaser.Input.Pointer;
 
 export default class MainScene extends Phaser.Scene {
     private _gameObj: Game;
@@ -57,8 +58,8 @@ export default class MainScene extends Phaser.Scene {
 
     create() {
 
-        
-        
+
+        this.input.setPollAlways();
 
         cursors = this.input.keyboard.createCursorKeys();
         w = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
@@ -66,6 +67,7 @@ export default class MainScene extends Phaser.Scene {
         s = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
         d = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
         spacebar = this.input.keyboard.addKey('SPACE');
+        pointer = this.input.activePointer;
         
         this.add.image(0, 0, "ground");
         this.add.image(1024, 0, "ground");
@@ -191,6 +193,8 @@ export default class MainScene extends Phaser.Scene {
 
     }
 
+    
+
     update() {
 
 
@@ -200,8 +204,12 @@ export default class MainScene extends Phaser.Scene {
         const down = s.isDown;
         const right = d.isDown;
         const spacebarPressed = spacebar.isDown;
+        var angle: number;
+
         
-        if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft); }
+
+       
+        if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft);  }
         else if (up && right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpRight); }
         else if (down && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownLeft); }
         else if (down && right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownRight); }
@@ -209,8 +217,20 @@ export default class MainScene extends Phaser.Scene {
         else if (left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Left); }
         else if (down) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Down); }
         else if (right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Right); }
-        else if (spacebarPressed) { this._hostingComponent.props.fireWeaponAction(90 * (Math.PI / 180)); }
+        else if (pointer.isDown) {
+            this.input.activePointer.updateWorldPoint(this.cameras.main);
+            var touchX = pointer.x;
+            var touchY = pointer.y;
+            var ourX = this._playerNameToContainerMap.get(this._hostingComponent.props.playerData.username).x;
+            var ourY = this._playerNameToContainerMap.get(this._hostingComponent.props.playerData.username).y;
+            
+            angle = Phaser.Math.Angle.Between(ourX, ourY, pointer.worldX , pointer.worldY );
+            //console.log(Phaser.Math.Angle.CounterClockwise(angle));
+            this._hostingComponent.props.fireWeaponAction(Phaser.Math.Angle.CounterClockwise(angle) + 1.5708);
+
+        }
         
+       
         
 
 
