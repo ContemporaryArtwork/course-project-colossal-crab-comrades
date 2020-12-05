@@ -55,7 +55,7 @@ namespace ColossalGame.Services
         /// </summary>
         private System.Threading.Timer _worldTimer;
 
-        private readonly ConcurrentQueue<AUserAction> actionQueue = new ConcurrentQueue<AUserAction>();
+        private readonly ConcurrentBag<AUserAction> actionBag = new ConcurrentBag<AUserAction>();
 
         private Mutex worldMutex = new Mutex();
 
@@ -93,7 +93,7 @@ namespace ColossalGame.Services
         /// </summary>
         public event EventHandler<PublishEvent> Publisher;
 
-        private ConcurrentQueue<GameObjectModel> cleanupQueue = new ConcurrentQueue<GameObjectModel>();
+        private ConcurrentBag<GameObjectModel> cleanupBag = new ConcurrentBag<GameObjectModel>();
 
         /// <summary>
         ///     Resets listeners for publishing the state
@@ -240,7 +240,7 @@ namespace ColossalGame.Services
         {
             var bulletBody = b.ObjectBody;
             if (!_world.BodyList.Contains(bulletBody)) return;
-            cleanupQueue.Enqueue(b);
+            cleanupBag.Add(b);
             
         }
 
@@ -359,22 +359,19 @@ namespace ColossalGame.Services
         {
             var spawned = PlayerDictionary.TryGetValue(action.Username, out var playerModel);
             if (!spawned) throw new Exception("Player must be spawned first!");
-            actionQueue.Enqueue(action);
+            actionBag.Add(action);
         }
 
         private void ProcessActionQueue()
         {
             
-            Parallel.ForEach(actionQueue, (action) =>
-            {
-                RunAction(action);
-                actionQueue.TryDequeue(out var _);
-            });
+            Parallel.ForEach(actionBag, RunAction);
+            actionBag.Clear();
         }
 
         private void Cleanup()
         {
-            Parallel.ForEach(cleanupQueue, (model) =>
+            Parallel.ForEach(cleanupBag, (model) =>
             {
                 if (model is BulletModel b)
                 {
@@ -391,6 +388,7 @@ namespace ColossalGame.Services
                     throw new Exception("Trying to cleanup something not supported");
                 }
             });
+            cleanupBag.Clear();
         }
 
 
