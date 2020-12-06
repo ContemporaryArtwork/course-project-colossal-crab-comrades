@@ -274,36 +274,35 @@ namespace ColossalGame.Services
             lock (actionQueue)
             {
                 _world.Add(bullet);
+                bullet.SetTransform(ballPosition, angle);
+                bulletFixture.OnCollision += (fixtureA, fixtureB, contact) =>
+                {
+                    if (fixtureA.Body.Tag is PlayerModel playerA)
+                        if (playerA.Username == spawner.Username)
+                            return false;
+                    if (fixtureB.Body.Tag is PlayerModel playerB)
+                        if (playerB.Username == spawner.Username)
+                            return false;
+
+                    if (fixtureA.Body.Tag is BulletModel b1)
+                        if (b1.ID == bulletModel.ID)
+                        {
+                            Task.Run(() => DestroyBullet(bulletModel));
+
+                            return false;
+                        }
+
+                    if (fixtureB.Body.Tag is BulletModel b2)
+                        if (b2.ID == bulletModel.ID)
+                        {
+                            Task.Run(() => DestroyBullet(bulletModel));
+                            return false;
+                        }
+
+
+                    return true;
+                };
             }
-            
-            bullet.SetTransform(ballPosition, angle);
-            bulletFixture.OnCollision += (fixtureA, fixtureB, contact) =>
-            {
-                if (fixtureA.Body.Tag is PlayerModel playerA)
-                    if (playerA.Username == spawner.Username)
-                        return false;
-                if (fixtureB.Body.Tag is PlayerModel playerB)
-                    if (playerB.Username == spawner.Username)
-                        return false;
-
-                if (fixtureA.Body.Tag is BulletModel b1)
-                    if (b1.ID == bulletModel.ID)
-                    {
-                        Task.Run(() => DestroyBullet(bulletModel));
-
-                        return false;
-                    }
-
-                if (fixtureB.Body.Tag is BulletModel b2)
-                    if (b2.ID == bulletModel.ID)
-                    {
-                        Task.Run(() => DestroyBullet(bulletModel));
-                        return false;
-                    }
-
-
-                return true;
-            };
 
 
             ObjectDictionary.TryAdd(bulletModel.ID, bulletModel);
