@@ -57,7 +57,8 @@ export default class MainScene extends Phaser.Scene {
     }
 
     create() {
-
+        this.scale.on('resize', this.resize, this);
+       
 
         this.input.setPollAlways();
 
@@ -187,12 +188,19 @@ export default class MainScene extends Phaser.Scene {
         //testingBug.setScale(2);
         //For testing bugs!
 
-
+       
 
 
 
     }
 
+    resize(gameSize: { width: any; height: any; }, baseSize: any, displaySize: any, resolution: any) {
+        var width = gameSize.width;
+        var height = gameSize.height;
+
+        this.cameras.resize(width, height);
+
+    }
     
 
     update() {
@@ -424,3 +432,4 @@ export default class MainScene extends Phaser.Scene {
 function isProjectile(gameObj: PlayerExportModel | BulletExportModel): gameObj is BulletExportModel {
     return (gameObj as BulletExportModel).bulletType !== undefined;
 }
+
