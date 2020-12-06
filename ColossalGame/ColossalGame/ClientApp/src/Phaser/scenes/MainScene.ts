@@ -218,7 +218,9 @@ export default class MainScene extends Phaser.Scene {
 
         var player: Phaser.GameObjects.Container | undefined = this._playerNameToContainerMap.get(this._hostingComponent.props.playerData.username);
 
-
+        if (!player) {
+            return;
+        }
         angle = Phaser.Math.Angle.Between(player.x, player.y, pointer.worldX, pointer.worldY);
         //Add 90 degrees because science???
         angle = Phaser.Math.Angle.CounterClockwise(angle) + 1.5708;
