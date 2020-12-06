@@ -271,8 +271,11 @@ namespace ColossalGame.Services
 
             bullet.Tag = bulletModel;
 
-
-            _world.Add(bullet);
+            lock (actionQueue)
+            {
+                _world.Add(bullet);
+            }
+            
             bullet.SetTransform(ballPosition, angle);
             bulletFixture.OnCollision += (fixtureA, fixtureB, contact) =>
             {
