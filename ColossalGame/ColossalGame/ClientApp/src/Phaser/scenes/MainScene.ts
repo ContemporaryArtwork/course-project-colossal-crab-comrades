@@ -216,7 +216,7 @@ export default class MainScene extends Phaser.Scene {
 
         this.input.activePointer.updateWorldPoint(this.cameras.main);
 
-        var player: Phaser.GameObjects.Container = this._playerNameToContainerMap.get(this._hostingComponent.props.playerData.username);
+        var player: Phaser.GameObjects.Container | undefined = this._playerNameToContainerMap.get(this._hostingComponent.props.playerData.username);
 
 
         angle = Phaser.Math.Angle.Between(player.x, player.y, pointer.worldX, pointer.worldY);

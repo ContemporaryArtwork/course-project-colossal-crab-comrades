@@ -30,11 +30,9 @@ namespace ColossalGame.Services
                 return _us.generateToken(returnedUser);
             else
                 throw new IncorrectPasswordException();
-            
-            
-            
         }
 
+        
         /// <summary>
         /// Creates an account for the desired username and password
         /// </summary>
