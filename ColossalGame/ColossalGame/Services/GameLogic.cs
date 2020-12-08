@@ -61,6 +61,8 @@ namespace ColossalGame.Services
 
         private Mutex worldMutex = new Mutex();
 
+        private ConcurrentQueue<SpawnObject> spawnQueue = new ConcurrentQueue<SpawnObject>();
+
 
         /// <summary>
         ///     Constructor for GameLogic class
@@ -95,7 +97,7 @@ namespace ColossalGame.Services
         /// </summary>
         public event EventHandler<PublishEvent> Publisher;
 
-        private ConcurrentBag<GameObjectModel> cleanupBag = new ConcurrentBag<GameObjectModel>();
+        private ConcurrentQueue<GameObjectModel> cleanupQueue = new ConcurrentQueue<GameObjectModel>();
 
         /// <summary>
         ///     Resets listeners for publishing the state
@@ -205,12 +207,14 @@ namespace ColossalGame.Services
         /// <param name="username">Username of desired user to spawn</param>
         /// <param name="xPos">Desired x position</param>
         /// <param name="yPos">Desired y position</param>
-        private void SpawnPlayer(string username, float xPos = 0f, float yPos = 0f)
+        private void SpawnPlayer(PlayerSpawnObject playerSpawn)
         {
+            var username = playerSpawn.Username;
+            
             if (string.IsNullOrEmpty(username)) return;
             if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
 
-            var playerPosition = new Vector2(xPos, yPos);
+            var playerPosition = playerSpawn.InitialPosition;
 
             var pm = new Body();
             pm.CreateCircle(.4f, 1f, playerPosition);
@@ -242,31 +246,34 @@ namespace ColossalGame.Services
         {
             var bulletBody = b.ObjectBody;
             if (!_world.BodyList.Contains(bulletBody)) return;
-            if (cleanupBag.Contains(b)) return;
-            cleanupBag.Add(b);
+            if (cleanupQueue.Contains(b)) return;
+            cleanupQueue.Enqueue(b);
             
         }
 
-        private void SpawnBullet(float angle, Vector2 ballPosition, PlayerModel spawner)
+        private void SpawnBullet(BulletSpawnObject bulletSpawn)
         {
+            //Load initial values
+            var ballPosition = bulletSpawn.InitialPosition;
+            var creator = bulletSpawn.Creator;
+
+            //Define body
             var bullet = new Body {BodyType = BodyType.Dynamic};
 
+            var bulletFixture = bullet.CreateCircle(bulletSpawn.Radius, 1);
 
-            var bulletFixture = bullet.CreateCircle(.3f, 1);
-
-            bullet.SetRestitution(1f);
-            bullet.SetFriction(1f);
-            bullet.Mass = .1f;
+            bullet.SetRestitution(bulletSpawn.InitialRestitution);
+            bullet.SetFriction(bulletSpawn.InitialFriction);
+            bullet.Mass = bulletSpawn.InitialMass;
             bullet.IsBullet = true;
 
-            const float magnitude = 30f;
-            var bulletForce = new Vector2((float) Math.Cos(angle) * magnitude, (float) -Math.Sin(angle) * magnitude);
-            bullet.ApplyForce(bulletForce, bullet.WorldCenter);
+            
+            bullet.ApplyForce(bulletSpawn.InitialVelocity, bullet.WorldCenter);
 
             var bulletModel = new BulletModel(bullet)
             {
                 BulletType = "small", //TODO: Make this better somehow?
-                Damage = 10f
+                Damage = bulletSpawn.Damage
             };
 
             bullet.Tag = bulletModel;
@@ -274,14 +281,14 @@ namespace ColossalGame.Services
             lock (actionQueue)
             {
                 _world.Add(bullet);
-                bullet.SetTransform(ballPosition, angle);
+                bullet.SetTransform(ballPosition, bulletSpawn.InitialAngle);
                 bulletFixture.OnCollision += (fixtureA, fixtureB, contact) =>
                 {
                     if (fixtureA.Body.Tag is PlayerModel playerA)
-                        if (playerA.Username == spawner.Username)
+                        if (playerA.Username == creator.Username)
                             return false;
                     if (fixtureB.Body.Tag is PlayerModel playerB)
-                        if (playerB.Username == spawner.Username)
+                        if (playerB.Username == creator.Username)
                             return false;
 
                     if (fixtureA.Body.Tag is BulletModel b1)
@@ -376,7 +383,7 @@ namespace ColossalGame.Services
 
         private void Cleanup()
         {
-            foreach (var model in cleanupBag)
+            foreach (var model in cleanupQueue)
             {
                 if (model is BulletModel b)
                 {
@@ -395,7 +402,28 @@ namespace ColossalGame.Services
                     throw new Exception("Trying to cleanup something not supported");
                 }
             }
-            cleanupBag.Clear();
+            cleanupQueue.Clear();
+        }
+
+        private void Spawn()
+        {
+            
+            while(spawnQueue.Any())
+            {
+                spawnQueue.TryDequeue(out var spawnObj);
+                if (spawnObj == null) break;
+                if (spawnObj is BulletSpawnObject bulletSpawn)
+                {
+                    SpawnBullet(bulletSpawn);
+                }else if (spawnObj is PlayerSpawnObject playerSpawn)
+                {
+                    SpawnPlayer(playerSpawn);
+                }
+                else
+                {
+                    throw new ArgumentException("Tried to parse an unsupported Spawn Object");
+                }
+            }
         }
 
 
@@ -419,7 +447,10 @@ namespace ColossalGame.Services
                 }
                 case ShootingAction s:
                 {
-                    SpawnBullet(s.Angle, playerBody.WorldCenter, playerModel);
+                    PlayerDictionary.TryGetValue(s.Username, out var creator);
+                    if (creator==null) throw new Exception("Player not found when spawning bullet");
+                    var bulletSpawn = new BulletSpawnObject(s.Angle,100f,creator,10f,.3f,creator.ObjectBody.Position);
+                    spawnQueue.Enqueue(bulletSpawn);
 
                     break;
                 }
@@ -499,14 +530,21 @@ namespace ColossalGame.Services
         /// </summary>
         private void StepWorld()
         {
-            Cleanup();
-            ProcessActionQueue();
-            var a = new SolverIterations {PositionIterations = 2, VelocityIterations = 4};
-            //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
-            //lock because sometimes world stepping will take too long
+            var solverIterations = new SolverIterations {PositionIterations = 2, VelocityIterations = 4};
+
+            
             lock (_world)
             {
-                _world.Step((float)TickRate / 1000f, ref a);
+                Spawn();
+                Cleanup();
+                ProcessActionQueue();
+
+            
+            
+            //lock because sometimes world stepping will take too long
+            
+                //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
+                _world.Step((float)TickRate / 1000f, ref solverIterations);
             }
             
         }
@@ -546,7 +584,10 @@ namespace ColossalGame.Services
         {
             if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
             //TODO: Get rid of this useless method
-            SpawnPlayer(username);
+            var playerSpawn = new PlayerSpawnObject();
+            playerSpawn.Username = username;
+            playerSpawn.InitialPosition = new Vector2(xPos,yPos);
+            spawnQueue.Enqueue(playerSpawn);
         }
 
         /// <summary>

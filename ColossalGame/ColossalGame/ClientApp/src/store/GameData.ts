@@ -162,7 +162,7 @@ export const actionCreators = {
     },
 
     sendMovementAction: (direction: Direction): AppThunkAction<KnownAction> => (dispatch, getState) => {
-        const resultPromise = new Promise((resolve, reject) => {
+        const resultPromise = new Promise(async (resolve, reject) => {
             const appState = getState();
             let token = getCookie("auth-token");
             if (appState &&
@@ -183,7 +183,7 @@ export const actionCreators = {
         });
     },
     fireWeaponAction: (angle: number): AppThunkAction<KnownAction> => (dispatch, getState) => {
-        const resultPromise = new Promise((resolve, reject) => {
+        const resultPromise = new Promise(async (resolve, reject) => {
         const appState = getState();
         let token = getCookie("auth-token");
         if (appState && appState.gameData && appState.gameData.connection && appState.gameData.playerData.username && token) {
