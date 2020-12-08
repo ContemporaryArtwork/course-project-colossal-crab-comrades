@@ -278,38 +278,37 @@ namespace ColossalGame.Services
 
             bullet.Tag = bulletModel;
 
-            lock (actionQueue)
+            
+            _world.Add(bullet);
+            bullet.SetTransform(ballPosition, bulletSpawn.InitialAngle);
+            bulletFixture.OnCollision += (fixtureA, fixtureB, contact) =>
             {
-                _world.Add(bullet);
-                bullet.SetTransform(ballPosition, bulletSpawn.InitialAngle);
-                bulletFixture.OnCollision += (fixtureA, fixtureB, contact) =>
-                {
-                    if (fixtureA.Body.Tag is PlayerModel playerA)
-                        if (playerA.Username == creator.Username)
-                            return false;
-                    if (fixtureB.Body.Tag is PlayerModel playerB)
-                        if (playerB.Username == creator.Username)
-                            return false;
+                if (fixtureA.Body.Tag is PlayerModel playerA)
+                    if (playerA.Username == creator.Username)
+                        return false;
+                if (fixtureB.Body.Tag is PlayerModel playerB)
+                    if (playerB.Username == creator.Username)
+                        return false;
 
-                    if (fixtureA.Body.Tag is BulletModel b1)
-                        if (b1.ID == bulletModel.ID)
-                        {
-                            Task.Run(() => DestroyBullet(bulletModel));
+                if (fixtureA.Body.Tag is BulletModel b1)
+                    if (b1.ID == bulletModel.ID)
+                    {
+                        Task.Run(() => DestroyBullet(bulletModel));
 
-                            return false;
-                        }
+                        return false;
+                    }
 
-                    if (fixtureB.Body.Tag is BulletModel b2)
-                        if (b2.ID == bulletModel.ID)
-                        {
-                            Task.Run(() => DestroyBullet(bulletModel));
-                            return false;
-                        }
+                if (fixtureB.Body.Tag is BulletModel b2)
+                    if (b2.ID == bulletModel.ID)
+                    {
+                        Task.Run(() => DestroyBullet(bulletModel));
+                        return false;
+                    }
 
 
-                    return true;
+                return true;
                 };
-            }
+            
 
 
             ObjectDictionary.TryAdd(bulletModel.ID, bulletModel);
@@ -376,9 +375,16 @@ namespace ColossalGame.Services
 
         private void ProcessActionQueue()
         {
-            
-            Parallel.ForEach(actionQueue, RunAction);
-            actionQueue.Clear();
+            Parallel.For(0, actionQueue.Count, ((i, state) =>
+            {
+                actionQueue.TryDequeue(out var action);
+                if (action != null)
+                {
+                    RunAction(action);
+                }
+            }));
+            //Parallel.ForEach(actionQueue, RunAction);
+            //actionQueue.Clear();
         }
 
         private void Cleanup()
@@ -532,17 +538,13 @@ namespace ColossalGame.Services
         {
             var solverIterations = new SolverIterations {PositionIterations = 2, VelocityIterations = 4};
 
-            
+            //lock because sometimes world stepping will take too long
             lock (_world)
             {
                 Spawn();
                 Cleanup();
                 ProcessActionQueue();
-
-            
-            
-            //lock because sometimes world stepping will take too long
-            
+                
                 //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
                 _world.Step((float)TickRate / 1000f, ref solverIterations);
             }
