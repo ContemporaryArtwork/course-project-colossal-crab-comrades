@@ -46,9 +46,9 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
         this.props.toggleLoginPage();
     }
     submitLogIn = (e: React.FormEvent<HTMLElement>): void => {
-
+        
         e.preventDefault();
-
+        
         const tempElement: HTMLElement | null = document.getElementById("logInForm");
         if (tempElement == undefined) {
             //It's undefined!
@@ -80,6 +80,7 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
     verifySubmit(message: string, status: string, code: string): boolean {
 
         if (status == "ok") {
+            this.setState({ errorText: "Attempting Login..." });
             return true;
         } else {
 
