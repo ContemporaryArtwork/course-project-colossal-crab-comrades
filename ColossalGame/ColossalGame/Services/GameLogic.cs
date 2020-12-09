@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ColossalGame.Models.AI;
+using ColossalGame.Models.Exceptions;
 using ColossalGame.Models.GameModels;
 using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Common.PhysicsLogic;
@@ -431,7 +432,7 @@ namespace ColossalGame.Services
         public void HandleAction(AUserAction action)
         {
             var spawned = PlayerDictionary.TryGetValue(action.Username, out var playerModel);
-            if (!spawned) throw new Exception("Player must be spawned first!");
+            if (!spawned) throw new UnspawnedException("Player must be spawned first!");
             actionQueue.Enqueue(action);
         }
 
@@ -640,6 +641,7 @@ namespace ColossalGame.Services
         /// </summary>
         private void StepWorld()
         {
+            //if (PlayerDictionary.IsEmpty&&spawnQueue.Any(i => i is PlayerSpawnObject)==false) return; 
             var solverIterations = new SolverIterations {PositionIterations = 2, VelocityIterations = 4};
 
             //lock because sometimes world stepping will take too long
