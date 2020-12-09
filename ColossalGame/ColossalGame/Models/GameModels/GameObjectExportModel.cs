@@ -30,6 +30,7 @@ namespace ColossalGame.Models.GameModels
     {
         public string EnemyType { get; set; }
         public int ID { get; set; }
+        public float Health { get; set; }
     }
 
 

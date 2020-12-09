@@ -9,7 +9,7 @@ import * as GameDataStore from "../../store/GameData";
 //import testBugJson from "../../assets/gameAssets/animation/TentacleMothSheet.json";
 import testBug from "../../assets/gameAssets/animation/Spritesheet.png";
 import { Console } from 'console';
-import { PlayerExportModel, BulletExportModel } from '../../store/GameData';
+import { PlayerExportModel, BulletExportModel, AIExportModel } from '../../store/GameData';
  
 
 
@@ -58,7 +58,14 @@ export default class MainScene extends Phaser.Scene {
 
     create() {
         this.scale.on('resize', this.resize, this);
-       
+
+        this.anims.create({
+
+            key: 'fly',
+            repeat: -1,
+            frames: this.anims.generateFrameNames('testBug', { start: 1, end: 23 })
+
+        });
 
         this.input.setPollAlways();
 
@@ -163,7 +170,7 @@ export default class MainScene extends Phaser.Scene {
                 var bulletSprite: any;  //This is of type any since this is how Josh had it. collideWorldBounds and enableBody are not part of Phaser.Physics.Arcade.Sprite, maybe thats why.
                 //In future we should probably figure out how to set collideWorldBounds and collideBody.
                 bulletSprite = this.add.sprite(0, 0, "jesse");
-                
+
 
                 bulletSprite.setName("bulletSprite");
                 bulletSprite.setScale(.1);
@@ -171,27 +178,27 @@ export default class MainScene extends Phaser.Scene {
 
                 this._gameObjectsOnScreen.set(projectileObj.id, bulletContainer);
             }
+            else {
+                var aiBugObj = value as AIExportModel;
+
+                let aiContainer = this.add.container(aiBugObj.xPos, aiBugObj.yPos);
+
+                var aiSprite: any;  //This is of type any since this is how Josh had it. collideWorldBounds and enableBody are not part of Phaser.Physics.Arcade.Sprite, maybe thats why.
+                //In future we should probably figure out how to set collideWorldBounds and collideBody.
+                aiSprite = this.add.sprite(0, 0, "testBug", 0);
+                aiSprite.play('fly');
+
+
+                aiSprite.setName("aiSprite");
+                //aiSprite.setScale(.5);
+                aiContainer.add(aiSprite);
+
+                this._gameObjectsOnScreen.set(aiBugObj.id, aiContainer);
+
+
+            }
 
         });
-
-        //For testing bugs!
-        var testingBug: any;
-        testingBug = this.add.sprite(10, -500, "testBug", 0);
-        this.anims.create({
-
-            key: 'fly',
-            repeat: -1,
-            frames: this.anims.generateFrameNames('testBug', { start: 1, end: 23 })
-
-        });
-        testingBug.play('fly');
-        //testingBug.setScale(2);
-        //For testing bugs!
-
-       
-
-
-
     }
 
     resize(gameSize: { width: any; height: any; }, baseSize: any, displaySize: any, resolution: any) {
@@ -361,11 +368,7 @@ export default class MainScene extends Phaser.Scene {
             gameobjList.forEach((value) => {
 
                 if (isProjectile(value)) {
-
-                    
-
                     var projectileObj = value as BulletExportModel;
-
 
                     if (!this._gameObjectsOnScreen.has(projectileObj.id)) {
                         //Does not have this ID rendered yet
@@ -398,12 +401,43 @@ export default class MainScene extends Phaser.Scene {
                         else {
                             console.log("its null in update. have id but no conainter");
                         }
-
-                        
                     }
+                }
+                else {
+                    var aiBugObj = value as AIExportModel;
 
+                    if (!this._gameObjectsOnScreen.has(aiBugObj.id)) {
+                        //Does not have this ID rendered yet
 
+                        let aiContainer = this.add.container(aiBugObj.xPos, aiBugObj.yPos);
 
+                        var aiSprite: any;  //This is of type any since this is how Josh had it. collideWorldBounds and enableBody are not part of Phaser.Physics.Arcade.Sprite, maybe thats why.
+                        //In future we should probably figure out how to set collideWorldBounds and collideBody.
+                        aiSprite = this.add.sprite(0, 0, "testBug", 0);
+                        aiSprite.play('fly');
+                        aiSprite.setName("aiSprite");
+                        //aiSprite.setScale(.5);
+                        aiContainer.add(aiSprite);
+
+                        this._gameObjectsOnScreen.set(aiBugObj.id, aiContainer);
+                    }
+                    else {
+
+                        let aiContainer = this._gameObjectsOnScreen.get(aiBugObj.id);
+
+                        if (aiContainer) {
+                            var xPos = aiBugObj.xPos;
+                            var yPos = aiBugObj.yPos;
+
+                            xPos = Phaser.Math.Interpolation.Bezier([xPos, aiContainer.x], .8);
+                            yPos = Phaser.Math.Interpolation.Bezier([yPos, aiContainer.y], .8);
+                            aiContainer.x = xPos;
+                            aiContainer.y = yPos;
+                        }
+                        else {
+                            console.log("its null in update. have id but no conainter");
+                        }
+                    }
                 }
 
             });
@@ -411,7 +445,8 @@ export default class MainScene extends Phaser.Scene {
             //Cleanup loop
             var ids: number[] = [];
             this._gameObjectsOnScreen.forEach((value: Phaser.GameObjects.Container, key: number) => {
-                let item = gameobjList.find(i => isProjectile(i) && i.id === key);
+                
+                let item = gameobjList.find(i => i.id == key); //removed isProjectile(i) since the loop should remove any ids no longer being used by the backend
                 if (item == undefined) {
                     value.destroy();
                     ids.push(key);
@@ -431,7 +466,7 @@ export default class MainScene extends Phaser.Scene {
     }
 }
 
-function isProjectile(gameObj: PlayerExportModel | BulletExportModel): gameObj is BulletExportModel {
+function isProjectile(gameObj: AIExportModel | BulletExportModel): gameObj is BulletExportModel {
     return (gameObj as BulletExportModel).bulletType !== undefined;
 }
 
