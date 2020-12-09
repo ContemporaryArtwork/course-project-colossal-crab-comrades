@@ -41,7 +41,7 @@ namespace ColossalGame.Services
         /// </summary>
         private readonly UserService _us;
 
-        private readonly World _world = new World(Vector2.Zero);
+        private World _world = new World(Vector2.Zero);
 
         private readonly Mutex _data = new Mutex();
 
@@ -212,6 +212,8 @@ namespace ColossalGame.Services
             aiController.Reset();
             PlayerDictionary.Clear();
             deathCounterDictionary.Clear();
+            _objectDictionary.Clear();
+            _world = new World(Vector2.Zero);
         }
 
         public bool IsPlayerSpawned(string username)
@@ -515,6 +517,7 @@ namespace ColossalGame.Services
                     if (PlayerDictionary.IsEmpty)
                     {
                         Reset();
+                        SetupWorld();
                         Restart();
                     }
                 }
