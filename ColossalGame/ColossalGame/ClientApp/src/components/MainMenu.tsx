@@ -76,12 +76,12 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
         this.setState({ showLoadout: !this.state.showLoadout });
     }
 
-    ChooseBuilder() {
-        var bui = document.getElementsByClassName("classColor") as HTMLCollectionOf<HTMLElement>;
-        bui[0].style.backgroundColor = "yellowgreen";
-        bui[0].textContent = "BUILDER";
-        this.setState({ showLoadout: !this.state.showLoadout });
-    }
+    //ChooseBuilder() {
+    //    var bui = document.getElementsByClassName("classColor") as HTMLCollectionOf<HTMLElement>;
+    //    bui[0].style.backgroundColor = "yellowgreen";
+    //    bui[0].textContent = "BUILDER";
+    //    this.setState({ showLoadout: !this.state.showLoadout });
+    //}
 
     render() {
 
@@ -152,6 +152,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
                                     <button className="loadButton" onClick={this.ChooseBrawler}>BRAWLER</button>
                                 </div>
 
+                                {/*
                                 <div className="classContainer">
                                     <div className="Builder"></div>
                                     <p> Class Summary: <br />
@@ -164,6 +165,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
                                     </p>
                                     <button className="loadButton" onClick={this.ChooseBuilder}>BUILDER</button>
                                 </div>
+                                */}
                             </div>
                         </div>
                         }
