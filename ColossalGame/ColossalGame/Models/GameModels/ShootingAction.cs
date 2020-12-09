@@ -5,6 +5,11 @@
         /// <summary>
         /// Angle of shot. Needs to be in RADIANS!!
         /// </summary>
-        public float Angle { get; set; }
+        private float secretAngle { get; set; }
+        public float Angle
+        {
+            get => secretAngle;
+            set => secretAngle = value;
+        }
     }
 }

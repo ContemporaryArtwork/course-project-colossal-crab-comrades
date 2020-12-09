@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using Castle.Core.Internal;
 using ColossalGame.Models;
+using ColossalGame.Models.GameModels;
 using tainicom.Aether.Physics2D.Common;
 
 namespace ColossalServiceTests.Services

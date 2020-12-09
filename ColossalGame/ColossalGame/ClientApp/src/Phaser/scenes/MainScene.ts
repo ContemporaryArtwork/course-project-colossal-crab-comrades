@@ -9,7 +9,7 @@ import * as GameDataStore from "../../store/GameData";
 //import testBugJson from "../../assets/gameAssets/animation/TentacleMothSheet.json";
 import testBug from "../../assets/gameAssets/animation/Spritesheet.png";
 import { Console } from 'console';
-import { PlayerExportModel, BulletExportModel } from '../../store/GameData';
+import { PlayerExportModel, BulletExportModel, AIExportModel } from '../../store/GameData';
  
 
 
@@ -19,7 +19,12 @@ type GameDataProps = //Rather than defining her, perhaps grab straight from the 
     RouteComponentProps<{}>;
 
 var cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+var w: Phaser.Input.Keyboard.Key;
+var a: Phaser.Input.Keyboard.Key;
+var s: Phaser.Input.Keyboard.Key;
+var d: Phaser.Input.Keyboard.Key;
 var spacebar: Phaser.Input.Keyboard.Key;
+var pointer: Phaser.Input.Pointer;
 
 export default class MainScene extends Phaser.Scene {
     private _gameObj: Game;
@@ -52,12 +57,26 @@ export default class MainScene extends Phaser.Scene {
     }
 
     create() {
+        this.scale.on('resize', this.resize, this);
 
-        
-        
+        this.anims.create({
+
+            key: 'fly',
+            repeat: -1,
+            frames: this.anims.generateFrameNames('testBug', { start: 1, end: 23 })
+
+        });
+
+        this.input.setPollAlways();
 
         cursors = this.input.keyboard.createCursorKeys();
+        w = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        a = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        s = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        d = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
         spacebar = this.input.keyboard.addKey('SPACE');
+        pointer = this.input.activePointer;
+        
         this.add.image(0, 0, "ground");
         this.add.image(1024, 0, "ground");
         this.add.image(1024, 1024, "ground");
@@ -151,7 +170,7 @@ export default class MainScene extends Phaser.Scene {
                 var bulletSprite: any;  //This is of type any since this is how Josh had it. collideWorldBounds and enableBody are not part of Phaser.Physics.Arcade.Sprite, maybe thats why.
                 //In future we should probably figure out how to set collideWorldBounds and collideBody.
                 bulletSprite = this.add.sprite(0, 0, "jesse");
-                
+
 
                 bulletSprite.setName("bulletSprite");
                 bulletSprite.setScale(.1);
@@ -159,38 +178,64 @@ export default class MainScene extends Phaser.Scene {
 
                 this._gameObjectsOnScreen.set(projectileObj.id, bulletContainer);
             }
+            else {
+                var aiBugObj = value as AIExportModel;
+
+                let aiContainer = this.add.container(aiBugObj.xPos, aiBugObj.yPos);
+
+                var aiSprite: any;  //This is of type any since this is how Josh had it. collideWorldBounds and enableBody are not part of Phaser.Physics.Arcade.Sprite, maybe thats why.
+                //In future we should probably figure out how to set collideWorldBounds and collideBody.
+                aiSprite = this.add.sprite(0, 0, "testBug", 0);
+                aiSprite.play('fly');
+
+
+                aiSprite.setName("aiSprite");
+                //aiSprite.setScale(.5);
+                aiContainer.add(aiSprite);
+
+                this._gameObjectsOnScreen.set(aiBugObj.id, aiContainer);
+
+
+            }
 
         });
+    }
 
-        //For testing bugs!
-        var testingBug: any;
-        testingBug = this.add.sprite(10, -500, "testBug", 0);
-        this.anims.create({
+    resize(gameSize: { width: any; height: any; }, baseSize: any, displaySize: any, resolution: any) {
+        var width = gameSize.width;
+        var height = gameSize.height;
 
-            key: 'fly',
-            repeat: -1,
-            frames: this.anims.generateFrameNames('testBug', { start: 1, end: 23 })
-
-        });
-        testingBug.play('fly');
-        //testingBug.setScale(2);
-        //For testing bugs!
-
-
-
-
+        this.cameras.resize(width, height);
 
     }
+    
 
     update() {
 
 
         //SEND Keyboard Presses To Server
-        const up = cursors.up && cursors.up.isDown;
-        const left = cursors.left && cursors.left.isDown;
-        const down = cursors.down && cursors.down.isDown;
-        const right = cursors.right && cursors.right.isDown;
-        if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft); }
+        const up = w.isDown;
+        const left = a.isDown;
+        const down = s.isDown;
+        const right = d.isDown;
+        const spacebarPressed = spacebar.isDown;
+        var angle: number;
+
+        this.input.activePointer.updateWorldPoint(this.cameras.main);
+
+        var player: Phaser.GameObjects.Container | undefined = this._playerNameToContainerMap.get(this._hostingComponent.props.playerData.username);
+
+        if (!player) {
+            return;
+        }
+        angle = Phaser.Math.Angle.Between(player.x, player.y, pointer.worldX, pointer.worldY);
+        //Add 90 degrees because science???
+        angle = Phaser.Math.Angle.CounterClockwise(angle) + 1.5708;
+        var playerSprite = <Phaser.Physics.Arcade.Sprite>player.getByName("playerSprite");
+        playerSprite.setRotation(Phaser.Math.Angle.CounterClockwise(angle) + 1.5708);
+
+       
+        if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft);  }
         else if (up && right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpRight); }
         else if (down && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownLeft); }
         else if (down && right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownRight); }
@@ -198,9 +243,15 @@ export default class MainScene extends Phaser.Scene {
         else if (left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Left); }
         else if (down) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Down); }
         else if (right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Right); }
+        else if (pointer.isDown) {
+
+            //console.log(Phaser.Math.Angle.CounterClockwise(angle));
+            this._hostingComponent.props.fireWeaponAction(angle);
+
+        }
         
-        const spacebarPressed = spacebar.isDown;
-        if (spacebarPressed) { this._hostingComponent.props.fireWeaponAction(45 * (Math.PI/180)); }
+       
+        
 
 
         //Update Position of all entities in the game using the current data in playerDict
@@ -317,11 +368,7 @@ export default class MainScene extends Phaser.Scene {
             gameobjList.forEach((value) => {
 
                 if (isProjectile(value)) {
-
-                    
-
                     var projectileObj = value as BulletExportModel;
-
 
                     if (!this._gameObjectsOnScreen.has(projectileObj.id)) {
                         //Does not have this ID rendered yet
@@ -354,14 +401,59 @@ export default class MainScene extends Phaser.Scene {
                         else {
                             console.log("its null in update. have id but no conainter");
                         }
-
-                        
                     }
+                }
+                else {
+                    var aiBugObj = value as AIExportModel;
 
+                    if (!this._gameObjectsOnScreen.has(aiBugObj.id)) {
+                        //Does not have this ID rendered yet
 
+                        let aiContainer = this.add.container(aiBugObj.xPos, aiBugObj.yPos);
 
+                        var aiSprite: any;  //This is of type any since this is how Josh had it. collideWorldBounds and enableBody are not part of Phaser.Physics.Arcade.Sprite, maybe thats why.
+                        //In future we should probably figure out how to set collideWorldBounds and collideBody.
+                        aiSprite = this.add.sprite(0, 0, "testBug", 0);
+                        aiSprite.play('fly');
+                        aiSprite.setName("aiSprite");
+                        //aiSprite.setScale(.5);
+                        aiContainer.add(aiSprite);
+
+                        this._gameObjectsOnScreen.set(aiBugObj.id, aiContainer);
+                    }
+                    else {
+
+                        let aiContainer = this._gameObjectsOnScreen.get(aiBugObj.id);
+
+                        if (aiContainer) {
+                            var xPos = aiBugObj.xPos;
+                            var yPos = aiBugObj.yPos;
+
+                            xPos = Phaser.Math.Interpolation.Bezier([xPos, aiContainer.x], .8);
+                            yPos = Phaser.Math.Interpolation.Bezier([yPos, aiContainer.y], .8);
+                            aiContainer.x = xPos;
+                            aiContainer.y = yPos;
+                        }
+                        else {
+                            console.log("its null in update. have id but no conainter");
+                        }
+                    }
                 }
 
+            });
+
+            //Cleanup loop
+            var ids: number[] = [];
+            this._gameObjectsOnScreen.forEach((value: Phaser.GameObjects.Container, key: number) => {
+                
+                let item = gameobjList.find(i => i.id == key); //removed isProjectile(i) since the loop should remove any ids no longer being used by the backend
+                if (item == undefined) {
+                    value.destroy();
+                    ids.push(key);
+                }
+            });
+            ids.forEach((key: number) => {
+                this._gameObjectsOnScreen.delete(key);
             });
         }
 
@@ -369,9 +461,12 @@ export default class MainScene extends Phaser.Scene {
             
             console.log("Key:"+key+ " Pos:"+value.x +","+ value.y);
         });*/
+
+
     }
 }
 
-function isProjectile(gameObj: PlayerExportModel | BulletExportModel): gameObj is BulletExportModel {
+function isProjectile(gameObj: AIExportModel | BulletExportModel): gameObj is BulletExportModel {
     return (gameObj as BulletExportModel).bulletType !== undefined;
 }
+

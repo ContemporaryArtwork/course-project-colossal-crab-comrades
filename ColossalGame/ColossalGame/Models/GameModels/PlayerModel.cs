@@ -11,9 +11,9 @@ namespace ColossalGame.Models.GameModels
         {
         }
 
-        public new PlayerExportModel Export()
+        public PlayerExportModel Export()
         {
-            var retVal = new PlayerExportModel {XPos = this.XPos, YPos = this.YPos, Username = this.Username};
+            var retVal = new PlayerExportModel {XPos = this.XPos, YPos = this.YPos, Username = this.Username, Radius = this.Radius, Health = this.Health};
             return retVal;
         }
     }

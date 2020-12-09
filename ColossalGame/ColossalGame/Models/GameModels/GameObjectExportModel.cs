@@ -9,11 +9,15 @@ namespace ColossalGame.Models.GameModels
     {
         public float XPos { get; set; }
         public float YPos { get; set; }
+
+        public float Radius { get; set; }
     }
 
     public class PlayerExportModel : GameObjectExportModel
     {
         public string Username { get; set; }
+
+        public float Health { get; set; }
     }
 
     public class BulletExportModel : GameObjectExportModel
@@ -21,4 +25,13 @@ namespace ColossalGame.Models.GameModels
         public string BulletType { get; set; }
         public int ID { get; set; }
     }
+
+    public class EnemyExportModel : GameObjectExportModel
+    {
+        public string EnemyType { get; set; }
+        public int ID { get; set; }
+        public float Health { get; set; }
+    }
+
+
 }

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading.Tasks;
 using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Dynamics;
 
@@ -20,7 +22,6 @@ namespace ColossalGame.Models.GameModels
 
         public GameObjectModel(Body b)
         {
-            var rnd = new Random();
             ObjectBody = b;
             ID = Counter++;
         }
@@ -39,21 +40,28 @@ namespace ColossalGame.Models.GameModels
             set => ObjectBody.SetTransform(new Vector2(value, YPos), ObjectBody.Rotation);
         }
 
-        /*public GameObjectExportModel Export()
+        public Vector2 Position
         {
-            var retVal = new GameObjectExportModel();
-            retVal.XPos = this.XPos;
-            retVal.YPos = this.YPos;
-            return retVal;
-        }*/
+            get => ObjectBody.WorldCenter;
+            set => ObjectBody.SetTransform(value, ObjectBody.Rotation);
+        }
+        
+        public float LinearDamping
+        {
+            get => ObjectBody.LinearDamping; 
+            set => ObjectBody.LinearDamping=value;
+        }
+
+        public float Damage { get; set; } = 0f;
+        public float Speed { get; set; } = 10f;
     }
 
     public class BulletModel : GameObjectModel
     {
         
         public string BulletType { get; set; }
-        
-        public float Damage { get; set; }
+
+        public new float Damage { get; set; } = 10f;
 
 
         public BulletModel(Body b) : base(b)
@@ -62,7 +70,7 @@ namespace ColossalGame.Models.GameModels
 
         public BulletExportModel Export()
         {
-            var retVal = new BulletExportModel { XPos = this.XPos, YPos = this.YPos, BulletType = this.BulletType, ID= this.ID};
+            var retVal = new BulletExportModel { XPos = this.XPos, YPos = this.YPos, BulletType = this.BulletType, ID= this.ID, Radius = this.Radius};
             return retVal;
         }
     }
@@ -70,7 +78,59 @@ namespace ColossalGame.Models.GameModels
     public class EnemyModel : GameObjectModel
     {
         public string EnemyType { get; set; }
-        public float Damage { get; set; }
+        public new float Damage { get; set; } = 5f;
+
+        public new float Speed { get; set; } = 5f;
+
+        public float Health { get; set; } = 100f;
+        
+
+        private PlayerModel _closestPlayer;
+
+        public void SearchForClosestPlayer(ConcurrentDictionary<string,PlayerModel> playerDictionary)
+        {
+            if (playerDictionary.IsEmpty) return;
+            var ourLocation = ObjectBody.WorldCenter;
+
+            //Simple linear search
+            //TODO: Optimize this?
+            PlayerModel player = playerDictionary.First().Value;
+            float distance = 10000000;
+            foreach (var (key,value) in playerDictionary)
+            {
+                float compareDistance;
+                var theirLocation = value.ObjectBody.WorldCenter;
+                Vector2.Distance(ref ourLocation, ref theirLocation, out compareDistance);
+                if (distance > compareDistance)
+                {
+                    player = value;
+                    distance = compareDistance;
+                }
+            }
+
+            _closestPlayer = player;
+        }
+
+        public void MoveTowardsClosestPlayer()
+        {
+            if (_closestPlayer == default(PlayerModel))
+            {
+                //Should we throw an exception here?
+                //I choose not to for simplicity of iterating through AI
+                return;
+            }
+
+            var directionalVector =  _closestPlayer.ObjectBody.WorldCenter - ObjectBody.WorldCenter;
+            directionalVector.Normalize();
+            float distanceProportion = .001f;
+            ObjectBody.ApplyLinearImpulse(directionalVector*this.Speed);
+        }
+
+        public EnemyExportModel Export()
+        {
+            var retVal = new EnemyExportModel() { XPos = this.XPos, YPos = this.YPos, EnemyType = this.EnemyType, ID = this.ID, Radius = this.Radius, Health = this.Health };
+            return retVal;
+        }
 
         public EnemyModel(Body b) : base(b)
         {

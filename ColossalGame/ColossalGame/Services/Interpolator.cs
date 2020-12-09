@@ -1,17 +1,21 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using ColossalGame.Models;
+using ColossalGame.Models.GameModels;
 
 namespace ColossalGame.Services
 {
     public class Interpolator : IInterpolator
     {
 
-        public double Interval { get; set; } = 17;
-        private Dictionary<string, DateTime> PlayerTimings = new Dictionary<string, DateTime>();
+        public double MovementInterval { get; set; } = 17;
+        public double ShootingInterval { get; set; } = 200;
+        private readonly ConcurrentDictionary<string, DateTime> _movementTimings = new ConcurrentDictionary<string, DateTime>();
+        private readonly ConcurrentDictionary<string, DateTime> _shootingTimings = new ConcurrentDictionary<string, DateTime>();
 
         private readonly LoginService _ls;
         private readonly GameLogic _gl;
@@ -31,42 +35,79 @@ namespace ColossalGame.Services
         /// <returns>A boolean representing whether the action was done successfully</returns>
         public bool ParseAction(AUserAction action)
         {
-            
             //Make sure that the user is authenticated
             if (!_ls.VerifyToken(action.Token, action.Username))
             {
                 throw new InvalidLoginException("Either the token or the username is invalid.");
             }
 
-            
-            
-            //If the action's user DNE
-            if (!PlayerTimings.ContainsKey(action.Username))
+            if (action is MovementAction)
             {
                 
-                PlayerTimings.Add(action.Username, DateTime.Now);
-                //Run relevant method to update game state
-                _gl.HandleAction(action);
-                //
-                return true;
+                //If the action's user DNE
+                if (!_movementTimings.ContainsKey(action.Username))
+                {
+
+                    _movementTimings.TryAdd(action.Username, DateTime.Now);
+                    //Run relevant method to update game state
+                    _gl.HandleAction(action);
+                    //
+                    return true;
+                }
+
+                //fetch last update time
+                DateTime x = _movementTimings[action.Username];
+
+                var ts = DateTime.Now - x;
+
+                //It's been at least {MovementInterval} milliseconds since last action
+                if (ts.TotalMilliseconds >= MovementInterval)
+                {
+                    _movementTimings[action.Username] = DateTime.Now;
+                    //Run relevant method to update game state
+                    _gl.HandleAction(action);
+                    //
+                    return true;
+                }
+
+                return false;
             }
-
-            //fetch last update time
-            DateTime x = PlayerTimings[action.Username];
-
-            var ts = DateTime.Now - x;
-
-            //It's been at least {Interval} milliseconds since last action
-            if (ts.TotalMilliseconds >= Interval)
+            else if (action is ShootingAction)
             {
-                PlayerTimings[action.Username] = DateTime.Now;
-                //Run relevant method to update game state
-                _gl.HandleAction(action);
-                //
-                return true;
-            }
 
-            return false;
+
+                //If the action's user DNE
+                if (!_shootingTimings.ContainsKey(action.Username))
+                {
+
+                    _shootingTimings.TryAdd(action.Username, DateTime.Now);
+                    //Run relevant method to update game state
+                    _gl.HandleAction(action);
+                    //
+                    return true;
+                }
+
+                //fetch last update time
+                DateTime x = _shootingTimings[action.Username];
+
+                var ts = DateTime.Now - x;
+
+                //It's been at least {MovementInterval} milliseconds since last action
+                if (ts.TotalMilliseconds >= ShootingInterval)
+                {
+                    _shootingTimings[action.Username] = DateTime.Now;
+                    //Run relevant method to update game state
+                    _gl.HandleAction(action);
+                    //
+                    return true;
+                }
+
+                return false;
+            }
+            else
+            {
+                return false;
+            }
         }
 
 

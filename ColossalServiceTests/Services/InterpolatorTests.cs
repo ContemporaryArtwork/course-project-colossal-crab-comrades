@@ -5,6 +5,7 @@ using System;
 using ColossalGame.Models;
 using System.Threading.Tasks;
 using System.Threading;
+using ColossalGame.Models.GameModels;
 
 namespace ColossalServiceTests.Services
 {
