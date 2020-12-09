@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
+using ColossalGame.Services;
 using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Dynamics;
 
@@ -63,6 +64,7 @@ namespace ColossalGame.Models.GameModels
 
         public new float Damage { get; set; } = 10f;
 
+       
 
         public BulletModel(Body b) : base(b)
         {
@@ -141,9 +143,21 @@ namespace ColossalGame.Models.GameModels
             return retVal;
         }
 
+        public void Hurt(float damage)
+        {
+            Health -= damage;
+            if (Health <= 0)
+            {
+                Dead = true;
+            }
+
+        }
+
         public EnemyModel(Body b) : base(b)
         {
         }
+
+        public bool Dead { get; set; } = false;
     }
 
 }

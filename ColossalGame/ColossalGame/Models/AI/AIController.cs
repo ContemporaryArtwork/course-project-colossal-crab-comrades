@@ -70,9 +70,10 @@ namespace ColossalGame.Models.AI
             {
                 case "alien_tick":
                     enemySpawn.EnemyType = "alien_tick";
-                    enemySpawn.Radius = .2f;
+                    enemySpawn.Radius = .4f;
                     enemySpawn.InitialRestitution = .01f;
-                    enemySpawn.Speed = .1f;
+                    enemySpawn.Speed = .2f;
+                    enemySpawn.Damage = 5f;
                     break;
                 default:
                     break;
@@ -81,13 +82,21 @@ namespace ColossalGame.Models.AI
             spawnQueue.Enqueue(enemySpawn);
         }
 
+        public void SpawnWave(int waveSize,float innerRadius, float outerRadius, ref ConcurrentQueue<SpawnObject> spawnQueue)
+        {
+            for (int i = 0; i<waveSize;i++)
+            {
+                SpawnOne("alien_tick",innerRadius,outerRadius,ref spawnQueue);
+            }
+        }
+
         public void Register(EnemyModel enemy, ref ConcurrentDictionary<int,GameObjectModel> objectDictionary)
         {
             if (EnemyList.Contains(enemy.ID)) throw new Exception("Tried to add register enemy when it was already");
             EnemyList.Enqueue(enemy.ID);
         }
 
-        public void Despawn(int id)
+        public void Deregister(int id)
         {
             EnemyList = new ConcurrentQueue<int>(EnemyList.Where((i => i!=id)));
         }

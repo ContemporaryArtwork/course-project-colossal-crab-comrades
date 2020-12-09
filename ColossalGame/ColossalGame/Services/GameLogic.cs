@@ -66,6 +66,8 @@ namespace ColossalGame.Services
 
         private AIController aiController = new AIController();
 
+        private ConcurrentDictionary<string,int> deathCounterDictionary = new ConcurrentDictionary<string, int>();
+
 
         /// <summary>
         ///     Constructor for GameLogic class
@@ -141,7 +143,7 @@ namespace ColossalGame.Services
             edge.CreateEdge(upperLeftCorner, lowerLeftCorner);
 
             //TODO: Remove this, debugging only
-            aiController.SpawnOne("alien_tick",500f/ConversionFactor,800f/ConversionFactor,ref spawnQueue);
+            aiController.SpawnWave(20,1200f/ConversionFactor,1600f/ConversionFactor,ref spawnQueue);
         }
 
 
@@ -204,6 +206,20 @@ namespace ColossalGame.Services
             return PlayerDictionary.ContainsKey(username);
         }
 
+        public bool HasPlayerDied(string username)
+        {
+            if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
+            if (!deathCounterDictionary.ContainsKey(username)) deathCounterDictionary.TryAdd(username, 0);
+            deathCounterDictionary.TryGetValue(username, out var deathCount);
+            if (deathCount > 0)
+            {
+                //throw new Exception("");
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         ///     Spawns a player based on input username, subject to change.
         /// </summary>
@@ -245,13 +261,12 @@ namespace ColossalGame.Services
             PlayerDictionary[username] = playerModel;
         }
 
-        private void DestroyBullet(BulletModel b)
+        private void MarkEntityForDestruction(GameObjectModel b)
         {
             var bulletBody = b.ObjectBody;
             if (!_world.BodyList.Contains(bulletBody)) return;
             if (cleanupQueue.Contains(b)) return;
             cleanupQueue.Enqueue(b);
-            
         }
 
         private void SpawnBullet(BulletSpawnObject bulletSpawn)
@@ -287,29 +302,53 @@ namespace ColossalGame.Services
             bulletFixture.OnCollision += (fixtureA, fixtureB, contact) =>
             {
                 if (fixtureA.Body.Tag is PlayerModel playerA)
+                {
                     if (playerA.Username == creator.Username)
+                    {
                         return false;
+                    }
+                }
+
                 if (fixtureB.Body.Tag is PlayerModel playerB)
+                {
                     if (playerB.Username == creator.Username)
+                    {
                         return false;
+                    }
+                }
+
 
                 if (fixtureA.Body.Tag is BulletModel b1)
+                {
                     if (b1.ID == bulletModel.ID)
                     {
-                        Task.Run(() => DestroyBullet(bulletModel));
-
-                        return false;
+                        MarkEntityForDestruction(bulletModel);
                     }
+                }
 
                 if (fixtureB.Body.Tag is BulletModel b2)
+                {
                     if (b2.ID == bulletModel.ID)
                     {
-                        Task.Run(() => DestroyBullet(bulletModel));
-                        return false;
+                        MarkEntityForDestruction(bulletModel);
                     }
+                }
+
+                if (fixtureA.Body.Tag is EnemyModel e1)
+                {
+                    e1.Hurt(bulletModel.Damage);
+                    if (e1.Dead) MarkEntityForDestruction(e1);
+                }
+
+                if (fixtureB.Body.Tag is EnemyModel e2)
+                {
+                    e2.Hurt(bulletModel.Damage);
+                    if (e2.Dead) MarkEntityForDestruction(e2);
+                }
 
 
-                return true;
+
+                return false;
                 };
             
             _objectDictionary.TryAdd(bulletModel.ID, bulletModel);
@@ -342,7 +381,33 @@ namespace ColossalGame.Services
 
             _world.Add(enemy);
             enemy.SetTransform(enemySpawn.InitialPosition, enemySpawn.InitialAngle);
-            
+            enemy.OnCollision += (fixtureA, fixtureB, contact) =>
+            {
+                if (fixtureA.Body.Tag is EnemyModel && fixtureB.Body.Tag is EnemyModel)
+                {
+                    return true;
+                }
+
+                if (fixtureA.Body.Tag is PlayerModel p1)
+                {
+                    p1.Hurt(enemyModel.Damage);
+                    if (p1.Dead)
+                    {
+                        MarkEntityForDestruction(p1);
+                    }
+                }
+
+                if (fixtureB.Body.Tag is PlayerModel p2)
+                {
+                    p2.Hurt(enemyModel.Damage);
+                    if (p2.Dead)
+                    {
+                        MarkEntityForDestruction(p2);
+                    }
+                }
+                return false;
+            };
+
 
             _objectDictionary.TryAdd(enemyModel.ID, enemyModel);
             aiController.Register(enemyModel,ref _objectDictionary);
@@ -350,15 +415,16 @@ namespace ColossalGame.Services
 
 
         /// <summary>
-        ///     Despawn a player
+        ///     Deregister a player
         /// </summary>
         /// <param name="username">Username of player to despawn</param>
         public void DespawnPlayer(string username)
         {
-            throw new NotImplementedException();
-            //if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
-
-            //TODO: Implement this
+            PlayerDictionary.TryGetValue(username, out var playerModel);
+            if (playerModel != null)
+            {
+                cleanupQueue.Enqueue(playerModel);
+            }
         }
 
 
@@ -395,10 +461,29 @@ namespace ColossalGame.Services
                     {
                         
                         _world.Remove(bulletBody);
-                        _objectDictionary.Remove(b.ID, out var _);
+                        _objectDictionary.TryRemove(b.ID, out var _);
                     }
 
                     
+                }else if (model is EnemyModel e)
+                {
+                    var enemyBody = e.ObjectBody;
+                    if (_world.BodyList.Contains(enemyBody))
+                    {
+                        _world.Remove(enemyBody);
+                        aiController.Deregister(e.ID);
+                        _objectDictionary.TryRemove(e.ID, out var _);
+                    }
+                }else if (model is PlayerModel p)
+                {
+                    var playerBody = p.ObjectBody;
+                    if (_world.BodyList.Contains(playerBody))
+                    {
+                        _world.Remove(playerBody);
+                        PlayerDictionary.TryRemove(p.Username, out var _);
+                        deathCounterDictionary.TryGetValue(p.Username, out var value);
+                        deathCounterDictionary.TryUpdate(p.Username, value+1, value);
+                    }
                 }
                 else
                 {
@@ -442,7 +527,7 @@ namespace ColossalGame.Services
         {
             var spawned = PlayerDictionary.TryGetValue(action.Username, out var playerModel);
 
-            if (!spawned) throw new Exception("Player must be spawned first!");
+            if (!spawned) return;
             var playerBody = playerModel.ObjectBody;
             switch (action)
             {
@@ -536,7 +621,7 @@ namespace ColossalGame.Services
             //Start publishing states
             _publishTimer = new System.Threading.Timer(o => PublishState(), null, 0, (int) PublishRate);
 
-            _aiBrainTimer = new System.Threading.Timer(o=>StepAiBrain(),null,0,5000);
+            _aiBrainTimer = new System.Threading.Timer(o=>StepAiBrain(),null,0,1000);
         }
 
         private void StepAiBrain()
@@ -605,15 +690,40 @@ namespace ColossalGame.Services
         public void HandleSpawnPlayer(string username, float xPos = 0f, float yPos = 0f)
         {
             if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
+            if (!deathCounterDictionary.ContainsKey(username)) deathCounterDictionary.TryAdd(username, 0);
+            deathCounterDictionary.TryGetValue(username, out var deathCount);
+            if (deathCount > 0)
+            {
+                //throw new Exception("");
+                return;
+            }
+            else
+            {
+                //TODO: Get rid of this useless method
+                var playerSpawn = new PlayerSpawnObject();
+                playerSpawn.Username = username;
+                playerSpawn.InitialPosition = new Vector2(xPos, yPos);
+                playerSpawn.LinearDamping = 4f;
+                playerSpawn.Speed = 20f;
+                playerSpawn.Radius = .4f;
+                spawnQueue.Enqueue(playerSpawn);
+            }
+        }
+
+        public void HandleRespawnPlayer(string username, float xPos = 0f, float yPos = 0f)
+        {
+            if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
             //TODO: Get rid of this useless method
             var playerSpawn = new PlayerSpawnObject();
             playerSpawn.Username = username;
-            playerSpawn.InitialPosition = new Vector2(xPos,yPos);
+            playerSpawn.InitialPosition = new Vector2(xPos, yPos);
             playerSpawn.LinearDamping = 4f;
             playerSpawn.Speed = 20f;
             playerSpawn.Radius = .4f;
             spawnQueue.Enqueue(playerSpawn);
         }
+
+
 
         /// <summary>
         ///     Stop the server thread from running new states

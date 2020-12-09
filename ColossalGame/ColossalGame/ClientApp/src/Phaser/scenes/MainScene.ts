@@ -302,7 +302,7 @@ export default class MainScene extends Phaser.Scene {
                 }
                 else {
                     //Player exists in the scene, so update their coordinates with the new ones.
-                    let playerContainer = this._playerNameToContainerMap.get(key)
+                    let playerContainer = this._playerNameToContainerMap.get(key);
 
                     if (playerContainer) {
                         var xPos = value.xPos;
@@ -416,7 +416,7 @@ export default class MainScene extends Phaser.Scene {
                         aiSprite = this.add.sprite(0, 0, "testBug", 0);
                         aiSprite.play('fly');
                         aiSprite.setName("aiSprite");
-                        //aiSprite.setScale(.5);
+                        aiSprite.setScale(.25);
                         aiContainer.add(aiSprite);
 
                         this._gameObjectsOnScreen.set(aiBugObj.id, aiContainer);
