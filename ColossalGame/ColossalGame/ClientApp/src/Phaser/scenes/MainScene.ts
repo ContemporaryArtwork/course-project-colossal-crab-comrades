@@ -25,6 +25,7 @@ var s: Phaser.Input.Keyboard.Key;
 var d: Phaser.Input.Keyboard.Key;
 var spacebar: Phaser.Input.Keyboard.Key;
 var pointer: Phaser.Input.Pointer;
+var coords: Phaser.GameObjects.Text;
 
 export default class MainScene extends Phaser.Scene {
     private _gameObj: Game;
@@ -89,14 +90,15 @@ export default class MainScene extends Phaser.Scene {
         var pad = this.add.image(0, 0, "spawnPad");
         pad.setScale(.5);
         
-        this.add.text(
-            500,
-            550,
-            "*Test Grounds YESyesyes*", {
+       coords = this.add.text(
+            0,
+            0,
+            "x=50,y=50", {
             font: "40px Arial",
-            fill: "#001DFF"
-        }
-        );
+            fill: "#FFFFFF"
+       }
+       ).setScrollFactor(0);
+        
 
         let currGameState = this._hostingComponent.props.currentGameState;
 
@@ -307,7 +309,8 @@ export default class MainScene extends Phaser.Scene {
                     if (playerContainer) {
                         var xPos = value.xPos;
                         var yPos = value.yPos;
-
+                        coords.text = "X= " + xPos.toFixed(0).toString() + "\n" + "Y= " + yPos.toFixed(0).toString();
+                        
                         var p = <Phaser.Physics.Arcade.Sprite>playerContainer.getByName("playerSprite");
                        
                         
@@ -358,6 +361,7 @@ export default class MainScene extends Phaser.Scene {
                         playerContainer.x = xPos;
                         playerContainer.y = yPos;
                     }
+                    
                 }
 
 
@@ -462,7 +466,7 @@ export default class MainScene extends Phaser.Scene {
             console.log("Key:"+key+ " Pos:"+value.x +","+ value.y);
         });*/
 
-
+        
     }
 }
 
