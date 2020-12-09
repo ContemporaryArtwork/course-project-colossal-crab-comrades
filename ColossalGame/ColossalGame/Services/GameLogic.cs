@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ColossalGame.Models.AI;
 using ColossalGame.Models.Exceptions;
 using ColossalGame.Models.GameModels;
+using tainicom.Aether.Physics2D.Collision.Shapes;
 using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Common.PhysicsLogic;
 using tainicom.Aether.Physics2D.Dynamics;
@@ -128,6 +129,7 @@ namespace ColossalGame.Services
             var upperLeftCorner = new Vector2(-widthInMeters, heightInMeters);
             var upperRightCorner = new Vector2(widthInMeters, heightInMeters);
             var edge = _world.CreateBody();
+            edge.Tag = "worldBounds";
             edge.SetRestitution(1f);
             edge.SetFriction(1f);
             var v = new Vertices();
@@ -402,9 +404,9 @@ namespace ColossalGame.Services
             enemy.SetTransform(enemySpawn.InitialPosition, enemySpawn.InitialAngle);
             enemy.OnCollision += (fixtureA, fixtureB, contact) =>
             {
-                if (fixtureA.Body.Tag is EnemyModel && fixtureB.Body.Tag is EnemyModel)
+                if (fixtureA.Body.Tag.Equals("worldBounds")||fixtureB.Body.Tag.Equals("worldBounds"))
                 {
-                    return true;
+                    return false;
                 }
 
                 if (fixtureA.Body.Tag is PlayerModel p1)
@@ -432,7 +434,7 @@ namespace ColossalGame.Services
                         }
                     }
                 }
-                return false;
+                return true;
             };
 
 
