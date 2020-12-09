@@ -74,6 +74,7 @@ namespace ColossalGame.Models.AI
                     enemySpawn.InitialRestitution = 0f;
                     enemySpawn.Speed = .2f;
                     enemySpawn.Damage = 1f;
+                    enemySpawn.InitialHealth = 20f;
                     break;
                 default:
                     break;

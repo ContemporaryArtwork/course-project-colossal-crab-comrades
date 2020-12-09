@@ -255,7 +255,8 @@ namespace ColossalGame.Services
 
             var playerModel = new PlayerModel(pm);
             playerModel.Username = username;
-
+            playerModel.Health = playerSpawn.InitialHealth;
+            playerModel.Damage = playerSpawn.Damage;
             pm.Tag = playerModel;
 
             //PlayerDictionary.Add(username, pm);
@@ -292,7 +293,7 @@ namespace ColossalGame.Services
             var bulletModel = new BulletModel(bullet)
             {
                 BulletType = "small", //TODO: Make this better somehow?
-                Damage = bulletSpawn.Damage
+                Damage = 10f
             };
 
             bullet.Tag = bulletModel;
@@ -377,6 +378,7 @@ namespace ColossalGame.Services
             enemyModel.EnemyType = enemySpawn.EnemyType;
             enemyModel.Damage = enemySpawn.Damage;
             enemyModel.Speed = enemySpawn.Speed;
+            enemyModel.Health = enemySpawn.InitialHealth;
             
 
             enemy.Tag = enemyModel;
@@ -422,6 +424,8 @@ namespace ColossalGame.Services
 
             _objectDictionary.TryAdd(enemyModel.ID, enemyModel);
             aiController.Register(enemyModel,ref _objectDictionary);
+            
+            enemyModel.SearchForClosestPlayer(PlayerDictionary);
         }
 
 
@@ -616,7 +620,7 @@ namespace ColossalGame.Services
         private System.Threading.Timer waveTimer;
         private void SpawnWave()
         {
-            aiController.SpawnWave(5*PlayerDictionary.Count, 1600f / ConversionFactor, 2000f / ConversionFactor, ref spawnQueue);
+            aiController.SpawnWave(100*PlayerDictionary.Count, 1600f / ConversionFactor, 2000f / ConversionFactor, ref spawnQueue);
         }
 
         private System.Threading.Timer _aiBrainTimer;
@@ -640,7 +644,7 @@ namespace ColossalGame.Services
 
             _aiBrainTimer = new System.Threading.Timer(o=>StepAiBrain(),null,0,5000);
 
-            waveTimer = new System.Threading.Timer(o=>SpawnWave(),null,0,10000);
+            waveTimer = new System.Threading.Timer(o=>SpawnWave(),null,0,20*1000);
 
         }
 
@@ -727,6 +731,8 @@ namespace ColossalGame.Services
                 playerSpawn.LinearDamping = 4f;
                 playerSpawn.Speed = 20f;
                 playerSpawn.Radius = .4f;
+                playerSpawn.Damage = 15f;
+                playerSpawn.InitialHealth = 100f;
                 spawnQueue.Enqueue(playerSpawn);
             }
         }
