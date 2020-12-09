@@ -41,7 +41,7 @@ export default class MainScene extends Phaser.Scene {
 
         //this.load.atlas("tentacleBug", require(testBug).default ,  require(testBugJson).default);
         this.load.spritesheet("testBug", testBug, { frameWidth: 400, frameHeight: 400 });
-        this.load.spritesheet("player", require("../../assets/gameAssets/animation/player/ForwardWalkSpritesheet.png").default, { frameWidth: 300, frameHeight: 300 });
+        this.load.spritesheet("player", require("../../assets/gameAssets/animation/player/HeavySpriteSheet.png").default, { frameWidth: 300, frameHeight: 300 });
 
     }
 
@@ -61,7 +61,7 @@ export default class MainScene extends Phaser.Scene {
         this.add.image(-1024, -1024, "ground");
         this.add.image(1024, -1024, "ground");
         var pad = this.add.image(0, 0, "spawnPad");
-        pad.setScale(.5);
+        pad.setScale(.75);
         
         this.add.text(
             500,
@@ -92,7 +92,7 @@ export default class MainScene extends Phaser.Scene {
             curPlayer.enableBody = true;
 
             curPlayer.setName("playerSprite"); //Set name of entities in container. Perhaps this will be useful later for changing image of sprite.
-            curPlayer.setScale(.5);
+            curPlayer.setScale(.75);
 
             let curText = this.add.text(0, 0 - (curPlayer.height / 4), key, { font: "16px Arial", fill: "#ffffff", backgroundColor: "#808080", align: "center"});
             curText.x = curText.x - (curText.width / 2);
@@ -126,7 +126,7 @@ export default class MainScene extends Phaser.Scene {
                 frames: this.anims.generateFrameNames('player', { start: 1, end: 1 })
 
             });
-            curPlayer.setScale(.5);
+            curPlayer.setScale(.75);
 
 
         });
@@ -200,7 +200,7 @@ export default class MainScene extends Phaser.Scene {
 
 
                     curPlayer.setName("playerSprite");
-                    curPlayer.setScale(.5);
+                    curPlayer.setScale(.75);
                     let curText = this.add.text(0, 0 - (curPlayer.height / 4), key, { font: "16px Arial", fill: "#ffffff", backgroundColor: "#808080", align: "center" });
                     curText.x = curText.x - (curText.width / 2);
                     curText.y = curText.y - 20;
