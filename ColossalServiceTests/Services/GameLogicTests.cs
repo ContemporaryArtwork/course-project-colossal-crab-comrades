@@ -38,7 +38,7 @@ namespace ColossalServiceTests.Services
                 this._subLoginService,
                 this._subUserService);
         }
-        
+        /*
         [Test]
         public void SpawnPlayer_ValidPlayer_DictionaryIncludesPlayer()
         {
@@ -84,56 +84,7 @@ namespace ColossalServiceTests.Services
             
         }
 
-        /*
-        [Test]
-        public void DespawnPlayer_PlayerExists_PlayerLeavesDictionary()
-        {
-            // Arrange
-            var gameLogic = this.CreateGameLogic();
-            string username = "realUser";
-            float xPos = 1.0f;
-            float yPos = 2.0f;
-
-            // Act
-            gameLogic.HandleSpawnPlayer(
-                username,
-                xPos,
-                yPos);
-
-            // Assert
-            Thread.Sleep(100);
-            var (a, b) = gameLogic.GetState();
-            
-            Assert.True(a.IsNullOrEmpty());
-            Assert.True(b.Count == 1);
-            Assert.True(b.ElementAt(0).Key == "realUser");
-            Assert.AreEqual(0.0f, b.Values.ElementAt(0).ObjectBody.GetWorldPoint(Vector2.Zero).X);
-            Assert.AreEqual(0.0f, b.Values.ElementAt(0).ObjectBody.GetWorldPoint(Vector2.Zero).Y);
-            gameLogic.DespawnPlayer("realUser");
-            Thread.Sleep(100);
-            (a, b) = gameLogic.GetState();
-            Assert.True(b.Count == 0);
-            Assert.False(b.ContainsKey("realUser"));
-        }
         
-        
-        [Test]
-        public void DespawnPlayer_UsernameNull_ErrorThrown()
-        {
-            // Arrange
-            var gameLogic = this.CreateGameLogic();
-
-            var (a, b) = gameLogic.GetState();
-
-            Assert.Throws<UserDoesNotExistException>(delegate
-            {
-                gameLogic.DespawnPlayer(null);
-            });
-            Thread.Sleep(100);
-            (a, b) = gameLogic.GetState();
-            Assert.True(a.IsNullOrEmpty() && b.IsNullOrEmpty());
-        }
-        */
         
         [Test]
         public void AddActionToQueue_ValidActionLeftAndPlayer_PositionMovesOnNextServerTick()
@@ -445,105 +396,7 @@ namespace ColossalServiceTests.Services
             Assert.AreEqual(0.0f, b.Values.ElementAt(usr2).ObjectBody.GetWorldPoint(Vector2.Zero).Y);
         }
         
-        /*
-        [Test]
-
-        public void SpawnTwoPlayers_DespawnMostRecentlySpawned()
-        {
-            // Spawn in two people and try despawning the one of them
-            // Arrange 1
-            var gameLogic = this.CreateGameLogic();
-            string username = "realUser";
-            float xPos = 0.0f;
-            float yPos = 0.0f;
-
-            // Act
-            gameLogic.HandleSpawnPlayer(
-                username,
-                xPos,
-                yPos);
-
-            Thread.Sleep(100);
-
-            // Arrange 2
-            string username2 = "realUser2";
-            float xPos2 = 0.0f;
-            float yPos2 = 0.0f;
-
-            // Act 2
-            gameLogic.HandleSpawnPlayer(
-                username2,
-                xPos2,
-                yPos2);
-
-            // Assert
-            Thread.Sleep(100);
-
-            gameLogic.DespawnPlayer("realUser2");
-
-            Thread.Sleep(200);
-            var (a, b) = gameLogic.GetState();
-
-            // Check if only P1 remains
-            Assert.True(a.IsNullOrEmpty());
-            Assert.AreEqual(1, b.Count);
-            Assert.AreEqual("realUser", b.ElementAt(0).Key);
-            Assert.AreEqual(0.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).X);
-            Assert.AreEqual(0.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).Y);
-
-            
-        }
         
-        [Test]
-
-        public void SpawnTwoPlayers_DespawnFirstPlayerSpawned()
-        {
-            // Spawn in two people and try despawning the one of them
-            // Arrange 1
-            var gameLogic = this.CreateGameLogic();
-            string username = "realUser";
-            float xPos = 0.0f;
-            float yPos = 0.0f;
-
-            // Act
-            gameLogic.HandleSpawnPlayer(
-                username,
-                xPos,
-                yPos);
-
-            Thread.Sleep(100);
-
-            // Arrange 2
-            string username2 = "realUser2";
-            float xPos2 = 0.0f;
-            float yPos2 = 0.0f;
-
-            // Act 2
-            gameLogic.HandleSpawnPlayer(
-                username2,
-                xPos2,
-                yPos2);
-
-            // Assert
-            Thread.Sleep(100);
-
-            gameLogic.DespawnPlayer("realUser");
-
-            Thread.Sleep(100);
-            var (a, b) = gameLogic.GetState();
-
-            // Check if only P2 remains
-            Assert.True(a.IsNullOrEmpty());
-            Assert.AreEqual(1, b.Count);
-            Assert.AreEqual("realUser2", b.ElementAt(0).Key);
-
-            Assert.AreEqual(0.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).X);
-            Assert.AreEqual(0.0f, b.ElementAt(0).Value.GetWorldPoint(Vector2.Zero).Y);
-
-
-
-        }
-        */
 
         [Test]
         
@@ -743,7 +596,7 @@ namespace ColossalServiceTests.Services
             Assert.AreEqual(0.0f, b.Values.ElementAt(usr2).ObjectBody.GetWorldPoint(Vector2.Zero).Y);
 
         }
-        
+        */
 
     }
 }

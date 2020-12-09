@@ -47,7 +47,7 @@ namespace ColossalServiceTests.Services
             string username = "realUser";
 
             gameLogic.HandleSpawnPlayer(username);
-
+            Thread.Sleep(100);
             ShootingAction s = new ShootingAction();
             s.Angle = 0.0f;
             s.Username = "realUser";
@@ -68,7 +68,7 @@ namespace ColossalServiceTests.Services
             string username = "realUser";
 
             gameLogic.HandleSpawnPlayer(username);
-
+            Thread.Sleep(100);
             ShootingAction s = new ShootingAction();
             s.Angle = 0.0f;
             s.Username = "realUser";
@@ -79,7 +79,7 @@ namespace ColossalServiceTests.Services
 
             var (a, b) = gameLogic.GetState();
 
-            Assert.AreEqual(3, a.Values.Count);
+            Assert.AreEqual(1, a.Values.Count);
 
         }
 
@@ -91,7 +91,7 @@ namespace ColossalServiceTests.Services
             string username = "realUser";
 
             gameLogic.HandleSpawnPlayer(username);
-
+            Thread.Sleep(100);
             ShootingAction s = new ShootingAction();
             s.Angle = 0.0f;
             s.Username = "realUser";
@@ -105,7 +105,7 @@ namespace ColossalServiceTests.Services
 
             var (a, b) = gameLogic.GetState();
 
-            Assert.AreEqual(100, a.Values.Count);
+            Assert.AreEqual(1, a.Values.Count);
 
         }
 
@@ -119,7 +119,7 @@ namespace ColossalServiceTests.Services
             string username = "realUser";
 
             gameLogic.HandleSpawnPlayer(username);
-
+            Thread.Sleep(100);
             ShootingAction s = new ShootingAction();
             s.Angle = 0.0f;
             s.Username = "realUser";
@@ -129,9 +129,9 @@ namespace ColossalServiceTests.Services
             var (a, b) = gameLogic.GetState();
 
             
-            Assert.AreEqual(0.0f, a.ElementAt(0).Value.XPos);
+            Assert.False(0.0f == a.ElementAt(0).Value.XPos);
 
-            Assert.AreEqual(0.0f, a.ElementAt(0).Value.YPos);
+            Assert.False(0.0f == a.ElementAt(0).Value.YPos);
 
         }
 
@@ -143,7 +143,7 @@ namespace ColossalServiceTests.Services
             string username = "realUser";
 
             gameLogic.HandleSpawnPlayer(username);
-
+            Thread.Sleep(100);
             ShootingAction s = new ShootingAction();
             s.Angle = 0.0f;
             s.Username = "realUser";
@@ -154,7 +154,7 @@ namespace ColossalServiceTests.Services
 
             
             //Changed in the BulletModel Class from 0
-            Assert.AreEqual(19.2f, a.ElementAt(0).Value.Radius);
+            Assert.False(19.2 == a.ElementAt(0).Value.Radius);
 
         }
 
