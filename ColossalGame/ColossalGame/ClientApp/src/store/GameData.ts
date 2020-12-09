@@ -10,15 +10,23 @@ import getCookie from "../Helpers/GetCookies"
 
 export interface GameObjectExportModel {
 
-    yPos: number;
-    xPos: number;
+    yPos: number,
+    xPos: number,
+    radius: number
 }
 export interface PlayerExportModel extends GameObjectExportModel {
-    username: string
+    username: string,
+    health: number
 }
 export interface BulletExportModel extends GameObjectExportModel {
-    bulletType: string,
-    id: number
+    id: number,
+    bulletType: string
+
+}
+export interface AIExportModel extends GameObjectExportModel {
+    id: number,
+    enemyType: string,
+    health: number
 }
 
 /*export interface GameObjectModel {
@@ -33,7 +41,7 @@ export interface PlayerModel {
 }*/
 
 export interface GameLogicMessage {
-    objectList: (PlayerExportModel | BulletExportModel)[],
+    objectList: (AIExportModel | BulletExportModel)[],
     playerDict: Map<string, PlayerExportModel>
 }
 
@@ -123,7 +131,7 @@ export interface ReceivedTokenAction {
 }
 export interface ReceivePositionsUpdateAction {
     type: 'RECEIVE_POSITIONS_UPDATE';
-    objectList: (PlayerExportModel | BulletExportModel)[],
+    objectList: (AIExportModel | BulletExportModel)[],
     playerDict: Map<string, PlayerExportModel>
 }
 
