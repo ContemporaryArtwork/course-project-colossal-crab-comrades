@@ -58,6 +58,12 @@ export default class MainScene extends Phaser.Scene {
     }
 
     create() {
+
+        var startingPosX: number;
+        startingPosX = 0;
+        var startingPosY: number;
+        startingPosY = 0;
+
         this.scale.on('resize', this.resize, this);
 
         this.anims.create({
@@ -90,14 +96,7 @@ export default class MainScene extends Phaser.Scene {
         var pad = this.add.image(0, 0, "spawnPad");
         pad.setScale(.5);
         
-       coords = this.add.text(
-            0,
-            0,
-            "x=50,y=50", {
-            font: "40px Arial",
-            fill: "#FFFFFF"
-       }
-       ).setScrollFactor(0);
+
         
 
         let currGameState = this._hostingComponent.props.currentGameState;
@@ -108,6 +107,10 @@ export default class MainScene extends Phaser.Scene {
         dict.forEach((value: GameDataStore.PlayerExportModel, key: string) => {
 
             let curPlayerContainer = this.add.container(value.xPos, value.yPos); //Player sprite and text is contained in a container. 
+            startingPosX = value.xPos;
+            startingPosY = value.yPos;
+
+
             //This allows for the player sprite and text to move together. Only need to update postion of the container.
 
             //curPlayerContainer.x = value.xPos;
@@ -201,6 +204,17 @@ export default class MainScene extends Phaser.Scene {
             }
 
         });
+
+        coords = this.add.text(
+            0,
+            0,
+            ("X= " + startingPosX.toFixed(0).toString() + "\n" + "Y= " + startingPosY.toFixed(0).toString()), {
+            font: "40px Arial",
+            fill: "#FFFFFF"
+        }
+        ).setScrollFactor(0);
+
+
     }
 
     resize(gameSize: { width: any; height: any; }, baseSize: any, displaySize: any, resolution: any) {
@@ -309,13 +323,16 @@ export default class MainScene extends Phaser.Scene {
                     if (playerContainer) {
                         var xPos = value.xPos;
                         var yPos = value.yPos;
-                        coords.text = "X= " + xPos.toFixed(0).toString() + "\n" + "Y= " + yPos.toFixed(0).toString();
+                        
                         
                         var p = <Phaser.Physics.Arcade.Sprite>playerContainer.getByName("playerSprite");
                        
                         
                         if (this._hostingComponent.props.playerData.username == key) {
-                           
+
+
+                            coords.text = "X= " + xPos.toFixed(0).toString() + "\n" + "Y= " + yPos.toFixed(0).toString();
+
                             if (up || down || left || right) {
                                 //console.log("MOVING");
                                 //p.tint = 0xFF000C;
