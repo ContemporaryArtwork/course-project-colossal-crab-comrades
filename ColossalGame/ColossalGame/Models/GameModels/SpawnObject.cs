@@ -11,15 +11,15 @@ namespace ColossalGame.Models.GameModels
     {
         public Vector2 InitialPosition { get; set; } = Vector2.Zero;
         public float Radius { get; set; } = 1f;
-        public float LinearDamping { get; set; } = 0f;
+        public float LinearDamping { get; set; } = 4f;
         public Vector2 InitialVelocity { get; set; } = Vector2.Zero;
-        public float InitialSpeed { get; set; } = 0f;
         public float Damage { get; set; } = 0f;
         public float InitialDensity { get; set; } = 1f;
         public float InitialFriction { get; set; } = 1f;
         public float InitialRestitution { get; set; } = .3f;
         public float InitialAngle { get; set; } = 0f;
         public float InitialMass { get; set; } = .3f;
+        public float Speed { get; set; } = 10f;
     }
 
     public class PlayerSpawnObject : SpawnObject
@@ -36,9 +36,12 @@ namespace ColossalGame.Models.GameModels
 
         public string BulletType { get; set; } = "small";
 
-        public BulletSpawnObject(float angle, float magnitude, PlayerModel creator, float damage, float radius, Vector2 initialPosition)
+        public new float LinearDamping { get; set; } = 0f;
+
+        public BulletSpawnObject(float angle, float speed, PlayerModel creator, float damage, float radius, Vector2 initialPosition)
         {
-            this.InitialVelocity = new Vector2((float)Math.Cos(angle) * magnitude, (float)-Math.Sin(angle) * magnitude);
+            this.InitialVelocity = new Vector2((float)Math.Cos(angle) * speed, (float)-Math.Sin(angle) * speed);
+            this.Speed = speed;
             this.InitialAngle = angle;
             this.Creator = creator;
             this.Damage = damage;
@@ -49,7 +52,8 @@ namespace ColossalGame.Models.GameModels
 
     public class EnemySpawnObject : SpawnObject
     {
-        
-        
+        public string EnemyType { get; set; } = "alien_tick";
+
+
     }
 }

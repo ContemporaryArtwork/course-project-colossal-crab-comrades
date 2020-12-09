@@ -40,21 +40,28 @@ namespace ColossalGame.Models.GameModels
             set => ObjectBody.SetTransform(new Vector2(value, YPos), ObjectBody.Rotation);
         }
 
-        /*public GameObjectExportModel Export()
+        public Vector2 Position
         {
-            var retVal = new GameObjectExportModel();
-            retVal.XPos = this.XPos;
-            retVal.YPos = this.YPos;
-            return retVal;
-        }*/
+            get => ObjectBody.WorldCenter;
+            set => ObjectBody.SetTransform(value, ObjectBody.Rotation);
+        }
+        
+        public float LinearDamping
+        {
+            get => ObjectBody.LinearDamping; 
+            set => ObjectBody.LinearDamping=value;
+        }
+
+        public float Damage { get; set; } = 0f;
+        public float Speed { get; set; } = 10f;
     }
 
     public class BulletModel : GameObjectModel
     {
         
         public string BulletType { get; set; }
-        
-        public float Damage { get; set; }
+
+        public new float Damage { get; set; } = 10f;
 
 
         public BulletModel(Body b) : base(b)
@@ -71,9 +78,12 @@ namespace ColossalGame.Models.GameModels
     public class EnemyModel : GameObjectModel
     {
         public string EnemyType { get; set; }
-        public float Damage { get; set; }
+        public new float Damage { get; set; } = 5f;
 
-        private PlayerModel closestPlayer;
+        public new float Speed { get; set; } = 5f;
+        
+
+        private PlayerModel _closestPlayer;
 
         public void SearchForClosestPlayer(ConcurrentDictionary<string,PlayerModel> playerDictionary)
         {
@@ -96,21 +106,22 @@ namespace ColossalGame.Models.GameModels
                 }
             }
 
-            closestPlayer = player;
+            _closestPlayer = player;
         }
 
         public void MoveTowardsClosestPlayer()
         {
-            if (closestPlayer == default(PlayerModel))
+            if (_closestPlayer == default(PlayerModel))
             {
                 //Should we throw an exception here?
                 //I choose not to for simplicity of iterating through AI
                 return;
             }
 
-            var directionalVector = ObjectBody.WorldCenter - closestPlayer.ObjectBody.WorldCenter;
-            float distanceProportion = .1f;
-            ObjectBody.ApplyLinearImpulse(directionalVector*distanceProportion);
+            var directionalVector =  _closestPlayer.ObjectBody.WorldCenter - ObjectBody.WorldCenter;
+            directionalVector.Normalize();
+            float distanceProportion = .001f;
+            ObjectBody.ApplyLinearImpulse(directionalVector*this.Speed);
         }
 
         public EnemyExportModel Export()
