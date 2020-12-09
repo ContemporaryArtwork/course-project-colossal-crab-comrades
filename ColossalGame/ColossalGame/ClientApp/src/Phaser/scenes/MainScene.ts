@@ -205,6 +205,10 @@ export default class MainScene extends Phaser.Scene {
 
         });
 
+        startingPosX /= 64;
+        startingPosY /= 64;
+        startingPosY *= -1;
+
         coords = this.add.text(
             0,
             0,
@@ -330,8 +334,14 @@ export default class MainScene extends Phaser.Scene {
                         
                         if (this._hostingComponent.props.playerData.username == key) {
 
-
-                            coords.text = "X= " + xPos.toFixed(0).toString() + "\n" + "Y= " + yPos.toFixed(0).toString();
+                            var updatePosX: number;
+                            updatePosX = xPos;
+                            var updatePosY: number;
+                            updatePosY = yPos;
+                            updatePosX /= 64;
+                            updatePosY /= 64;
+                            updatePosY *= -1;
+                            coords.text = "X= " + updatePosX.toFixed(0).toString() + "\n" + "Y= " + updatePosY.toFixed(0).toString();
 
                             if (up || down || left || right) {
                                 //console.log("MOVING");
