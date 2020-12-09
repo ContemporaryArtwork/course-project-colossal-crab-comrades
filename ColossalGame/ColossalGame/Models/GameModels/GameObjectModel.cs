@@ -120,10 +120,19 @@ namespace ColossalGame.Models.GameModels
                 return;
             }
 
-            var directionalVector =  _closestPlayer.ObjectBody.WorldCenter - ObjectBody.WorldCenter;
+            var playerPos = _closestPlayer.ObjectBody.WorldCenter;
+            var ourPos = ObjectBody.WorldCenter;
+            var directionalVector =  playerPos - ourPos;
             directionalVector.Normalize();
-            float distanceProportion = .001f;
-            ObjectBody.ApplyLinearImpulse(directionalVector*this.Speed);
+            Vector2.Distance(ref playerPos,ref ourPos,out var distance);
+            if (distance > 1f)
+            {
+                ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
+            }
+            else
+            {
+                ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
+            }
         }
 
         public EnemyExportModel Export()

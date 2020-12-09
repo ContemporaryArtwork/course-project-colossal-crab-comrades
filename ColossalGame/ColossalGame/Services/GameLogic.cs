@@ -141,7 +141,7 @@ namespace ColossalGame.Services
             edge.CreateEdge(upperLeftCorner, lowerLeftCorner);
 
             //TODO: Remove this, debugging only
-            aiController.SpawnOne("alien_tick",1300f/ConversionFactor,1600f/ConversionFactor,ref spawnQueue);
+            aiController.SpawnOne("alien_tick",500f/ConversionFactor,800f/ConversionFactor,ref spawnQueue);
         }
 
 
@@ -326,6 +326,7 @@ namespace ColossalGame.Services
             enemy.SetRestitution(enemySpawn.InitialRestitution);
             enemy.SetFriction(enemySpawn.InitialFriction);
             enemy.Mass = enemySpawn.InitialMass;
+            enemy.LinearDamping = enemySpawn.LinearDamping;
 
 
 
@@ -333,6 +334,7 @@ namespace ColossalGame.Services
             
             enemyModel.EnemyType = enemySpawn.EnemyType;
             enemyModel.Damage = enemySpawn.Damage;
+            enemyModel.Speed = enemySpawn.Speed;
             
 
             enemy.Tag = enemyModel;

@@ -72,6 +72,7 @@ namespace ColossalGame.Models.AI
                     enemySpawn.EnemyType = "alien_tick";
                     enemySpawn.Radius = .2f;
                     enemySpawn.InitialRestitution = .01f;
+                    enemySpawn.Speed = .1f;
                     break;
                 default:
                     break;
