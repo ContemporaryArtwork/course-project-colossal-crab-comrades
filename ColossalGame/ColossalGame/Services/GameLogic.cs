@@ -202,6 +202,18 @@ namespace ColossalGame.Services
             return impulse;
         }
 
+        public void Reset()
+        {
+            Parallel.ForEach(_objectDictionary, ((pair, state) =>
+            {
+                var (key, value) = pair;
+                MarkEntityForDestruction(value);
+            }));
+            aiController.Reset();
+            PlayerDictionary.Clear();
+            deathCounterDictionary.Clear();
+        }
+
         public bool IsPlayerSpawned(string username)
         {
             return PlayerDictionary.ContainsKey(username);
@@ -499,6 +511,12 @@ namespace ColossalGame.Services
                         deathCounterDictionary.TryGetValue(p.Username, out var value);
                         deathCounterDictionary.TryUpdate(p.Username, value+1, value);
                     }
+
+                    if (PlayerDictionary.IsEmpty)
+                    {
+                        Reset();
+                        Restart();
+                    }
                 }
                 else
                 {
@@ -648,6 +666,26 @@ namespace ColossalGame.Services
 
         }
 
+        private void Restart()
+        {
+
+            _worldTimer.DisposeAsync();
+            _publishTimer.DisposeAsync();
+            _aiBrainTimer.DisposeAsync();
+            waveTimer.DisposeAsync();
+
+            //New method (using timers) (more efficient!)
+            //Start world stepping
+            _worldTimer = new System.Threading.Timer(o => StepWorld(), null, 0, (int)TickRate);
+            //Start publishing states
+            _publishTimer = new System.Threading.Timer(o => PublishState(), null, 0, (int)PublishRate);
+
+            _aiBrainTimer = new System.Threading.Timer(o => StepAiBrain(), null, 0, 5000);
+
+            waveTimer = new System.Threading.Timer(o => SpawnWave(), null, 0, 20 * 1000);
+
+        }
+
         private void StepAiBrain()
         {
             aiController.Recalculate(PlayerDictionary, _objectDictionary);
@@ -664,7 +702,7 @@ namespace ColossalGame.Services
         /// </summary>
         private void StepWorld()
         {
-            //if (PlayerDictionary.IsEmpty&&spawnQueue.Any(i => i is PlayerSpawnObject)==false) return; 
+            if (PlayerDictionary.IsEmpty&&deathCounterDictionary.IsEmpty) return; 
             var solverIterations = new SolverIterations {PositionIterations = 2, VelocityIterations = 4};
 
             //lock because sometimes world stepping will take too long

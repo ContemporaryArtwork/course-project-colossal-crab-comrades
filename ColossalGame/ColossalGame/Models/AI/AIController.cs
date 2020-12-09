@@ -83,6 +83,11 @@ namespace ColossalGame.Models.AI
             spawnQueue.Enqueue(enemySpawn);
         }
 
+        public void Reset()
+        {
+            EnemyList.Clear();
+        }
+
         public void SpawnWave(int waveSize,float innerRadius, float outerRadius, ref ConcurrentQueue<SpawnObject> spawnQueue)
         {
             var tempSQ = spawnQueue;
