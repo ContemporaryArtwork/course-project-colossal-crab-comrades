@@ -144,7 +144,7 @@ namespace ColossalGame.Services
             edge.CreateEdge(upperLeftCorner, lowerLeftCorner);
 
             //TODO: Remove this, debugging only
-            aiController.SpawnWave(20,1200f/ConversionFactor,1600f/ConversionFactor,ref spawnQueue);
+            
         }
 
 
@@ -355,6 +355,8 @@ namespace ColossalGame.Services
             _objectDictionary.TryAdd(bulletModel.ID, bulletModel);
         }
 
+        
+
         private void SpawnEnemy(EnemySpawnObject enemySpawn)
         {
             
@@ -395,6 +397,10 @@ namespace ColossalGame.Services
                     if (p1.Dead)
                     {
                         MarkEntityForDestruction(p1);
+                        if (fixtureB.Body.Tag is EnemyModel eB)
+                        {
+                            eB.ResetClosestPlayer();
+                        }
                     }
                 }
 
@@ -404,6 +410,10 @@ namespace ColossalGame.Services
                     if (p2.Dead)
                     {
                         MarkEntityForDestruction(p2);
+                        if (fixtureA.Body.Tag is EnemyModel eA)
+                        {
+                            eA.ResetClosestPlayer();
+                        }
                     }
                 }
                 return false;
@@ -603,6 +613,12 @@ namespace ColossalGame.Services
             return (gameObjectQueue, returnDictionary);
         }
 
+        private System.Threading.Timer waveTimer;
+        private void SpawnWave()
+        {
+            aiController.SpawnWave(5*PlayerDictionary.Count, 1600f / ConversionFactor, 2000f / ConversionFactor, ref spawnQueue);
+        }
+
         private System.Threading.Timer _aiBrainTimer;
         /// <summary>
         ///     Starts the server tick processing thread
@@ -622,7 +638,10 @@ namespace ColossalGame.Services
             //Start publishing states
             _publishTimer = new System.Threading.Timer(o => PublishState(), null, 0, (int) PublishRate);
 
-            _aiBrainTimer = new System.Threading.Timer(o=>StepAiBrain(),null,0,1000);
+            _aiBrainTimer = new System.Threading.Timer(o=>StepAiBrain(),null,0,5000);
+
+            waveTimer = new System.Threading.Timer(o=>SpawnWave(),null,0,10000);
+
         }
 
         private void StepAiBrain()

@@ -70,7 +70,7 @@ namespace ColossalGame.Models.AI
             {
                 case "alien_tick":
                     enemySpawn.EnemyType = "alien_tick";
-                    enemySpawn.Radius = .4f;
+                    enemySpawn.Radius = .25f;
                     enemySpawn.InitialRestitution = 0f;
                     enemySpawn.Speed = .2f;
                     enemySpawn.Damage = 1f;
@@ -84,10 +84,12 @@ namespace ColossalGame.Models.AI
 
         public void SpawnWave(int waveSize,float innerRadius, float outerRadius, ref ConcurrentQueue<SpawnObject> spawnQueue)
         {
-            for (int i = 0; i<waveSize;i++)
+            var tempSQ = spawnQueue;
+            Parallel.For(0, waveSize, (i =>
             {
-                SpawnOne("alien_tick",innerRadius,outerRadius,ref spawnQueue);
-            }
+                SpawnOne("alien_tick", innerRadius, outerRadius, ref tempSQ);
+            }));
+            spawnQueue = tempSQ;
         }
 
         public void Register(EnemyModel enemy, ref ConcurrentDictionary<int,GameObjectModel> objectDictionary)

@@ -115,7 +115,7 @@ namespace ColossalGame.Models.GameModels
 
         public void MoveTowardsClosestPlayer()
         {
-            if (_closestPlayer == default(PlayerModel))
+            if (_closestPlayer == null)
             {
                 //Should we throw an exception here?
                 //I choose not to for simplicity of iterating through AI
@@ -135,6 +135,11 @@ namespace ColossalGame.Models.GameModels
             {
                 ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
             }
+        }
+
+        public void ResetClosestPlayer()
+        {
+            _closestPlayer = null;
         }
 
         public EnemyExportModel Export()
