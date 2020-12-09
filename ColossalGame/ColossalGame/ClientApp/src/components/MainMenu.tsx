@@ -44,7 +44,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
         this.OpenLoadout = this.OpenLoadout.bind(this);
         this.ChooseHeavy = this.ChooseHeavy.bind(this);
         this.ChooseBrawler = this.ChooseBrawler.bind(this);
-        this.ChooseBuilder = this.ChooseBuilder.bind(this);
+        //this.ChooseBuilder = this.ChooseBuilder.bind(this);
         this.closeOpenMenu = this.closeOpenMenu.bind(this);
     }
 
