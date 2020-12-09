@@ -357,19 +357,34 @@ namespace ColossalServiceTests.Services
             // Assert
             Thread.Sleep(100);
             var (a, b) = gameLogic.GetState();
-
-            // Check P1
             Assert.True(a.IsNullOrEmpty());
             Assert.AreEqual(2, b.Count);
-            Assert.AreEqual("realUser", b.ElementAt(0).Key);
-            Assert.AreEqual(0.0f, b.Values.ElementAt(0).ObjectBody.GetWorldPoint(Vector2.Zero).X);
-            Assert.AreEqual(0.0f, b.Values.ElementAt(0).ObjectBody.GetWorldPoint(Vector2.Zero).Y);
+            Assert.True(b.ContainsKey("realUser"));
+            Assert.True(b.ContainsKey("realUser2"));
+
+            //Users can be in either 0 or 1 spot so have to check first
+            var usr1 = -1;
+            var usr2 = -2;
+            if (b.ElementAt(0).Key == "realUser")
+            {
+                usr1 = 0;
+                usr2 = 1;
+            }
+            else
+            {
+                usr1 = 1;
+                usr2 = 0;
+            }
+
+            // Check P1
+            
+            Assert.AreEqual(0.0f, b.Values.ElementAt(usr1).ObjectBody.GetWorldPoint(Vector2.Zero).X);
+            Assert.AreEqual(0.0f, b.Values.ElementAt(usr1).ObjectBody.GetWorldPoint(Vector2.Zero).Y);
 
             
             // Check P2
-            Assert.True(b.ContainsKey("realUser2"));
-            Assert.AreEqual(0.0f, b.Values.ElementAt(1).ObjectBody.GetWorldPoint(Vector2.Zero).X);
-            Assert.AreEqual(0.0f, b.Values.ElementAt(1).ObjectBody.GetWorldPoint(Vector2.Zero).Y);
+            Assert.AreEqual(0.0f, b.Values.ElementAt(usr2).ObjectBody.GetWorldPoint(Vector2.Zero).X);
+            Assert.AreEqual(0.0f, b.Values.ElementAt(usr2).ObjectBody.GetWorldPoint(Vector2.Zero).Y);
         }
         
         [Test]
@@ -399,18 +414,34 @@ namespace ColossalServiceTests.Services
             Thread.Sleep(100);
             var (a, b) = gameLogic.GetState();
 
-            // Check P1
             Assert.True(a.IsNullOrEmpty());
             Assert.AreEqual(2, b.Count);
-            Assert.AreEqual("realUser", b.ElementAt(0).Key);
-            Assert.AreEqual(0.0f, b.Values.ElementAt(0).ObjectBody.GetWorldPoint(Vector2.Zero).X);
-            Assert.AreEqual(0.0f, b.Values.ElementAt(0).ObjectBody.GetWorldPoint(Vector2.Zero).Y);
+            Assert.True(b.ContainsKey("realUser"));
+            Assert.True(b.ContainsKey("realUser2"));
+
+            //Users can be in either 0 or 1 spot so have to check first
+            var usr1 = -1;
+            var usr2 = -2;
+            if (b.ElementAt(0).Key == "realUser")
+            {
+                usr1 = 0;
+                usr2 = 1;
+            }
+            else
+            {
+                usr1 = 1;
+                usr2 = 0;
+            }
+
+            // Check P1
+
+            Assert.AreEqual(0.0f, b.Values.ElementAt(usr1).ObjectBody.GetWorldPoint(Vector2.Zero).X);
+            Assert.AreEqual(0.0f, b.Values.ElementAt(usr1).ObjectBody.GetWorldPoint(Vector2.Zero).Y);
 
 
             // Check P2
-            Assert.True(b.ContainsKey("realUser2"));
-            Assert.AreEqual(0.0f, b.Values.ElementAt(1).ObjectBody.GetWorldPoint(Vector2.Zero).X);
-            Assert.AreEqual(0.0f, b.Values.ElementAt(1).ObjectBody.GetWorldPoint(Vector2.Zero).Y);
+            Assert.AreEqual(0.0f, b.Values.ElementAt(usr2).ObjectBody.GetWorldPoint(Vector2.Zero).X);
+            Assert.AreEqual(0.0f, b.Values.ElementAt(usr2).ObjectBody.GetWorldPoint(Vector2.Zero).Y);
         }
         
         /*
