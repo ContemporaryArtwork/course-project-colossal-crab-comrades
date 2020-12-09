@@ -16,7 +16,7 @@ export interface GameObjectModel {
 export interface PlayerModel {
     Username: string,
     yPos: number,
-    xPos: number
+    xPos: number,
 }
 
 export interface GameLogicMessage {
@@ -44,7 +44,8 @@ export interface MovementAction {
 }
 export interface SpawnAction {
     Username: string,
-    Token: string
+    Token: string,
+
 }
 
 export interface Coordinates {
@@ -59,7 +60,8 @@ export interface Position {
 
 export interface PlayerData {
     username: string,
-    position: Position
+    position: Position,
+    classType: boolean
 }
 
 export interface GameDataState {
@@ -104,11 +106,14 @@ export interface ReceivePositionsUpdateAction {
     objectList: GameObjectModel[],
     playerDict: Map<string, PlayerModel>
 }
+export interface ToggleClassAction {
+    type: 'TOGGLE_CLASS';
+}
 
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-export type KnownAction = InitializeAction | SendMovementAction | SpawnPlayerRequestAction | SetUsernameAction | TempLoginAction | ReceivedTokenAction | ReceivePositionsUpdateAction;
+export type KnownAction = ToggleClassAction | InitializeAction | SendMovementAction | SpawnPlayerRequestAction | SetUsernameAction | TempLoginAction | ReceivedTokenAction | ReceivePositionsUpdateAction;
 
 const SignalRActionsList: string[] = ["RECEIVED_STRING", "RECEIVE_TOKEN", "RECEIVE_POSITIONS_UPDATE"];
 // ----------------
@@ -116,6 +121,8 @@ const SignalRActionsList: string[] = ["RECEIVED_STRING", "RECEIVE_TOKEN", "RECEI
 // They don't directly mutate state, but they can have external side-effects (such as loading data).
 
 export const actionCreators = {
+
+    toggleClass: () => ({ type: 'TOGGLE_CLASS'} as ToggleClassAction),
 
     setUsername: (name: string) => ({ type: 'SET_USERNAME', username: name } as SetUsernameAction),
 
@@ -162,6 +169,7 @@ export const actionCreators = {
             const spawnActionDTO: SpawnAction = {
                 Username: appState.gameData.playerData.username,
                 Token: token,
+
             }
             appState.gameData.connection && appState.gameData.connection.invoke("SpawnPlayer", spawnActionDTO)
 
@@ -176,7 +184,8 @@ export const actionCreators = {
 const unloadedState: GameDataState = {
     isLoading: false,playerData: {
         username: "", position: {
-            coords: { x: 0, y: 0 }, direction: Direction.Right,}
+            coords: { x: 0, y: 0 }, direction: Direction.Right,
+        }, classType: false
     },
     currentGameState: {
         objectList: [],
@@ -196,8 +205,8 @@ export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined
                 isLoading: false,
                 connection: action.connection,
                 playerData: {
-                    username: "", position: { coords: { x: 0, y: 0 }, direction: Direction.Right }
-                },
+                    username: "", position: { coords: { x: 0, y: 0 }, direction: Direction.Right }, classType: false
+                }, 
                 currentGameState: {
                     objectList: [],
                     playerDict: new Map<string, PlayerModel>(),
@@ -222,6 +231,11 @@ export const reducer: Reducer<GameDataState> = (state: GameDataState | undefined
         case 'SET_USERNAME':
             return {
                 ...state, playerData: { ...state.playerData, username: action.username }
+            };
+        case 'TOGGLE_CLASS':
+            return {
+
+                ...state, playerData: { ...state.playerData, classType: !state.playerData.classType}
             };
         default:
             return state;
