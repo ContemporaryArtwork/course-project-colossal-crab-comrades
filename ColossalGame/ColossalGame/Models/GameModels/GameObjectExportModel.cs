@@ -16,7 +16,7 @@ namespace ColossalGame.Models.GameModels
     public class PlayerExportModel : GameObjectExportModel
     {
         public string Username { get; set; }
-
+        public string PlayerClass { get; set; }
         public float Health { get; set; }
 
         public string PlayerClass { get; set; }

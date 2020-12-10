@@ -274,6 +274,7 @@ namespace ColossalGame.Services
 
             var playerModel = new PlayerModel(pm);
             playerModel.Username = username;
+            playerModel.PlayerClass = playerSpawn.PlayerClass;
             playerModel.Health = playerSpawn.InitialHealth;
             playerModel.Damage = playerSpawn.Damage;
             playerModel.PlayerClass = playerSpawn.PlayerClass;
@@ -812,9 +813,10 @@ namespace ColossalGame.Services
         ///     Add a new player to the spawn queue
         /// </summary>
         /// <param name="username">Username to spawn. Must exist in the user database</param>
+        /// <param name="playerClass">The class chosen by the player.</param>
         /// <param name="xPos">X Position to spawn at. Default is 0</param>
         /// <param name="yPos">Y Position to spawn at. Default is 0</param>
-        public void HandleSpawnPlayer(string username,string playerClass="assault", float xPos = 0f, float yPos = 0f)
+        public void HandleSpawnPlayer(string username, string playerClass, float xPos = 0f, float yPos = 0f)
         {
             if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
             if (!deathCounterDictionary.ContainsKey(username)) deathCounterDictionary.TryAdd(username, 0);
@@ -829,6 +831,7 @@ namespace ColossalGame.Services
                 //TODO: Get rid of this useless method
                 var playerSpawn = new PlayerSpawnObject();
                 playerSpawn.Username = username;
+                playerSpawn.PlayerClass = playerClass;
                 playerSpawn.InitialPosition = new Vector2(xPos, yPos);
                 playerSpawn.LinearDamping = 4f;
                 playerSpawn.Speed = 20f;
@@ -840,12 +843,13 @@ namespace ColossalGame.Services
             }
         }
 
-        public void HandleRespawnPlayer(string username, float xPos = 0f, float yPos = 0f)
+        public void HandleRespawnPlayer(string username, string playerClass, float xPos = 0f, float yPos = 0f)
         {
             if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
             //TODO: Get rid of this useless method
             var playerSpawn = new PlayerSpawnObject();
             playerSpawn.Username = username;
+            playerSpawn.PlayerClass = playerClass;
             playerSpawn.InitialPosition = new Vector2(xPos, yPos);
             playerSpawn.LinearDamping = 4f;
             playerSpawn.Speed = 20f;
