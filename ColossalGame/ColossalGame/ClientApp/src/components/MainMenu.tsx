@@ -21,6 +21,9 @@ import getCookie from "../Helpers/GetCookies"
 //Router Import
 import { Redirect } from "react-router-dom";
 
+//HTTP? Import
+import { request } from 'http';
+
 
 type GameMainMenuTogglerProps =
     GameMainMenuTogglerStore.GameMainMenuTogglerState &
@@ -84,10 +87,22 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
     //}
 
     render() {
-
+        const req = request(
+            {
+                path: '/api/loggedIn',
+                method: 'GET',
+            },
+            response => {
+                console.log(response.statusCode); // 200
+                console.log("fuck");
+            }
+        );
+        console.log("fuck");
         if (document.cookie == "") {
             return <Redirect to="/signup" />
-        } else {
+        }
+
+        else {
             return (
                 <body>
                     <div className="enclosing">

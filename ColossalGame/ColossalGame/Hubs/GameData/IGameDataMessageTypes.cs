@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ColossalGame.Models;
+using ColossalGame.Models.GameModels;
 
 namespace ColossalGame.Hubs.GameData
 {
@@ -14,7 +15,9 @@ namespace ColossalGame.Hubs.GameData
 
         Task ChangeWeapon(string message);
 
-        Task FireWeapon(string message);
+        Task FireWeapon(ShootingAction shootingAction);
+
+        Task MoveAndShoot(MovementAction movementAction, ShootingAction shootingAction);
 
 
     }
