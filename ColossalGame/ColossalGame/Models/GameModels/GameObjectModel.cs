@@ -127,12 +127,12 @@ namespace ColossalGame.Models.GameModels
             var directionalVector =  playerPos - ourPos;
             directionalVector.Normalize();
             Vector2.Distance(ref playerPos,ref ourPos,out var distance);
-            ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
+            //ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
             Random rnd = new Random();
             
-            if (distance <= 512f/64f)
+            if (distance <= 1024f/64f)
             {
-                if (rnd.NextDouble() <= .9)
+                if (rnd.NextDouble() <= .05)
                 {
                     var randomVector = new Vector2((float)rnd.NextDouble()-(float)rnd.NextDouble(),(float)rnd.NextDouble()-(float)rnd.NextDouble());
                     randomVector.Normalize();
@@ -140,14 +140,23 @@ namespace ColossalGame.Models.GameModels
                 }
                 else
                 {
-                    ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
+                    ObjectBody.ApplyForce(directionalVector * this.Speed, ObjectBody.WorldCenter);
                 }
             }
             else
             {
-                ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
+                ObjectBody.ApplyForce(directionalVector * this.Speed, ObjectBody.WorldCenter);
             }
-            
+
+            if (ObjectBody.LinearVelocity.X > this.Speed)
+            {
+                ObjectBody.LinearVelocity = new Vector2(this.Speed,ObjectBody.LinearVelocity.Y);
+            }
+            if (ObjectBody.LinearVelocity.Y > this.Speed)
+            {
+                ObjectBody.LinearVelocity = new Vector2(ObjectBody.LinearVelocity.X, this.Speed);
+            }
+
 
         }
 
