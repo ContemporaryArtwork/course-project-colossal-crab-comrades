@@ -22,9 +22,11 @@ class GameMainMenuToggler extends React.PureComponent<GameMainMenuTogglerProps> 
     }
 
     render() {
-       
+        const gameStartRendererInlineProps = { // make sure all required component's inputs/Props keys&types match
+            playerClass: "HahaFunny!"
+        }
 
-            return (this.props.inGame ? <GameStartRenderer2 /> : <MainMenu />);
+        return (this.props.inGame ? <GameStartRenderer2 {...gameStartRendererInlineProps} /> : <MainMenu />);
 
 
         }    
