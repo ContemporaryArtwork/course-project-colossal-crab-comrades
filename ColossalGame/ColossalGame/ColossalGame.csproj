@@ -42,6 +42,7 @@
     <None Remove="ClientApp\src\components\UserAuth.tsx" />
     <None Remove="ClientApp\src\Helpers\GetCookies.ts" />
     <None Remove="ClientApp\src\Phaser\Game.ts" />
+    <None Remove="ClientApp\src\Phaser\HealthBar.ts" />
     <None Remove="ClientApp\src\Phaser\scenes\MainScene.ts" />
     <None Remove="ClientApp\src\store\GameData.ts" />
     <None Remove="ClientApp\src\store\GameMainMenuToggler.ts" />
