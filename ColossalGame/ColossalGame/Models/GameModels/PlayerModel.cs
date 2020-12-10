@@ -70,7 +70,7 @@ namespace ColossalGame.Models.GameModels
 
         public PlayerExportModel Export()
         {
-            var retVal = new PlayerExportModel {XPos = this.XPos, YPos = this.YPos, Username = this.Username, Radius = this.Radius, Health = this.Health, PlayerClass = this.PlayerClass};
+            var retVal = new PlayerExportModel {XPos = this.XPos, YPos = this.YPos, Username = this.Username, Radius = this.Radius, Health = this.Health, PlayerClass = this.PlayerClass, MaxHealth =  this.MaxHealth};
             return retVal;
         }
 

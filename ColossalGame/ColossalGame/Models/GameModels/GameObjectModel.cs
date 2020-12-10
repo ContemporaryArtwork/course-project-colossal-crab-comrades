@@ -86,7 +86,8 @@ namespace ColossalGame.Models.GameModels
         public new float Speed { get; set; } = 5f;
 
         public float Health { get; set; } = 100f;
-        
+
+        public float MaxHealth { get; set; } = 100f;
 
         private PlayerModel _closestPlayer;
 
@@ -168,7 +169,7 @@ namespace ColossalGame.Models.GameModels
 
         public EnemyExportModel Export()
         {
-            var retVal = new EnemyExportModel() { XPos = this.XPos, YPos = this.YPos, EnemyType = this.EnemyType, ID = this.ID, Radius = this.Radius, Health = this.Health };
+            var retVal = new EnemyExportModel() { XPos = this.XPos, YPos = this.YPos, EnemyType = this.EnemyType, ID = this.ID, Radius = this.Radius, Health = this.Health, MaxHealth = this.MaxHealth};
             return retVal;
         }
 

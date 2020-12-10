@@ -18,6 +18,8 @@ namespace ColossalGame.Models.GameModels
         public string Username { get; set; }
         public string PlayerClass { get; set; }
         public float Health { get; set; }
+
+        public float MaxHealth { get; set; }
     }
 
     public class BulletExportModel : GameObjectExportModel
@@ -31,6 +33,8 @@ namespace ColossalGame.Models.GameModels
         public string EnemyType { get; set; }
         public int ID { get; set; }
         public float Health { get; set; }
+
+        public float MaxHealth { get; set; }
     }
 
 
