@@ -18,6 +18,10 @@ type GameDataProps = //Rather than defining her, perhaps grab straight from the 
     typeof GameDataStore.actionCreators &
     RouteComponentProps<{}>;
 
+interface GameDataPassedState {
+    classChosen3: string
+}
+
 var cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 var w: Phaser.Input.Keyboard.Key;
 var a: Phaser.Input.Keyboard.Key;
@@ -29,7 +33,7 @@ var coords: Phaser.GameObjects.Text;
 
 export default class MainScene extends Phaser.Scene {
     private _gameObj: Game;
-    private _hostingComponent: React.PureComponent<GameDataProps>;
+    private _hostingComponent: React.PureComponent<GameDataProps, GameDataPassedState>;
 
     private _playerNameToContainerMap: Map<string, Phaser.GameObjects.Container>;
 
@@ -40,7 +44,7 @@ export default class MainScene extends Phaser.Scene {
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig, gameObj:Game) {
         super(config)
         this._gameObj = gameObj;
-        this._hostingComponent = this._gameObj.react as React.PureComponent<GameDataProps>; //hostingComponent allows us to access the store of the GameStartRender2 page.
+        this._hostingComponent = this._gameObj.react as React.PureComponent<GameDataProps, GameDataPassedState>; //hostingComponent allows us to access the store of the GameStartRender2 page.
 
         this._playerNameToContainerMap = new Map<string, Phaser.GameObjects.Container>();
         this._gameObjectsOnScreen = new Map<number, Phaser.GameObjects.Container>();
@@ -54,7 +58,7 @@ export default class MainScene extends Phaser.Scene {
 
         //this.load.atlas("tentacleBug", require(testBug).default ,  require(testBugJson).default);
         this.load.spritesheet("testBug", testBug, { frameWidth: 400, frameHeight: 400 });
-        this.load.spritesheet("player", require("../../assets/gameAssets/animation/player/ForwardWalkSpritesheet.png").default, { frameWidth: 300, frameHeight: 300 });
+        this.load.spritesheet("player", require("../../assets/gameAssets/animation/player/HeavySpriteSheet.png").default, { frameWidth: 300, frameHeight: 300 });
 
     }
 
@@ -95,7 +99,7 @@ export default class MainScene extends Phaser.Scene {
         this.add.image(-1024, -1024, "ground");
         this.add.image(1024, -1024, "ground");
         var pad = this.add.image(0, 0, "spawnPad");
-        pad.setScale(.5);
+        pad.setScale(.75);
         
 
         
@@ -264,69 +268,69 @@ export default class MainScene extends Phaser.Scene {
             //UP LEFT 
             var direction = GameDataStore.Direction.UpLeft;
             if (pointer.isDown) {
-                this._hostingComponent.props.moveAndShootAction(direction, angle);
+                this._hostingComponent.props.moveAndShootAction(direction, angle, this._hostingComponent.state.classChosen3);
             } else {
-                this._hostingComponent.props.sendMovementAction(direction);
+                this._hostingComponent.props.sendMovementAction(direction, this._hostingComponent.state.classChosen3);
             }
         }
         else if (up && right) {
             //UP RIGHT
             var direction = GameDataStore.Direction.UpRight;
             if (pointer.isDown) {
-                this._hostingComponent.props.moveAndShootAction(direction, angle);
+                this._hostingComponent.props.moveAndShootAction(direction, angle, this._hostingComponent.state.classChosen3);
             } else {
-                this._hostingComponent.props.sendMovementAction(direction);
+                this._hostingComponent.props.sendMovementAction(direction, this._hostingComponent.state.classChosen3);
             }
         }
         else if (down && left) {
             //DOWN LEFT
             var direction = GameDataStore.Direction.DownLeft;
             if (pointer.isDown) {
-                this._hostingComponent.props.moveAndShootAction(direction, angle);
+                this._hostingComponent.props.moveAndShootAction(direction, angle, this._hostingComponent.state.classChosen3);
             } else {
-                this._hostingComponent.props.sendMovementAction(direction);
+                this._hostingComponent.props.sendMovementAction(direction, this._hostingComponent.state.classChosen3);
             }
         }
         else if (down && right) {
             //DOWN RIGHT
             var direction = GameDataStore.Direction.DownRight;
             if (pointer.isDown) {
-                this._hostingComponent.props.moveAndShootAction(direction, angle);
+                this._hostingComponent.props.moveAndShootAction(direction, angle, this._hostingComponent.state.classChosen3);
             } else {
-                this._hostingComponent.props.sendMovementAction(direction);
+                this._hostingComponent.props.sendMovementAction(direction, this._hostingComponent.state.classChosen3);
             }
         }
         else if (up) {
             //UP
             var direction = GameDataStore.Direction.Up;
             if (pointer.isDown) {
-                this._hostingComponent.props.moveAndShootAction(direction, angle);
+                this._hostingComponent.props.moveAndShootAction(direction, angle, this._hostingComponent.state.classChosen3);
             } else {
-                this._hostingComponent.props.sendMovementAction(direction);
+                this._hostingComponent.props.sendMovementAction(direction, this._hostingComponent.state.classChosen3);
             }
         } else if (down) {
             //UP
             var direction = GameDataStore.Direction.Down;
             if (pointer.isDown) {
-                this._hostingComponent.props.moveAndShootAction(direction, angle);
+                this._hostingComponent.props.moveAndShootAction(direction, angle, this._hostingComponent.state.classChosen3);
             } else {
-                this._hostingComponent.props.sendMovementAction(direction);
+                this._hostingComponent.props.sendMovementAction(direction, this._hostingComponent.state.classChosen3);
             }
         } else if (left) {
             //UP
             var direction = GameDataStore.Direction.Left;
             if (pointer.isDown) {
-                this._hostingComponent.props.moveAndShootAction(direction, angle);
+                this._hostingComponent.props.moveAndShootAction(direction, angle, this._hostingComponent.state.classChosen3);
             } else {
-                this._hostingComponent.props.sendMovementAction(direction);
+                this._hostingComponent.props.sendMovementAction(direction, this._hostingComponent.state.classChosen3);
             }
         } else if (right) {
             //UP
             var direction = GameDataStore.Direction.Right;
             if (pointer.isDown) {
-                this._hostingComponent.props.moveAndShootAction(direction, angle);
+                this._hostingComponent.props.moveAndShootAction(direction, angle, this._hostingComponent.state.classChosen3);
             } else {
-                this._hostingComponent.props.sendMovementAction(direction);
+                this._hostingComponent.props.sendMovementAction(direction, this._hostingComponent.state.classChosen3);
             }
         }
 

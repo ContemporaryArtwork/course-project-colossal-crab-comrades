@@ -6,8 +6,8 @@ namespace ColossalGame.Models.GameModels
     {
         public float Health { get; set; } = 100f;
         public string Username { get; set; }
-
         public string PlayerClass { get; set; }
+
 
         public PlayerModel(Body b) : base(b)
         {

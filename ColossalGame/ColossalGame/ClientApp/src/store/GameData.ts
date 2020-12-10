@@ -16,7 +16,8 @@ export interface GameObjectExportModel {
 }
 export interface PlayerExportModel extends GameObjectExportModel {
     username: string,
-    health: number
+    health: number,
+    playerClass: string
 }
 export interface BulletExportModel extends GameObjectExportModel {
     id: number,
@@ -61,7 +62,8 @@ export enum Direction {
 export interface MovementAction {
     Username: string,
     Token: string,
-    Direction: Direction
+    Direction: Direction,
+    playerClass: string
 }
 export interface FireWeaponAction {
     Username: string,
@@ -70,7 +72,8 @@ export interface FireWeaponAction {
 }
 export interface SpawnAction {
     Username: string,
-    Token: string
+    Token: string,
+    playerClass: string
 }
 
 export interface Coordinates {
@@ -106,20 +109,23 @@ export interface InitializeAction {
     connection: HubConnection;
 }
 export interface SendMovementAction {
-    type: 'SEND_MOVEMENT';
-    direction: Direction;
+    type: 'SEND_MOVEMENT',
+    direction: Direction,
+    playerClass: string
 }
 export interface MoveAndShootAction {
-    type: 'MOVE_SHOOT';
-    direction: Direction;
-    angle: number;
+    type: 'MOVE_SHOOT',
+    direction: Direction,
+    angle: number,
+    playerClass: string
 }
 export interface SendFireWeaponAction {
     type: 'SEND_FIRE_WEAPON';
     angle: number;
 }
 export interface SpawnPlayerRequestAction {
-    type: 'SPAWN_PLAYER_REQUEST';
+    type: 'SPAWN_PLAYER_REQUEST',
+    playerClass: string
 }
 export interface SetUsernameAction {
     type: 'SET_USERNAME';
@@ -174,7 +180,7 @@ export const actionCreators = {
         }
     },
 
-    sendMovementAction: (direction: Direction): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    sendMovementAction: (direction: Direction, playerClass: string): AppThunkAction<KnownAction> => (dispatch, getState) => {
         const resultPromise = new Promise(async (resolve, reject) => {
             const appState = getState();
             let token = getCookie("auth-token");
@@ -187,15 +193,16 @@ export const actionCreators = {
                 const movementActionDTO: MovementAction = {
                     Username: appState.gameData.playerData.username,
                     Token: token,
-                    Direction: direction
+                    Direction: direction,
+                    playerClass: playerClass
                 }
                 appState.gameData.connection && appState.gameData.connection.invoke("SendMovement", movementActionDTO)
 
-                dispatch({ type: 'SEND_MOVEMENT', direction: direction });
+                dispatch({ type: 'SEND_MOVEMENT', direction: direction, playerClass: playerClass });
             }
         });
     },
-    moveAndShootAction: (direction: Direction, angle: number): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    moveAndShootAction: (direction: Direction, angle: number, playerClass: string): AppThunkAction<KnownAction> => (dispatch, getState) => {
         const resultPromise = new Promise(async (resolve, reject) => {
             const appState = getState();
             let token = getCookie("auth-token");
@@ -208,7 +215,8 @@ export const actionCreators = {
                 const movementActionDTO: MovementAction = {
                     Username: appState.gameData.playerData.username,
                     Token: token,
-                    Direction: direction
+                    Direction: direction,
+                    playerClass: playerClass
                 }
 
                 const fireActionDTO: FireWeaponAction = {
@@ -219,7 +227,7 @@ export const actionCreators = {
                 appState.gameData.connection &&
                     appState.gameData.connection.invoke("MoveAndShoot", movementActionDTO, fireActionDTO);
 
-                dispatch({ type: 'MOVE_SHOOT', direction: direction, angle:angle });
+                dispatch({ type: 'MOVE_SHOOT', direction: direction, angle: angle, playerClass: playerClass });
             }
         });
     },
@@ -240,7 +248,7 @@ export const actionCreators = {
             }
         });
     },
-    spawnPlayerAction: (): AppThunkAction<KnownAction> => (dispatch, getState) => { //Used to request to spawn the player. This method attempts to spawn the player using the username and auth-token cookies.
+    spawnPlayerAction: (playerClass: string): AppThunkAction<KnownAction> => (dispatch, getState) => { //Used to request to spawn the player. This method attempts to spawn the player using the username and auth-token cookies.
         const appState = getState();
         let token = getCookie("auth-token");
         if (appState && appState.gameData && appState.gameData.connection && appState.gameData.playerData.username && token) {
@@ -248,10 +256,11 @@ export const actionCreators = {
             const spawnActionDTO: SpawnAction = {
                 Username: appState.gameData.playerData.username,
                 Token: token,
+                playerClass: playerClass
             }
             appState.gameData.connection && appState.gameData.connection.invoke("SpawnPlayer", spawnActionDTO)
 
-            dispatch({ type: 'SPAWN_PLAYER_REQUEST' });
+            dispatch({ type: 'SPAWN_PLAYER_REQUEST', playerClass });
         }
     }
 };

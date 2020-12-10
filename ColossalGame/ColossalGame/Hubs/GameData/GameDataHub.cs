@@ -107,7 +107,7 @@ namespace ColossalGame.Hubs.GameData
                 {
                     if (!_gameLogic.IsPlayerSpawned(movementAction.Username)) //Should Deprecate this in favor of requiring the player to call the SpawnPlayer action.
                     {
-                        _gameLogic.HandleSpawnPlayer(movementAction.Username);
+                        _gameLogic.HandleSpawnPlayer(movementAction.Username, movementAction.PlayerClass);
                     }
                     
                     res = _interpolator.ParseAction(movementAction);
@@ -135,7 +135,7 @@ namespace ColossalGame.Hubs.GameData
                 {
                     if (!_gameLogic.IsPlayerSpawned(movementAction.Username)) //Should Deprecate this in favor of requiring the player to call the SpawnPlayer action.
                     {
-                        _gameLogic.HandleSpawnPlayer(movementAction.Username);
+                        _gameLogic.HandleSpawnPlayer(movementAction.Username, movementAction.PlayerClass);
                     }
 
 
@@ -178,7 +178,7 @@ namespace ColossalGame.Hubs.GameData
                     res = _gameLogic.IsPlayerSpawned(spawnAction.Username);
                     if (!res)
                     {
-                        _gameLogic.HandleSpawnPlayer(spawnAction.Username);
+                        _gameLogic.HandleSpawnPlayer(spawnAction.Username, spawnAction.PlayerClass);
                     }
                     responseString = res ? "Player Already Spawned." :
                                         "Player wasnt already spawned. Added Player to spawn queue.";

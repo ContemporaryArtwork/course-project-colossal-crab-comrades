@@ -214,21 +214,21 @@ body {
 }
 
 .Heavy {
-    height: 300px;
-    width: 300px;
+    height: 500px;
+    width: 500px;
     border: solid 1px;
     border-color: black;
     border-radius: 10px;
-    background-image: url("../assets/Crawl_class_icons/Heavy.png");
+    background-image: url("../assets/Crawl_class_icons/HeavyModel.png");
 }
 
 .Brawler {
-    height: 300px;
-    width: 300px;
+    height: 500px;
+    width: 500px;
     border: solid 1px;
     border-color: black;
     border-radius: 10px;
-    background-image: url("../assets/Crawl_class_icons/Brawler.png");
+    background-image: url("../assets/Crawl_class_icons/BrawlerModel.png");
 }
 
 .Builder {

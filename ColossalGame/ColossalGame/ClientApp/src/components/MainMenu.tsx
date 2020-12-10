@@ -47,7 +47,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
         this.OpenLoadout = this.OpenLoadout.bind(this);
         this.ChooseHeavy = this.ChooseHeavy.bind(this);
         this.ChooseBrawler = this.ChooseBrawler.bind(this);
-        this.ChooseBuilder = this.ChooseBuilder.bind(this);
+        //this.ChooseBuilder = this.ChooseBuilder.bind(this);
         this.closeOpenMenu = this.closeOpenMenu.bind(this);
     }
 
@@ -70,6 +70,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
         heav[0].style.backgroundColor = "purple";
         heav[0].textContent = "HEAVY";
         this.setState({ showLoadout: !this.state.showLoadout });
+        this.props.sendPlayerClass("heavy")
     }
 
     ChooseBrawler() {
@@ -77,14 +78,15 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
         braw[0].style.backgroundColor = "red";
         braw[0].textContent = "BRAWLER";
         this.setState({ showLoadout: !this.state.showLoadout });
+        this.props.sendPlayerClass("brawler")
     }
 
-    ChooseBuilder() {
-        var bui = document.getElementsByClassName("classColor") as HTMLCollectionOf<HTMLElement>;
-        bui[0].style.backgroundColor = "yellowgreen";
-        bui[0].textContent = "BUILDER";
-        this.setState({ showLoadout: !this.state.showLoadout });
-    }
+    //ChooseBuilder() {
+    //    var bui = document.getElementsByClassName("classColor") as HTMLCollectionOf<HTMLElement>;
+    //    bui[0].style.backgroundColor = "yellowgreen";
+    //    bui[0].textContent = "BUILDER";
+    //    this.setState({ showLoadout: !this.state.showLoadout });
+    //}
 
     render() {
         const req = request(
@@ -167,6 +169,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
                                     <button className="loadButton" onClick={this.ChooseBrawler}>BRAWLER</button>
                                 </div>
 
+                                {/*
                                 <div className="classContainer">
                                     <div className="Builder"></div>
                                     <p> Class Summary: <br />
@@ -179,6 +182,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
                                     </p>
                                     <button className="loadButton" onClick={this.ChooseBuilder}>BUILDER</button>
                                 </div>
+                                */}
                             </div>
                         </div>
                         }
