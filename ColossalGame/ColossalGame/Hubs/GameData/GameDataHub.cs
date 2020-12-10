@@ -124,6 +124,48 @@ namespace ColossalGame.Hubs.GameData
             await Clients.Caller.ReceiveString(responseString);
         }
 
+        public async Task MoveAndShoot(MovementAction movementAction, ShootingAction shootingAction)
+        {
+            bool res = true;
+
+
+            if (_interpolator != null)
+            {
+                try
+                {
+                    if (!_gameLogic.IsPlayerSpawned(movementAction.Username)) //Should Deprecate this in favor of requiring the player to call the SpawnPlayer action.
+                    {
+                        _gameLogic.HandleSpawnPlayer(movementAction.Username);
+                    }
+
+
+                    var x = Task.Run((() => _interpolator.ParseAction(movementAction)));
+                    
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                }
+
+                try
+                {
+                    
+
+                    var y = Task.Run((() => _interpolator.ParseAction(shootingAction)));
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                }
+
+            }
+
+            var responseString = res ? "Action accepted by interpolator" :
+                "Action rejected by interpolator. Action sent too close to previous action.";
+            await Clients.Caller.ReceiveString(responseString);
+        }
+
         public async Task SpawnPlayer(SpawnAction spawnAction)
         {
             bool res;

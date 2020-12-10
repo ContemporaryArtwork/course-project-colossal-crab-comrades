@@ -109,6 +109,11 @@ export interface SendMovementAction {
     type: 'SEND_MOVEMENT';
     direction: Direction;
 }
+export interface MoveAndShootAction {
+    type: 'MOVE_SHOOT';
+    direction: Direction;
+    angle: number;
+}
 export interface SendFireWeaponAction {
     type: 'SEND_FIRE_WEAPON';
     angle: number;
@@ -138,7 +143,7 @@ export interface ReceivePositionsUpdateAction {
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-export type KnownAction = InitializeAction | SendMovementAction | SendFireWeaponAction | SpawnPlayerRequestAction | SetUsernameAction | TempLoginAction | ReceivedTokenAction | ReceivePositionsUpdateAction;
+export type KnownAction = InitializeAction | SendMovementAction | SendFireWeaponAction | SpawnPlayerRequestAction | SetUsernameAction | TempLoginAction | ReceivedTokenAction | ReceivePositionsUpdateAction | MoveAndShootAction;
 
 const SignalRActionsList: string[] = ["RECEIVED_STRING", "RECEIVE_TOKEN", "RECEIVE_POSITIONS_UPDATE"];
 // ----------------
@@ -187,6 +192,34 @@ export const actionCreators = {
                 appState.gameData.connection && appState.gameData.connection.invoke("SendMovement", movementActionDTO)
 
                 dispatch({ type: 'SEND_MOVEMENT', direction: direction });
+            }
+        });
+    },
+    moveAndShootAction: (direction: Direction, angle: number): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        const resultPromise = new Promise(async (resolve, reject) => {
+            const appState = getState();
+            let token = getCookie("auth-token");
+            if (appState &&
+                appState.gameData &&
+                appState.gameData.connection &&
+                appState.gameData.playerData.username &&
+                token) {
+
+                const movementActionDTO: MovementAction = {
+                    Username: appState.gameData.playerData.username,
+                    Token: token,
+                    Direction: direction
+                }
+
+                const fireActionDTO: FireWeaponAction = {
+                    Username: appState.gameData.playerData.username,
+                    Token: token,
+                    Angle: angle
+                }
+                appState.gameData.connection &&
+                    appState.gameData.connection.invoke("MoveAndShoot", movementActionDTO, fireActionDTO);
+
+                dispatch({ type: 'MOVE_SHOOT', direction: direction, angle:angle });
             }
         });
     },

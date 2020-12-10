@@ -643,7 +643,7 @@ namespace ColossalGame.Services
         private System.Threading.Timer waveTimer;
         private void SpawnWave()
         {
-            aiController.SpawnWave(100*PlayerDictionary.Count, 1600f / ConversionFactor, 2000f / ConversionFactor, ref spawnQueue);
+            aiController.SpawnWave(AIController.EnemyStrength.Hard,AIController.WaveSize.XtraLarge,PlayerDictionary.Count, 1600f / ConversionFactor, 2000f / ConversionFactor, ref spawnQueue);
         }
 
         private System.Threading.Timer _aiBrainTimer;
@@ -707,14 +707,16 @@ namespace ColossalGame.Services
         /// </summary>
         private void StepWorld()
         {
-            if (PlayerDictionary.IsEmpty&&deathCounterDictionary.IsEmpty) return; 
+            
             var solverIterations = new SolverIterations {PositionIterations = 2, VelocityIterations = 4};
 
             //lock because sometimes world stepping will take too long
             lock (_world)
             {
+                
                 Cleanup();
                 Spawn();
+                if (PlayerDictionary.IsEmpty) return;
                 ProcessActionQueue();
                 StepAiMovement();
 
@@ -774,7 +776,7 @@ namespace ColossalGame.Services
                 playerSpawn.LinearDamping = 4f;
                 playerSpawn.Speed = 20f;
                 playerSpawn.Radius = .4f;
-                playerSpawn.Damage = 15f;
+                playerSpawn.Damage = 10f;
                 playerSpawn.InitialHealth = 100f;
                 spawnQueue.Enqueue(playerSpawn);
             }

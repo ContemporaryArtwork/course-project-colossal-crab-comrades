@@ -17,6 +17,8 @@ namespace ColossalGame.Hubs.GameData
 
         Task FireWeapon(ShootingAction shootingAction);
 
+        Task MoveAndShoot(MovementAction movementAction, ShootingAction shootingAction);
+
 
     }
 }

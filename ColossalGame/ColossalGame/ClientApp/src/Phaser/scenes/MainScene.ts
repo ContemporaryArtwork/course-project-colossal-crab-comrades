@@ -234,21 +234,101 @@ export default class MainScene extends Phaser.Scene {
         var playerSprite = <Phaser.Physics.Arcade.Sprite>player.getByName("playerSprite");
         playerSprite.setRotation(Phaser.Math.Angle.CounterClockwise(angle) + 1.5708);
 
-       
-        if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft);  }
+        if (up && left) {
+            //UP LEFT 
+            var direction = GameDataStore.Direction.UpLeft;
+            if (pointer.isDown) {
+                this._hostingComponent.props.moveAndShootAction(direction, angle);
+            } else {
+                this._hostingComponent.props.sendMovementAction(direction);
+            }
+        }
+        else if (up && right) {
+            //UP RIGHT
+            var direction = GameDataStore.Direction.UpRight;
+            if (pointer.isDown) {
+                this._hostingComponent.props.moveAndShootAction(direction, angle);
+            } else {
+                this._hostingComponent.props.sendMovementAction(direction);
+            }
+        }
+        else if (down && left) {
+            //DOWN LEFT
+            var direction = GameDataStore.Direction.DownLeft;
+            if (pointer.isDown) {
+                this._hostingComponent.props.moveAndShootAction(direction, angle);
+            } else {
+                this._hostingComponent.props.sendMovementAction(direction);
+            }
+        }
+        else if (down && right) {
+            //DOWN RIGHT
+            var direction = GameDataStore.Direction.DownRight;
+            if (pointer.isDown) {
+                this._hostingComponent.props.moveAndShootAction(direction, angle);
+            } else {
+                this._hostingComponent.props.sendMovementAction(direction);
+            }
+        }
+        else if (up) {
+            //UP
+            var direction = GameDataStore.Direction.Up;
+            if (pointer.isDown) {
+                this._hostingComponent.props.moveAndShootAction(direction, angle);
+            } else {
+                this._hostingComponent.props.sendMovementAction(direction);
+            }
+        } else if (down) {
+            //UP
+            var direction = GameDataStore.Direction.Down;
+            if (pointer.isDown) {
+                this._hostingComponent.props.moveAndShootAction(direction, angle);
+            } else {
+                this._hostingComponent.props.sendMovementAction(direction);
+            }
+        } else if (left) {
+            //UP
+            var direction = GameDataStore.Direction.Left;
+            if (pointer.isDown) {
+                this._hostingComponent.props.moveAndShootAction(direction, angle);
+            } else {
+                this._hostingComponent.props.sendMovementAction(direction);
+            }
+        } else if (right) {
+            //UP
+            var direction = GameDataStore.Direction.Right;
+            if (pointer.isDown) {
+                this._hostingComponent.props.moveAndShootAction(direction, angle);
+            } else {
+                this._hostingComponent.props.sendMovementAction(direction);
+            }
+        }
+
+        else if (pointer.isDown) {
+            this._hostingComponent.props.fireWeaponAction(angle);
+        }
+        
+        
+
+
+        /*if (up && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpLeft);  }
         else if (up && right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.UpRight); }
         else if (down && left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownLeft); }
         else if (down && right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.DownRight); }
-        else if (up) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Up); }
+        else if (pointer.isDown && up) { this._hostingComponent.props.moveAndShootAction(GameDataStore.Direction.Up, angle); }
+        else if (pointer.isDown && down) { this._hostingComponent.props.moveAndShootAction(GameDataStore.Direction.Down, angle); }  
+        else if (pointer.isDown && left) { this._hostingComponent.props.moveAndShootAction(GameDataStore.Direction.Up, angle); }
+        else if (pointer.isDown && up) { this._hostingComponent.props.moveAndShootAction(GameDataStore.Direction.Up, angle); }
+        else if (up) {  }
         else if (left) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Left); }
         else if (down) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Down); }
         else if (right) { this._hostingComponent.props.sendMovementAction(GameDataStore.Direction.Right); }
         else if (pointer.isDown) {
 
             //console.log(Phaser.Math.Angle.CounterClockwise(angle));
-            this._hostingComponent.props.fireWeaponAction(angle);
+            
 
-        }
+        }*/
         
        
         
