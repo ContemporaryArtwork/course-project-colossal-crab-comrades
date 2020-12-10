@@ -411,7 +411,11 @@ namespace ColossalGame.Services
 
                 if (fixtureA.Body.Tag is PlayerModel p1)
                 {
-                    p1.Hurt(enemyModel.Damage);
+                    if (fixtureB.Body.Tag is EnemyModel e && !e.Dead)
+                    {
+                        p1.Hurt(enemyModel.Damage);
+                    }
+                    
                     if (p1.Dead)
                     {
                         MarkEntityForDestruction(p1);
@@ -424,7 +428,11 @@ namespace ColossalGame.Services
 
                 if (fixtureB.Body.Tag is PlayerModel p2)
                 {
-                    p2.Hurt(enemyModel.Damage);
+                    if (fixtureA.Body.Tag is EnemyModel e && !e.Dead)
+                    {
+                        p2.Hurt(enemyModel.Damage);
+                    }
+                    
                     if (p2.Dead)
                     {
                         MarkEntityForDestruction(p2);
