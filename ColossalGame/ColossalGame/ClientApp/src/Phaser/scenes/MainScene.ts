@@ -2,7 +2,7 @@ import * as Phaser from 'phaser'
 import { RouteComponentProps } from 'react-router';
 import Game from '../Game'
 import * as GameDataStore from "../../store/GameData";
-
+import HealthBar from "../HealthBar";
 
 
 //Test Big Bug
@@ -135,8 +135,12 @@ export default class MainScene extends Phaser.Scene {
             curText.y = curText.y - 20;
 
             curText = curText.setName("playerText");
+
+            let healthbar = new HealthBar(this, 0, 0 - (curPlayer.displayHeight / 4), 80);
+            healthbar.setName("healthbar");
             curPlayerContainer.add(curPlayer);
             curPlayerContainer.add(curText);
+            curPlayerContainer.add(healthbar);
 
             if (this._hostingComponent.props.playerData.username == key) {
                 //Found player in the create method. This means player spawned by time create was called. Attach camera to this container so that the camera follows the player.
@@ -206,7 +210,11 @@ export default class MainScene extends Phaser.Scene {
                 var aiwidth = calculateProportionalWidth(aiBugObj.radius, this.basePlayerSize);
                 aiSprite.setDisplaySize(aiwidth, aiwidth);
 
+                let healthbar = new HealthBar(this, 0, 0 - (aiSprite.displayHeight / 4), 40);
+                healthbar.setName("healthbar");
+
                 aiContainer.add(aiSprite);
+                aiContainer.add(healthbar);
 
                 this._gameObjectsOnScreen.set(aiBugObj.id, aiContainer);
 
@@ -400,9 +408,13 @@ export default class MainScene extends Phaser.Scene {
                     curText.y = curText.y - 20;
 
                     curText = curText.setName("playerText");
-                    
+
+                    let healthbar = new HealthBar(this, 0, 0 - (curPlayer.displayHeight / 4), 80);
+                    healthbar.setName("healthbar");
+
                     curPlayerContainer.add(curPlayer);
                     curPlayerContainer.add(curText);
+                    curPlayerContainer.add(healthbar);
 
                     if (this._hostingComponent.props.playerData.username == key) {
                         //Found player in the update loop. Attach camera to this container so that the camera follows the player.
@@ -478,6 +490,9 @@ export default class MainScene extends Phaser.Scene {
                         yPos = Phaser.Math.Interpolation.Bezier([yPos, playerContainer.y], .8);
                         playerContainer.x = xPos;
                         playerContainer.y = yPos;
+
+                        var healthbar = <HealthBar>playerContainer.getByName("healthbar");
+                        healthbar.setHealthBar(value.health);
                     }
                     
                 }
@@ -544,7 +559,12 @@ export default class MainScene extends Phaser.Scene {
                         
                         var aiwidth = calculateProportionalWidth(aiBugObj.radius, this.basePlayerSize);
                         aiSprite.setDisplaySize(aiwidth, aiwidth);
+
+                        let healthbar = new HealthBar(this, 0, 0 - (aiSprite.displayHeight / 4), 40);
+                        healthbar.setName("healthbar");
+
                         aiContainer.add(aiSprite);
+                        aiContainer.add(healthbar);
 
                         this._gameObjectsOnScreen.set(aiBugObj.id, aiContainer);
                     }
@@ -560,6 +580,8 @@ export default class MainScene extends Phaser.Scene {
                             yPos = Phaser.Math.Interpolation.Bezier([yPos, aiContainer.y], .8);
                             aiContainer.x = xPos;
                             aiContainer.y = yPos;
+                            var healthbar = <HealthBar>aiContainer.getByName("healthbar");
+                            healthbar.setHealthBar(value.health);
                         }
                         else {
                             console.log("its null in update. have id but no conainter");
