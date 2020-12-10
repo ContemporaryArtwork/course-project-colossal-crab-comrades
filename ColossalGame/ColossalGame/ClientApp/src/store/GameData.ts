@@ -198,7 +198,7 @@ export const actionCreators = {
                 }
                 appState.gameData.connection && appState.gameData.connection.invoke("SendMovement", movementActionDTO)
 
-                dispatch({ type: 'SEND_MOVEMENT', direction: direction });
+                dispatch({ type: 'SEND_MOVEMENT', direction: direction, playerClass: playerClass });
             }
         });
     },
@@ -227,7 +227,7 @@ export const actionCreators = {
                 appState.gameData.connection &&
                     appState.gameData.connection.invoke("MoveAndShoot", movementActionDTO, fireActionDTO);
 
-                dispatch({ type: 'MOVE_SHOOT', direction: direction, angle:angle });
+                dispatch({ type: 'MOVE_SHOOT', direction: direction, angle: angle, playerClass: playerClass });
             }
         });
     },

@@ -44,7 +44,7 @@ export default class MainScene extends Phaser.Scene {
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig, gameObj:Game) {
         super(config)
         this._gameObj = gameObj;
-        this._hostingComponent = this._gameObj.react as React.PureComponent<GameDataProps>; //hostingComponent allows us to access the store of the GameStartRender2 page.
+        this._hostingComponent = this._gameObj.react as React.PureComponent<GameDataProps, GameDataPassedState>; //hostingComponent allows us to access the store of the GameStartRender2 page.
 
         this._playerNameToContainerMap = new Map<string, Phaser.GameObjects.Container>();
         this._gameObjectsOnScreen = new Map<number, Phaser.GameObjects.Container>();
