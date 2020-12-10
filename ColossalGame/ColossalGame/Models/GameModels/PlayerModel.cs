@@ -51,6 +51,7 @@ namespace ColossalGame.Models.GameModels
             }
         }
 
+        public float FireRate { get; set; } = 200f;
         public void LevelUp()
         {
             Level++;

@@ -149,6 +149,18 @@ namespace ColossalGame.Services
             
         }
 
+        public float getFireRate(string username)
+        {
+            if (PlayerDictionary.TryGetValue(username, out var playerModel))
+            {
+                return playerModel.FireRate;
+            }
+            else
+            {
+                throw new UnspawnedException();
+            }
+        }
+
 
         private Vector2 ConvertMovementActionToVector2(MovementAction action, PlayerModel playerModel)
         {
@@ -313,7 +325,7 @@ namespace ColossalGame.Services
             var bulletModel = new BulletModel(bullet)
             {
                 BulletType = "small", //TODO: Make this better somehow?
-                Damage = 10f
+                Damage = 10f+creator.Damage
             };
 
             bullet.Tag = bulletModel;
@@ -564,9 +576,9 @@ namespace ColossalGame.Services
                         {
                             Reset();
                             SetupWorld();
-                            Start();
                         }
-                        
+                        Start();
+
                     }
                 }
                 else
@@ -848,7 +860,7 @@ namespace ColossalGame.Services
                 playerSpawn.LinearDamping = 4f;
                 playerSpawn.Speed = 20f;
                 playerSpawn.Radius = .4f;
-                playerSpawn.Damage = 10f;
+                playerSpawn.Damage = .5f;
                 playerSpawn.InitialHealth = 100f;
                 playerSpawn.PlayerClass = playerClass;
                 spawnQueue.Enqueue(playerSpawn);
