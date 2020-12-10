@@ -38,10 +38,10 @@ namespace ColossalGame.Services
         {
 
             //Make sure that the user is authenticated
-            /*if (!_ls.VerifyToken(action.Token, action.Username))
+            if (!_ls.VerifyToken(action.Token, action.Username))
             {
                 throw new InvalidLoginException("Either the token or the username is invalid.");
-            }*/
+            }
 
             try
             {
