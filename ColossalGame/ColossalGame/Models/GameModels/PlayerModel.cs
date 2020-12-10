@@ -9,7 +9,6 @@ namespace ColossalGame.Models.GameModels
 
         public float MaxHealth { get; set; } = 100f;
         public string Username { get; set; }
-
         public string PlayerClass { get; set; }
 
         public float Exp { get; set; } = 0;

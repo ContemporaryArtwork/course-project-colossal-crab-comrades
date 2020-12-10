@@ -20,7 +20,7 @@
 
     public class MovementAction : AUserAction
     {
-        
+        public string PlayerClass { get; set; } //Temporary, since we use this for player repawning after waves
         public EDirection Direction { get; set; }
         
 
@@ -28,7 +28,7 @@
 
     public class SpawnAction: AUserAction
     {
-        
+        public string PlayerClass { get; set; }
     }
 
 

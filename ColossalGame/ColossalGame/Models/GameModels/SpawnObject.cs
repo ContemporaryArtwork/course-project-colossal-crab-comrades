@@ -27,11 +27,7 @@ namespace ColossalGame.Models.GameModels
     public class PlayerSpawnObject : SpawnObject
     {
         public string Username { get; set; }
-
         public string PlayerClass { get; set; }
-
-        
-        
     }
 
     public class BulletSpawnObject : SpawnObject
