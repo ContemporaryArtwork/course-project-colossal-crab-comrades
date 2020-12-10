@@ -76,6 +76,7 @@ namespace ColossalGame.Models.AI
         {
             EnemySpawnObject enemySpawn = new EnemySpawnObject();
             var rand = new Random();
+            var entropy = (float)rand.NextDouble();
             if (waveType == WaveTypes.Ring)
             {
                 //Set enemy spawn using MATH POWAH
@@ -93,7 +94,7 @@ namespace ColossalGame.Models.AI
             }
             else if (waveType == WaveTypes.Corners)
             {
-                var entropy = (float)rand.NextDouble();
+                
                 if (entropy >= .5)
                 {
                     enemySpawn.InitialPosition = new Vector2(sideLength/2+entropy,sideLength/2+entropy);
@@ -105,7 +106,7 @@ namespace ColossalGame.Models.AI
             }
             else if (waveType == WaveTypes.InsideOut)
             {
-                enemySpawn.InitialPosition = Vector2.Zero;
+                enemySpawn.InitialPosition = new Vector2(entropy,-entropy);
             }
 
             var enemyType = "alien_tick";
@@ -176,9 +177,25 @@ namespace ColossalGame.Models.AI
                     waveCount = 10 * players;
                     break;
             }
+            var rand = new Random();
+            var randomNumber = rand.NextDouble();
+            WaveTypes waveType ;
+            if (randomNumber <= .5)
+            {
+                waveType = WaveTypes.Corners;
+            }else if (randomNumber <= .75)
+            {
+                waveType = WaveTypes.Ring;
+            }
+            else
+            {
+                waveType = WaveTypes.InsideOut;
+            }
+
+
             Parallel.For(0, waveCount, (i =>
             {
-                SpawnOneTick(enemyStrength, ref tempSQ, WaveTypes.Corners,innerRadius,outerRadius,sideLength);
+                SpawnOneTick(enemyStrength, ref tempSQ, waveType,innerRadius,outerRadius,sideLength);
             }));
             spawnQueue = tempSQ;
         }
