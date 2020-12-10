@@ -70,6 +70,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
         heav[0].style.backgroundColor = "purple";
         heav[0].textContent = "HEAVY";
         this.setState({ showLoadout: !this.state.showLoadout });
+        this.props.sendPlayerClass("heavy")
     }
 
     ChooseBrawler() {
@@ -77,6 +78,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
         braw[0].style.backgroundColor = "red";
         braw[0].textContent = "BRAWLER";
         this.setState({ showLoadout: !this.state.showLoadout });
+        this.props.sendPlayerClass("brawler")
     }
 
     //ChooseBuilder() {
