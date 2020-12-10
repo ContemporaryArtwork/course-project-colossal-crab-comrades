@@ -28,6 +28,8 @@ namespace ColossalGame.Models.GameModels
     {
         public string Username { get; set; }
         public string PlayerClass { get; set; }
+
+        public float FireRate { get; set; }
     }
 
     public class BulletSpawnObject : SpawnObject

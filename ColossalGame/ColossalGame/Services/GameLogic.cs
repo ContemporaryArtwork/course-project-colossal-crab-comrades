@@ -281,7 +281,7 @@ namespace ColossalGame.Services
             pm.LinearDamping = playerSpawn.LinearDamping;
             
 
-            SpinWait.SpinUntil(() => !_world.IsLocked);
+            
             _world.Add(pm);
 
             var playerModel = new PlayerModel(pm);
@@ -289,6 +289,8 @@ namespace ColossalGame.Services
             playerModel.PlayerClass = playerSpawn.PlayerClass;
             playerModel.Health = playerSpawn.InitialHealth;
             playerModel.Damage = playerSpawn.Damage;
+            playerModel.FireRate = playerSpawn.FireRate;
+            playerModel.MaxHealth = playerSpawn.InitialHealth;
             pm.Tag = playerModel;
 
             //PlayerDictionary.Add(username, pm);
@@ -325,7 +327,7 @@ namespace ColossalGame.Services
             var bulletModel = new BulletModel(bullet)
             {
                 BulletType = "small", //TODO: Make this better somehow?
-                Damage = 10f+creator.Damage
+                Damage = creator.Damage
             };
 
             bullet.Tag = bulletModel;
@@ -860,10 +862,24 @@ namespace ColossalGame.Services
                 playerSpawn.PlayerClass = playerClass;
                 playerSpawn.InitialPosition = new Vector2(xPos, yPos);
                 playerSpawn.LinearDamping = 4f;
-                playerSpawn.Speed = 20f;
                 playerSpawn.Radius = .4f;
-                playerSpawn.Damage = .5f;
-                playerSpawn.InitialHealth = 100f;
+
+                
+                if (playerClass == "heavy")
+                {
+                    playerSpawn.FireRate = 120f;
+                    playerSpawn.Speed = 15f;
+                    playerSpawn.InitialHealth = 150f;
+                    playerSpawn.Damage = 5f;
+                }
+                else
+                {
+                    playerSpawn.FireRate = 200f;
+                    playerSpawn.Speed = 20f;
+                    playerSpawn.InitialHealth = 100f;
+                    playerSpawn.Damage = 10f;
+                }
+                
                 playerSpawn.PlayerClass = playerClass;
                 spawnQueue.Enqueue(playerSpawn);
             }
