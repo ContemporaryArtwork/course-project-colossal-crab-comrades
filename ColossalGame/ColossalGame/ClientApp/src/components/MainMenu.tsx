@@ -96,10 +96,10 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
             },
             response => {
                 console.log(response.statusCode); // 200
-                console.log("fuck");
+                
             }
         );
-        console.log("fuck");
+        
         if (document.cookie == "") {
             return <Redirect to="/signup" />
         }
