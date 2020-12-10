@@ -638,7 +638,7 @@ namespace ColossalGame.Services
                 {
                     PlayerDictionary.TryGetValue(s.Username, out var creator);
                     if (creator==null) throw new Exception("Player not found when spawning bullet");
-                    var bulletSpawn = new BulletSpawnObject(s.Angle,20f,creator,10f,.3f,creator.ObjectBody.Position);
+                    var bulletSpawn = new BulletSpawnObject(s.Angle,20f,creator,10f,.1f,creator.ObjectBody.Position);
                     bulletSpawn.InitialMass = .02f;
                     spawnQueue.Enqueue(bulletSpawn);
 
