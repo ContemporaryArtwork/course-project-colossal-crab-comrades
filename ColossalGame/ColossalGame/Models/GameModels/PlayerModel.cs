@@ -7,13 +7,15 @@ namespace ColossalGame.Models.GameModels
         public float Health { get; set; } = 100f;
         public string Username { get; set; }
 
+        public string PlayerClass { get; set; }
+
         public PlayerModel(Body b) : base(b)
         {
         }
 
         public PlayerExportModel Export()
         {
-            var retVal = new PlayerExportModel {XPos = this.XPos, YPos = this.YPos, Username = this.Username, Radius = this.Radius, Health = this.Health};
+            var retVal = new PlayerExportModel {XPos = this.XPos, YPos = this.YPos, Username = this.Username, Radius = this.Radius, Health = this.Health, PlayerClass = this.PlayerClass};
             return retVal;
         }
 

@@ -94,14 +94,28 @@ namespace ColossalGame.Models.AI
             }
             else if (waveType == WaveTypes.Corners)
             {
-                
-                if (entropy >= .5)
+                var entropy2 = (float)rand.NextDouble();
+                if (entropy2 >= .5)
                 {
-                    enemySpawn.InitialPosition = new Vector2(sideLength/2+entropy,sideLength/2+entropy);
+                    if (entropy >= .5)
+                    {
+                        enemySpawn.InitialPosition = new Vector2(sideLength / 2 + entropy, sideLength / 2 + entropy);
+                    }
+                    else
+                    {
+                        enemySpawn.InitialPosition = new Vector2(-sideLength / 2 + entropy, -sideLength / 2 + entropy);
+                    }
                 }
                 else
                 {
-                    enemySpawn.InitialPosition = new Vector2(-sideLength/2+entropy,-sideLength/2+entropy);
+                    if (entropy >= .5)
+                    {
+                        enemySpawn.InitialPosition = new Vector2(-sideLength / 2 + entropy, sideLength / 2 + entropy);
+                    }
+                    else
+                    {
+                        enemySpawn.InitialPosition = new Vector2(sideLength / 2 + entropy, -sideLength / 2 + entropy);
+                    }
                 }
             }
             else if (waveType == WaveTypes.InsideOut)
@@ -116,31 +130,31 @@ namespace ColossalGame.Models.AI
             {
                 case EnemyStrength.Easy:
                     enemySpawn.EnemyType = enemyType;
-                    enemySpawn.Speed = .4f;
+                    enemySpawn.Speed = 11f;
                     enemySpawn.Damage = 2f;
                     enemySpawn.InitialHealth = 10f;
                     break;
                 case EnemyStrength.EasyMedium:
                     enemySpawn.EnemyType = enemyType;
-                    enemySpawn.Speed = .5f;
+                    enemySpawn.Speed = 12f;
                     enemySpawn.Damage = 5f;
                     enemySpawn.InitialHealth = 10f;
                     break;
                 case EnemyStrength.Medium:
                     enemySpawn.EnemyType = enemyType;
-                    enemySpawn.Speed = .6f;
+                    enemySpawn.Speed = 14f;
                     enemySpawn.Damage = 10f;
                     enemySpawn.InitialHealth = 20f;
                     break;
                 case EnemyStrength.Hard:
                     enemySpawn.EnemyType = enemyType;
-                    enemySpawn.Speed = .65f;
+                    enemySpawn.Speed = 16f;
                     enemySpawn.Damage = 25f;
                     enemySpawn.InitialHealth = 25f;
                     break;
                 case EnemyStrength.VeryHard:
                     enemySpawn.EnemyType = enemyType;
-                    enemySpawn.Speed = .67f;
+                    enemySpawn.Speed = 18f;
                     enemySpawn.Damage = 35f;
                     enemySpawn.InitialHealth = 30f;
                     break;
@@ -183,13 +197,13 @@ namespace ColossalGame.Models.AI
             if (randomNumber <= .5)
             {
                 waveType = WaveTypes.Corners;
-            }else if (randomNumber <= .75)
+            }else if (randomNumber <= .80)
             {
-                waveType = WaveTypes.Ring;
+                waveType = WaveTypes.InsideOut;
             }
             else
             {
-                waveType = WaveTypes.InsideOut;
+                waveType = WaveTypes.Ring;
             }
 
 

@@ -206,16 +206,18 @@ namespace ColossalGame.Services
 
         public void Reset()
         {
-            Parallel.ForEach(_objectDictionary, ((pair, state) =>
-            {
-                var (key, value) = pair;
-                MarkEntityForDestruction(value);
-            }));
-            aiController.Reset();
-            PlayerDictionary.Clear();
-            deathCounterDictionary.Clear();
-            _objectDictionary.Clear();
-            _world = new World(Vector2.Zero);
+            
+                Parallel.ForEach(_objectDictionary, ((pair, state) =>
+                {
+                    var (key, value) = pair;
+                    MarkEntityForDestruction(value);
+                }));
+                aiController.Reset();
+                PlayerDictionary.Clear();
+                deathCounterDictionary.Clear();
+                _objectDictionary.Clear();
+                _world = new World(Vector2.Zero);
+            
         }
 
         public bool IsPlayerSpawned(string username)
@@ -265,6 +267,7 @@ namespace ColossalGame.Services
             pm.Mass = playerSpawn.InitialMass;
             //Friction for moving around in space
             pm.LinearDamping = playerSpawn.LinearDamping;
+            
 
             SpinWait.SpinUntil(() => !_world.IsLocked);
             _world.Add(pm);
@@ -273,6 +276,7 @@ namespace ColossalGame.Services
             playerModel.Username = username;
             playerModel.Health = playerSpawn.InitialHealth;
             playerModel.Damage = playerSpawn.Damage;
+            playerModel.PlayerClass = playerSpawn.PlayerClass;
             pm.Tag = playerModel;
 
             //PlayerDictionary.Add(username, pm);
@@ -411,7 +415,15 @@ namespace ColossalGame.Services
 
                 if (fixtureA.Body.Tag is PlayerModel p1)
                 {
-                    p1.Hurt(enemyModel.Damage);
+                    if (fixtureB.Body.Tag is EnemyModel e && !e.Dead)
+                    {
+                        p1.Hurt(enemyModel.Damage);
+                    }
+                    if (fixtureB.Body.Tag is EnemyModel e2 && e2.Dead)
+                    {
+                        return false;
+                    }
+
                     if (p1.Dead)
                     {
                         MarkEntityForDestruction(p1);
@@ -424,7 +436,15 @@ namespace ColossalGame.Services
 
                 if (fixtureB.Body.Tag is PlayerModel p2)
                 {
-                    p2.Hurt(enemyModel.Damage);
+                    if (fixtureA.Body.Tag is EnemyModel e && !e.Dead)
+                    {
+                        p2.Hurt(enemyModel.Damage);
+                    }
+                    if (fixtureA.Body.Tag is EnemyModel e2&& e2.Dead)
+                    {
+                        return false;
+                    }
+                    
                     if (p2.Dead)
                     {
                         MarkEntityForDestruction(p2);
@@ -435,6 +455,7 @@ namespace ColossalGame.Services
                     }
                 }
                 return true;
+                
             };
 
 
@@ -518,9 +539,13 @@ namespace ColossalGame.Services
 
                     if (PlayerDictionary.IsEmpty)
                     {
-                        Reset();
-                        SetupWorld();
-                        Restart();
+                        lock (_world)
+                        {
+                            Reset();
+                            SetupWorld();
+                            Restart();
+                        }
+                        
                     }
                 }
                 else
@@ -684,7 +709,7 @@ namespace ColossalGame.Services
         /// </summary>
         private void Start()
         {
-            waveNum = 1;
+            
             //Old method:
             //var instanceCaller = new Thread(RunWorld);
             //var instanceCaller2 = new Thread(StartPublishing);
@@ -705,7 +730,7 @@ namespace ColossalGame.Services
 
         private void Restart()
         {
-
+            waveNum = 1;
             _worldTimer.DisposeAsync();
             _publishTimer.DisposeAsync();
             _aiBrainTimer.DisposeAsync();
@@ -789,7 +814,7 @@ namespace ColossalGame.Services
         /// <param name="username">Username to spawn. Must exist in the user database</param>
         /// <param name="xPos">X Position to spawn at. Default is 0</param>
         /// <param name="yPos">Y Position to spawn at. Default is 0</param>
-        public void HandleSpawnPlayer(string username, float xPos = 0f, float yPos = 0f)
+        public void HandleSpawnPlayer(string username,string playerClass="assault", float xPos = 0f, float yPos = 0f)
         {
             if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
             if (!deathCounterDictionary.ContainsKey(username)) deathCounterDictionary.TryAdd(username, 0);
@@ -810,6 +835,7 @@ namespace ColossalGame.Services
                 playerSpawn.Radius = .4f;
                 playerSpawn.Damage = 10f;
                 playerSpawn.InitialHealth = 100f;
+                playerSpawn.PlayerClass = playerClass;
                 spawnQueue.Enqueue(playerSpawn);
             }
         }
