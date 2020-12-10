@@ -62,7 +62,7 @@ namespace ColossalGame.Services
 
         private readonly ConcurrentQueue<AUserAction> actionQueue = new ConcurrentQueue<AUserAction>();
 
-        private Mutex worldMutex = new Mutex();
+        private System.Threading.Timer _healthTimer;
 
         private ConcurrentQueue<SpawnObject> spawnQueue = new ConcurrentQueue<SpawnObject>();
 
@@ -204,14 +204,14 @@ namespace ColossalGame.Services
             return impulse;
         }
 
+        
         public void Reset()
         {
             
-            Parallel.ForEach(_objectDictionary, ((pair, state) =>
-            {
-                    var (key, value) = pair;
-                    MarkEntityForDestruction(value);
-            }));
+           
+            cleanupQueue.Clear();
+            spawnQueue.Clear();
+            actionQueue.Clear();
             aiController.Reset();
             PlayerDictionary.Clear();
             deathCounterDictionary.Clear();
@@ -359,13 +359,29 @@ namespace ColossalGame.Services
                 if (fixtureA.Body.Tag is EnemyModel e1)
                 {
                     e1.Hurt(bulletModel.Damage);
-                    if (e1.Dead) MarkEntityForDestruction(e1);
+                    if (e1.Dead)
+                    {
+                        PlayerDictionary.TryGetValue(creator.Username, out var playerModel);
+                        if (playerModel != null)
+                        {
+                            playerModel.AddExp(e1.Strength);
+                        }
+                        MarkEntityForDestruction(e1);
+                    }
                 }
 
                 if (fixtureB.Body.Tag is EnemyModel e2)
                 {
                     e2.Hurt(bulletModel.Damage);
-                    if (e2.Dead) MarkEntityForDestruction(e2);
+                    if (e2.Dead)
+                    {
+                        PlayerDictionary.TryGetValue(creator.Username, out var playerModel);
+                        if (playerModel != null)
+                        {
+                            playerModel.AddExp(e2.Strength);
+                        }
+                        MarkEntityForDestruction(e2);
+                    }
                 }
 
 
@@ -543,11 +559,12 @@ namespace ColossalGame.Services
                         waveTimer.Dispose();
                         _aiBrainTimer.Dispose();
                         _publishTimer.Dispose();
+                        _healthTimer.Dispose();
                         lock (_world)
                         {
                             Reset();
                             SetupWorld();
-                            Restart();
+                            Start();
                         }
                         
                     }
@@ -713,7 +730,8 @@ namespace ColossalGame.Services
         /// </summary>
         private void Start()
         {
-            
+
+            waveNum = 1;
             //Old method:
             //var instanceCaller = new Thread(RunWorld);
             //var instanceCaller2 = new Thread(StartPublishing);
@@ -730,23 +748,20 @@ namespace ColossalGame.Services
 
             waveTimer = new System.Threading.Timer(o=>SpawnWave(),null,0,20*1000);
 
+            _healthTimer = new System.Threading.Timer(o => RestoreHealth(), null, 0, 100);
+
         }
 
-        private void Restart()
+        private void RestoreHealth()
         {
-            waveNum = 1;
-            
-            //New method (using timers) (more efficient!)
-            //Start world stepping
-            _worldTimer = new System.Threading.Timer(o => StepWorld(), null, 0, (int)TickRate);
-            //Start publishing states
-            _publishTimer = new System.Threading.Timer(o => PublishState(), null, 0, (int)PublishRate);
-
-            _aiBrainTimer = new System.Threading.Timer(o => StepAiBrain(), null, 0, 5000);
-
-            waveTimer = new System.Threading.Timer(o => SpawnWave(), null, 0, 20 * 1000);
-
+            Parallel.ForEach(PlayerDictionary, (pair =>
+            {
+                var (key, value) = pair;
+                value.RegenerateHealth(.01f);
+            }));
         }
+
+        
 
         private void StepAiBrain()
         {
