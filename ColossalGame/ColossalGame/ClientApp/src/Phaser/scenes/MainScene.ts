@@ -392,7 +392,7 @@ export default class MainScene extends Phaser.Scene {
                     let curPlayerContainer = this.add.container(value.xPos, value.yPos);
 
                     var curPlayer: any;
-                    curPlayer = this.physics.add.sprite(0, 0, "player");
+                    curPlayer = this.physics.add.sprite(0, 0, value.playerClass == "brawler" ? "brawler" : "player");
                     curPlayer.collideWorldBounds = true;
                     curPlayer.enableBody = true;
 
@@ -433,7 +433,8 @@ export default class MainScene extends Phaser.Scene {
                         
                         
                         var p = <Phaser.Physics.Arcade.Sprite>playerContainer.getByName("playerSprite");
-                       
+                        
+                        p.setTexture(value.playerClass == "brawler" ? "brawler" : "player");
                         
                         if (this._hostingComponent.props.playerData.username == key) {
 
