@@ -20,6 +20,8 @@ namespace ColossalGame.Models.GameModels
         public float InitialAngle { get; set; } = 0f;
         public float InitialMass { get; set; } = .3f;
         public float Speed { get; set; } = 10f;
+
+        public float InitialHealth { get; set; } = 100f;
     }
 
     public class PlayerSpawnObject : SpawnObject

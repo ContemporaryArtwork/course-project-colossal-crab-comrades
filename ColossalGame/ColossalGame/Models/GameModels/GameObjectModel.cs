@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
+using ColossalGame.Services;
 using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Dynamics;
 
@@ -63,6 +64,7 @@ namespace ColossalGame.Models.GameModels
 
         public new float Damage { get; set; } = 10f;
 
+       
 
         public BulletModel(Body b) : base(b)
         {
@@ -113,17 +115,31 @@ namespace ColossalGame.Models.GameModels
 
         public void MoveTowardsClosestPlayer()
         {
-            if (_closestPlayer == default(PlayerModel))
+            if (_closestPlayer == null)
             {
                 //Should we throw an exception here?
                 //I choose not to for simplicity of iterating through AI
                 return;
             }
 
-            var directionalVector =  _closestPlayer.ObjectBody.WorldCenter - ObjectBody.WorldCenter;
+            var playerPos = _closestPlayer.ObjectBody.WorldCenter;
+            var ourPos = ObjectBody.WorldCenter;
+            var directionalVector =  playerPos - ourPos;
             directionalVector.Normalize();
-            float distanceProportion = .001f;
-            ObjectBody.ApplyLinearImpulse(directionalVector*this.Speed);
+            Vector2.Distance(ref playerPos,ref ourPos,out var distance);
+            if (distance > 1f)
+            {
+                ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
+            }
+            else
+            {
+                ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
+            }
+        }
+
+        public void ResetClosestPlayer()
+        {
+            _closestPlayer = null;
         }
 
         public EnemyExportModel Export()
@@ -132,9 +148,21 @@ namespace ColossalGame.Models.GameModels
             return retVal;
         }
 
+        public void Hurt(float damage)
+        {
+            Health -= damage;
+            if (Health <= 0)
+            {
+                Dead = true;
+            }
+
+        }
+
         public EnemyModel(Body b) : base(b)
         {
         }
+
+        public bool Dead { get; set; } = false;
     }
 
 }

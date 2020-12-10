@@ -16,5 +16,16 @@ namespace ColossalGame.Models.GameModels
             var retVal = new PlayerExportModel {XPos = this.XPos, YPos = this.YPos, Username = this.Username, Radius = this.Radius, Health = this.Health};
             return retVal;
         }
+
+        public void Hurt(float damage)
+        {
+            Health -= damage;
+            if (Health <= 0)
+            {
+                Dead = true;
+            }
+        }
+
+        public bool Dead { get; set; }
     }
 }
