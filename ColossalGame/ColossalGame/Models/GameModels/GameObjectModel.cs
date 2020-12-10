@@ -132,7 +132,7 @@ namespace ColossalGame.Models.GameModels
             
             if (distance <= 1024f/64f)
             {
-                if (rnd.NextDouble() <= .05)
+                if (rnd.NextDouble() <= .02)
                 {
                     var randomVector = new Vector2((float)rnd.NextDouble()-(float)rnd.NextDouble(),(float)rnd.NextDouble()-(float)rnd.NextDouble());
                     randomVector.Normalize();

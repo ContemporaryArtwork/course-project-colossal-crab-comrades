@@ -94,14 +94,28 @@ namespace ColossalGame.Models.AI
             }
             else if (waveType == WaveTypes.Corners)
             {
-                
-                if (entropy >= .5)
+                var entropy2 = (float)rand.NextDouble();
+                if (entropy2 >= .5)
                 {
-                    enemySpawn.InitialPosition = new Vector2(sideLength/2+entropy,sideLength/2+entropy);
+                    if (entropy >= .5)
+                    {
+                        enemySpawn.InitialPosition = new Vector2(sideLength / 2 + entropy, sideLength / 2 + entropy);
+                    }
+                    else
+                    {
+                        enemySpawn.InitialPosition = new Vector2(-sideLength / 2 + entropy, -sideLength / 2 + entropy);
+                    }
                 }
                 else
                 {
-                    enemySpawn.InitialPosition = new Vector2(-sideLength/2+entropy,-sideLength/2+entropy);
+                    if (entropy >= .5)
+                    {
+                        enemySpawn.InitialPosition = new Vector2(-sideLength / 2 + entropy, sideLength / 2 + entropy);
+                    }
+                    else
+                    {
+                        enemySpawn.InitialPosition = new Vector2(sideLength / 2 + entropy, -sideLength / 2 + entropy);
+                    }
                 }
             }
             else if (waveType == WaveTypes.InsideOut)
@@ -183,13 +197,13 @@ namespace ColossalGame.Models.AI
             if (randomNumber <= .5)
             {
                 waveType = WaveTypes.Corners;
-            }else if (randomNumber <= .75)
+            }else if (randomNumber <= .80)
             {
-                waveType = WaveTypes.Ring;
+                waveType = WaveTypes.InsideOut;
             }
             else
             {
-                waveType = WaveTypes.InsideOut;
+                waveType = WaveTypes.Ring;
             }
 
 

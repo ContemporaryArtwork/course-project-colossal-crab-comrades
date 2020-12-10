@@ -206,16 +206,18 @@ namespace ColossalGame.Services
 
         public void Reset()
         {
-            Parallel.ForEach(_objectDictionary, ((pair, state) =>
-            {
-                var (key, value) = pair;
-                MarkEntityForDestruction(value);
-            }));
-            aiController.Reset();
-            PlayerDictionary.Clear();
-            deathCounterDictionary.Clear();
-            _objectDictionary.Clear();
-            _world = new World(Vector2.Zero);
+            
+                Parallel.ForEach(_objectDictionary, ((pair, state) =>
+                {
+                    var (key, value) = pair;
+                    MarkEntityForDestruction(value);
+                }));
+                aiController.Reset();
+                PlayerDictionary.Clear();
+                deathCounterDictionary.Clear();
+                _objectDictionary.Clear();
+                _world = new World(Vector2.Zero);
+            
         }
 
         public bool IsPlayerSpawned(string username)
@@ -537,9 +539,13 @@ namespace ColossalGame.Services
 
                     if (PlayerDictionary.IsEmpty)
                     {
-                        Reset();
-                        SetupWorld();
-                        Restart();
+                        lock (_world)
+                        {
+                            Reset();
+                            SetupWorld();
+                            Restart();
+                        }
+                        
                     }
                 }
                 else
