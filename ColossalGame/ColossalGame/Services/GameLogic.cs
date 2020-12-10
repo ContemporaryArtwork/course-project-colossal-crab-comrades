@@ -207,16 +207,16 @@ namespace ColossalGame.Services
         public void Reset()
         {
             
-                Parallel.ForEach(_objectDictionary, ((pair, state) =>
-                {
+            Parallel.ForEach(_objectDictionary, ((pair, state) =>
+            {
                     var (key, value) = pair;
                     MarkEntityForDestruction(value);
-                }));
-                aiController.Reset();
-                PlayerDictionary.Clear();
-                deathCounterDictionary.Clear();
-                _objectDictionary.Clear();
-                _world = new World(Vector2.Zero);
+            }));
+            aiController.Reset();
+            PlayerDictionary.Clear();
+            deathCounterDictionary.Clear();
+            _objectDictionary.Clear();
+            _world = new World(Vector2.Zero);
             
         }
 
@@ -539,6 +539,10 @@ namespace ColossalGame.Services
 
                     if (PlayerDictionary.IsEmpty)
                     {
+                        _worldTimer.Dispose();
+                        waveTimer.Dispose();
+                        _aiBrainTimer.Dispose();
+                        _publishTimer.Dispose();
                         lock (_world)
                         {
                             Reset();
@@ -731,11 +735,7 @@ namespace ColossalGame.Services
         private void Restart()
         {
             waveNum = 1;
-            _worldTimer.DisposeAsync();
-            _publishTimer.DisposeAsync();
-            _aiBrainTimer.DisposeAsync();
-            waveTimer.DisposeAsync();
-
+            
             //New method (using timers) (more efficient!)
             //Start world stepping
             _worldTimer = new System.Threading.Timer(o => StepWorld(), null, 0, (int)TickRate);
