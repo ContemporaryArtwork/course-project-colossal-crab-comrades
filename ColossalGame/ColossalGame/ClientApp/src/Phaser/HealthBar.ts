@@ -10,17 +10,19 @@ export default class HealthBar extends Phaser.GameObjects.Graphics{
     value: number;
     p: number;
     width: number;
+    maxHealth: number;
 
-    constructor(scene: Phaser.Scene, x:number, y:number, width:number) {
+    constructor(scene: Phaser.Scene, x:number, y:number, width:number,value:number, maxHealth: number) {
         super(scene);
         //this.bar = new Phaser.GameObjects.Graphics(scene);
 
         this.x = x-(width/4);
         this.y = y;
-        this.value = 100;
+        this.value = value;
         this.p = 76 / 100;
 
         this.width = width;
+        this.maxHealth = maxHealth;
 
         this.draw();
 
@@ -33,13 +35,19 @@ export default class HealthBar extends Phaser.GameObjects.Graphics{
             this.value = 0;
         }
         else {
-            this.value = amount;
+            this.value = (amount / this.maxHealth);
         }
 
         this.draw();
 
         return (this.value === 0);
         
+    }
+    setMaxHealth(amount: number) {
+
+        this.maxHealth = amount;
+      
+
     }
  
     draw() {
@@ -54,14 +62,16 @@ export default class HealthBar extends Phaser.GameObjects.Graphics{
         this.fillStyle(0xffffff);
         this.fillRect(this.x + 2, this.y + 2, this.width-4, 12-4);
 
-        if (this.value < 30) {
+        if (this.value < .3) {
             this.fillStyle(0xff0000);
         }
         else {
             this.fillStyle(0x00ff00);
         }
 
-        var d = Math.floor(this.p * this.value);
+        var preval = this.value;
+        var mathy = (preval * (this.width-4));
+        var d = Math.floor(mathy)
 
         this.fillRect(this.x + 2, this.y + 2, d, 12-4);
     }

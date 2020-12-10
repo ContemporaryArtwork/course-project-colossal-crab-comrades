@@ -17,6 +17,7 @@ export interface GameObjectExportModel {
 export interface PlayerExportModel extends GameObjectExportModel {
     username: string,
     health: number,
+    maxHealth: number,
     playerClass: string
 }
 export interface BulletExportModel extends GameObjectExportModel {
@@ -27,7 +28,8 @@ export interface BulletExportModel extends GameObjectExportModel {
 export interface AIExportModel extends GameObjectExportModel {
     id: number,
     enemyType: string,
-    health: number
+    health: number,
+    maxHealth: number
 }
 
 /*export interface GameObjectModel {
