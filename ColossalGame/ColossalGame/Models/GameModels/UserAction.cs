@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace ColossalGame.Models
+﻿namespace ColossalGame.Models.GameModels
 {
     public enum EDirection
     {
@@ -25,7 +20,7 @@ namespace ColossalGame.Models
 
     public class MovementAction : AUserAction
     {
-        
+        public string PlayerClass { get; set; } //Temporary, since we use this for player repawning after waves
         public EDirection Direction { get; set; }
         
 
@@ -33,8 +28,10 @@ namespace ColossalGame.Models
 
     public class SpawnAction: AUserAction
     {
-        
+        public string PlayerClass { get; set; }
     }
+
+
 
     
 }

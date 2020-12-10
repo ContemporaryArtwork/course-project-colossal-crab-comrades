@@ -32,6 +32,8 @@ namespace ColossalGame.Controllers
             UserAlreadyExists,
             BadPassword,
             BadUsername,
+            MalformedToken,
+            BadToken,
             Unknown
         }
         public LoginController(LoginService ls)
@@ -128,6 +130,68 @@ namespace ColossalGame.Controllers
 
             return JsonConvert.SerializeObject(output, Formatting.Indented);
         }
+
+        [HttpGet("/api/loggedIn")]
+        public string loggedIn()
+        {
+            var output = new Dictionary<string, string>();
+            try
+            {
+                string username;
+                string token;
+                if (Request.Cookies["username"] != null && Request.Cookies["auth-token"] != null)
+                {
+                    username = Request.Cookies["username"];
+                    token = Request.Cookies["auth-token"];
+
+                    //Try login service method
+                    var loggedIn = _ls.VerifyToken(token, username);
+                    output["status"] = "ok";
+                    output["message"] = "You are logged in";
+                }
+                else
+                {
+                    output["status"] = "error";
+                    output["message"] = "You need to login first";
+                }
+                
+                
+            }
+            catch (BadTokenException)
+            {
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.MalformedToken.ToString("G");
+                output["message"] = "Token Malformed";
+            }
+            catch (BadUsernameException)
+            {
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.BadUsername.ToString("G");
+                output["message"] = "Incorrect or otherwise bad username";
+            }
+            catch (UserDoesNotExistException)
+            {
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.BadUsername.ToString("G");
+                output["message"] = "Incorrect or otherwise bad username";
+            }
+            catch (TokenExpiredException)
+            {
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.BadToken.ToString("G");
+                output["message"] = "Your token is out of date";
+            }
+            catch (Exception e)
+            {
+                output["status"] = "error";
+                output["errorCode"] = ErrorTypes.Unknown.ToString("G");
+                output["message"] = "Unknown Error Encountered of type: " + e.GetType();
+            }
+
+            return JsonConvert.SerializeObject(output, Formatting.Indented);
+        }
+
+
 
 
 

@@ -9,7 +9,7 @@ import MainMenu from './MainMenu';
 import GameStartRenderer from './gameComponents/GameStartRenderer2';
 import "./UserAuth.css";
 
-import BGVideo from "../assets/mainMenu/BGVideo.mp4";
+import BGIMG from "../assets/Login_Signup/CityRuins.png";
 //import BG from "../assets/mainMenu/mainBackground.jpg";
 //import test from "../assets/mainMenu/test.png";
 import BG from "../assets/test/undraw_personalization_triu.png";
@@ -46,9 +46,9 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
         this.props.toggleLoginPage();
     }
     submitLogIn = (e: React.FormEvent<HTMLElement>): void => {
-
+        
         e.preventDefault();
-
+        
         const tempElement: HTMLElement | null = document.getElementById("logInForm");
         if (tempElement == undefined) {
             //It's undefined!
@@ -80,6 +80,7 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
     verifySubmit(message: string, status: string, code: string): boolean {
 
         if (status == "ok") {
+            this.setState({ errorText: "Attempting Login..." });
             return true;
         } else {
 
@@ -103,6 +104,10 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
 
     render() {
         return (<div className="logSignEnclosing">
+            <div className="bg-container">
+                <img src={BGIMG} />
+            </div>
+
             {this.renderLogIn()}
         </div>);        
     }
@@ -110,6 +115,11 @@ class Login extends React.PureComponent<GameMainMenuTogglerProps, IState> {
     renderLogIn() {
         return (
             <div className="logSign">
+
+
+                
+
+
                 <ul className="switchUp">
                     <li value="Log In" style={{ background: '#008000', color: '#FFFFFF' }}> Log In</li>
                     <li value="Register" onClick={this.doRedirect}> Register</li>

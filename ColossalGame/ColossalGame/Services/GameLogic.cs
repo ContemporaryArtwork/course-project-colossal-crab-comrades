@@ -1,16 +1,36 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ColossalGame.Models;
+using ColossalGame.Models.AI;
+using ColossalGame.Models.Exceptions;
+using ColossalGame.Models.GameModels;
+using tainicom.Aether.Physics2D.Collision.Shapes;
 using tainicom.Aether.Physics2D.Common;
+using tainicom.Aether.Physics2D.Common.PhysicsLogic;
 using tainicom.Aether.Physics2D.Dynamics;
 
 namespace ColossalGame.Services
 {
     public class GameLogic
     {
-        private static readonly object _serverLock = new object();
+        /// <summary>
+        ///     Lower bound on milliseconds per world step, can be higher if inputs are sufficiently high
+        /// </summary>
+        private const double TickRate = 30.0;
+
+        /// <summary>
+        ///     Amount of milliseconds to wait until publishing the newest game state to clients
+        /// </summary>
+        private const double PublishRate = 10.0;
+
+        /// <summary>
+        ///     The ratio of meters in the physics engine to pixels in the game world, i.e. a conversion factor of 64 means that 1
+        ///     meter in engine is 64 pixels
+        /// </summary>
+        private static readonly float ConversionFactor = 64.0f;
 
         /// <summary>
         ///     Login service to keep track of user's login status
@@ -22,22 +42,34 @@ namespace ColossalGame.Services
         /// </summary>
         private readonly UserService _us;
 
-        /// <summary>
-        ///     boolean representing whether the server thread should continue processing new states
-        /// </summary>
-        private bool KeepGoing = true;
+        private World _world = new World(Vector2.Zero);
 
-        private DateTime lastTick = DateTime.Now;
+        private readonly Mutex _data = new Mutex();
 
-        /// <summary>
-        ///     variable that keeps track of the current tick
-        /// </summary>
-        private int tickCounter;
+        private readonly Mutex _lowPriority = new Mutex();
+
+        private readonly Mutex _nextToAccess = new Mutex();
 
         /// <summary>
-        ///     Amount of seconds per tick
+        ///     Object which publishes the states
         /// </summary>
-        private readonly double tickRate = 50.0;
+        private System.Threading.Timer _publishTimer;
+
+        /// <summary>
+        ///     Object which steps the world every {tickRate} milliseconds
+        /// </summary>
+        private System.Threading.Timer _worldTimer;
+
+        private readonly ConcurrentQueue<AUserAction> actionQueue = new ConcurrentQueue<AUserAction>();
+
+        private System.Threading.Timer _healthTimer;
+
+        private ConcurrentQueue<SpawnObject> spawnQueue = new ConcurrentQueue<SpawnObject>();
+
+        private AIController aiController = new AIController();
+
+        private ConcurrentDictionary<string,int> deathCounterDictionary = new ConcurrentDictionary<string, int>();
+
 
         /// <summary>
         ///     Constructor for GameLogic class
@@ -48,103 +80,156 @@ namespace ColossalGame.Services
         {
             _ls = ls;
             _us = us;
-            //TODO: Separate constructor and Start method
+            
+
+            SetupWorld();
             Start();
         }
+
 
         /// <summary>
         ///     Dictionary of usernames to PlayerModels.
         /// </summary>
-        private Dictionary<string, Body> PlayerDictionary { get; } = new Dictionary<string, Body>();
+        private ConcurrentDictionary<string, PlayerModel> PlayerDictionary { get; } =
+            new ConcurrentDictionary<string, PlayerModel>();
 
         /// <summary>
         ///     List of non-player GameObjectModels
         /// </summary>
-        private List<GameObjectModel> ObjectList { get; } = new List<GameObjectModel>();
+        private ConcurrentDictionary<int, GameObjectModel> _objectDictionary =
+            new ConcurrentDictionary<int, GameObjectModel>();
 
-        /// <summary>
-        ///     Queue of Player Actions
-        /// </summary>
-        private Queue<AUserAction> ActionQueue { get; } = new Queue<AUserAction>();
-
-        /// <summary>
-        ///     Queue of players to spawn in the next tick
-        /// </summary>
-        private Queue<PlayerModel> PlayerSpawnQueue { get; } = new Queue<PlayerModel>();
-
-        /// <summary>
-        ///     Queue of players to despawn in the next tick
-        /// </summary>
-        private Queue<string> PlayerDespawnQueue { get; } = new Queue<string>();
 
         /// <summary>
         ///     Event handler to publish new server states
         /// </summary>
-        public event EventHandler<CustomEventArgs> RaiseCustomEvent;
+        public event EventHandler<PublishEvent> Publisher;
 
+        private ConcurrentQueue<GameObjectModel> cleanupQueue = new ConcurrentQueue<GameObjectModel>();
+
+        /// <summary>
+        ///     Resets listeners for publishing the state
+        /// </summary>
         public void ClearEh()
         {
-            RaiseCustomEvent = null;
+            //TODO: Change the names of event listener stuff to better reflect what's actually happening
+            Publisher = null;
+        }
+
+        /// <summary>
+        ///     Add boundaries to the world, among other things (TODO!)
+        /// </summary>
+        private void SetupWorld()
+        {
+            //TODO: Make the bounds bigger??
+            var widthInMeters = 1024 * 1.5f / ConversionFactor;
+            var heightInMeters = 1024 * 1.5f / ConversionFactor;
+            var lowerLeftCorner = new Vector2(-widthInMeters, -heightInMeters);
+            var lowerRightCorner = new Vector2(widthInMeters, -heightInMeters);
+            var upperLeftCorner = new Vector2(-widthInMeters, heightInMeters);
+            var upperRightCorner = new Vector2(widthInMeters, heightInMeters);
+            var edge = _world.CreateBody();
+            edge.Tag = "worldBounds";
+            edge.SetRestitution(1f);
+            edge.SetFriction(1f);
+            var v = new Vertices();
+            v.Add(lowerLeftCorner);
+            v.Add(lowerRightCorner);
+            v.Add(upperLeftCorner);
+            v.Add(upperRightCorner);
+
+            //edge.CreateLoopShape(v);
+
+            edge.CreateEdge(lowerLeftCorner, lowerRightCorner);
+            edge.CreateEdge(lowerRightCorner, upperRightCorner);
+            edge.CreateEdge(upperRightCorner, upperLeftCorner);
+            edge.CreateEdge(upperLeftCorner, lowerLeftCorner);
+
+            //TODO: Remove this, debugging only
+            
+        }
+
+        public float getFireRate(string username)
+        {
+            if (PlayerDictionary.TryGetValue(username, out var playerModel))
+            {
+                return playerModel.FireRate;
+            }
+            else
+            {
+                throw new UnspawnedException();
+            }
         }
 
 
-        /// <summary>
-        ///     Void method which handles actions. Currently only handles movement actions
-        /// </summary>
-        /// <param name="action">Object representing various user actions. Currently only MovementAction will have functionality</param>
-        private void HandleAction(Object action)
+        private Vector2 ConvertMovementActionToVector2(MovementAction action, PlayerModel playerModel)
         {
             
-            if (action is MovementAction m)
+
+            var playerBody = playerModel.ObjectBody;
+
+            //Start calculations
+            var linearImpulseForce = playerModel.Speed;
+            var movementRate = linearImpulseForce / 2;
+
+
+            Vector2 desiredVelocity;
+            var leftHorizontalVelocity = Math.Max(playerBody.LinearVelocity.X - movementRate, -linearImpulseForce);
+            var rightHorizontalVelocity = Math.Min(playerBody.LinearVelocity.X + movementRate, linearImpulseForce);
+            var upVerticalVelocity = Math.Max(playerBody.LinearVelocity.Y - movementRate, -linearImpulseForce);
+            var downVerticalVelocity = Math.Min(playerBody.LinearVelocity.Y + movementRate, linearImpulseForce);
+
+            switch (action.Direction)
             {
-                if (!PlayerDictionary.ContainsKey(m.Username)) throw new Exception("Player must be spawned first!");
-                var pm = PlayerDictionary.GetValueOrDefault(m.Username);
-                if (pm == null)
-                {
-                    //THIS SHOULD NOT BE ABLE TO HAPPEN!!!
-                    throw new Exception("NULL VALUE IN DICTIONARY");
-                }
+                case EDirection.Down:
+                    desiredVelocity = new Vector2(0, downVerticalVelocity);
+                    break;
+                case EDirection.Up:
+                    desiredVelocity = new Vector2(0, upVerticalVelocity);
+                    break;
+                case EDirection.Left:
 
-                float linearImpulseForce = 100f;
-                switch (m.Direction)
-                {
-                    case EDirection.Down:
-                        
-                        pm.ApplyLinearImpulse(new Vector2(0,linearImpulseForce));
-                        break;
-                    case EDirection.Up:
-                        pm.ApplyLinearImpulse(new Vector2(0, -linearImpulseForce));
-                        break;
-                    case EDirection.Left:
-                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, 0));
-                        break;
-                    case EDirection.Right:
-                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, 0));
-                        break;
-                    case EDirection.UpLeft:
-                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, -linearImpulseForce));
-                        break;
-                    case EDirection.UpRight:
-                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, -linearImpulseForce));
-                        break;
-                    case EDirection.DownLeft:
-                        pm.ApplyLinearImpulse(new Vector2(-linearImpulseForce, linearImpulseForce));
-                        break;
-                    case EDirection.DownRight:
-                        pm.ApplyLinearImpulse(new Vector2(linearImpulseForce, linearImpulseForce));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                    desiredVelocity = new Vector2(leftHorizontalVelocity, 0);
+                    break;
+                case EDirection.Right:
 
-                //PlayerDictionary.Add(m.Username, pm);
-                PlayerDictionary[m.Username] = pm;
+                    desiredVelocity = new Vector2(rightHorizontalVelocity, 0);
+                    break;
+                case EDirection.UpLeft:
+                    desiredVelocity = new Vector2(leftHorizontalVelocity, upVerticalVelocity);
+                    break;
+                case EDirection.UpRight:
+                    desiredVelocity = new Vector2(rightHorizontalVelocity, upVerticalVelocity);
+                    break;
+                case EDirection.DownLeft:
+                    desiredVelocity = new Vector2(leftHorizontalVelocity, downVerticalVelocity);
+                    break;
+                case EDirection.DownRight:
+                    desiredVelocity = new Vector2(rightHorizontalVelocity, downVerticalVelocity);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
-            else if (action is ShootingAction s)
-            {
-                if (!PlayerDictionary.ContainsKey(s.Username)) throw new Exception("Player must be spawned first!");
-            }
+            var velChange = desiredVelocity - playerBody.LinearVelocity;
+            var impulse = playerBody.Mass * velChange;
+            return impulse;
+        }
+
+        
+        public void Reset()
+        {
+            
+           
+            cleanupQueue.Clear();
+            spawnQueue.Clear();
+            actionQueue.Clear();
+            aiController.Reset();
+            PlayerDictionary.Clear();
+            deathCounterDictionary.Clear();
+            _objectDictionary.Clear();
+            _world = new World(Vector2.Zero);
+            
         }
 
         public bool IsPlayerSpawned(string username)
@@ -152,7 +237,19 @@ namespace ColossalGame.Services
             return PlayerDictionary.ContainsKey(username);
         }
 
-        private World _world = new World(Vector2.Zero);
+        public bool HasPlayerDied(string username)
+        {
+            if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
+            if (!deathCounterDictionary.ContainsKey(username)) deathCounterDictionary.TryAdd(username, 0);
+            deathCounterDictionary.TryGetValue(username, out var deathCount);
+            if (deathCount > 0)
+            {
+                //throw new Exception("");
+                return true;
+            }
+
+            return false;
+        }
 
         /// <summary>
         ///     Spawns a player based on input username, subject to change.
@@ -160,150 +257,560 @@ namespace ColossalGame.Services
         /// <param name="username">Username of desired user to spawn</param>
         /// <param name="xPos">Desired x position</param>
         /// <param name="yPos">Desired y position</param>
-        private void SpawnPlayer(string username, float xPos = 0f, float yPos = 0f)
+        private void SpawnPlayer(PlayerSpawnObject playerSpawn)
         {
+            var username = playerSpawn.Username;
+            
             if (string.IsNullOrEmpty(username)) return;
             if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
 
-            Vector2 playerPosition = new Vector2(xPos, yPos);
+            var playerPosition = playerSpawn.InitialPosition;
 
-            var pm = _world.CreateCircle(1f, 1f, playerPosition);
+            var pm = new Body();
+            pm.CreateCircle(playerSpawn.Radius, playerSpawn.InitialDensity, playerPosition);
+
+            //Can do all the cool physics stuff
             pm.BodyType = BodyType.Dynamic;
-            pm.SetRestitution(0.3f);
-            pm.SetFriction(.3f);
-            pm.Mass = .1f;
-            pm.LinearDamping = 4f;
+            //Bounciness?
+            pm.SetRestitution(playerSpawn.InitialRestitution);
+            //Friction for touching other bodies
+            pm.SetFriction(playerSpawn.InitialFriction);
+            //Just your standard mass
+            pm.Mass = playerSpawn.InitialMass;
+            //Friction for moving around in space
+            pm.LinearDamping = playerSpawn.LinearDamping;
+            
 
             
-            
+            _world.Add(pm);
+
+            var playerModel = new PlayerModel(pm);
+            playerModel.Username = username;
+            playerModel.PlayerClass = playerSpawn.PlayerClass;
+            playerModel.Health = playerSpawn.InitialHealth;
+            playerModel.Damage = playerSpawn.Damage;
+            playerModel.FireRate = playerSpawn.FireRate;
+            playerModel.MaxHealth = playerSpawn.InitialHealth;
+            pm.Tag = playerModel;
+
             //PlayerDictionary.Add(username, pm);
-            PlayerDictionary[username] = pm;
+            PlayerDictionary[username] = playerModel;
         }
 
-        private void SpawnBall(float xPos = 0f, float yPos = 0f)
+        private void MarkEntityForDestruction(GameObjectModel b)
+        {
+            var bulletBody = b.ObjectBody;
+            if (!_world.BodyList.Contains(bulletBody)) return;
+            if (cleanupQueue.Contains(b)) return;
+            cleanupQueue.Enqueue(b);
+        }
+
+        private void SpawnBullet(BulletSpawnObject bulletSpawn)
+        {
+            //Load initial values
+            var ballPosition = bulletSpawn.InitialPosition;
+            var creator = bulletSpawn.Creator;
+
+            //Define body
+            var bullet = new Body {BodyType = BodyType.Dynamic};
+
+            var bulletFixture = bullet.CreateCircle(bulletSpawn.Radius, 1);
+
+            bullet.SetRestitution(bulletSpawn.InitialRestitution);
+            bullet.SetFriction(bulletSpawn.InitialFriction);
+            bullet.Mass = bulletSpawn.InitialMass;
+            bullet.IsBullet = true;
+
+            
+            bullet.ApplyForce(bulletSpawn.InitialVelocity, bullet.WorldCenter);
+
+            var bulletModel = new BulletModel(bullet)
+            {
+                BulletType = "small", //TODO: Make this better somehow?
+                Damage = creator.Damage
+            };
+
+            bullet.Tag = bulletModel;
+
+            
+            _world.Add(bullet);
+            bullet.SetTransform(ballPosition, bulletSpawn.InitialAngle);
+            bulletFixture.OnCollision += (fixtureA, fixtureB, contact) =>
+            {
+                if (fixtureA.Body.Tag is PlayerModel playerA)
+                {
+                    if (playerA.Username == creator.Username)
+                    {
+                        return false;
+                    }
+                }
+
+                if (fixtureB.Body.Tag is PlayerModel playerB)
+                {
+                    if (playerB.Username == creator.Username)
+                    {
+                        return false;
+                    }
+                }
+
+
+                if (fixtureA.Body.Tag is BulletModel b1)
+                {
+                    if (b1.ID == bulletModel.ID)
+                    {
+                        MarkEntityForDestruction(bulletModel);
+                    }
+                }
+
+                if (fixtureB.Body.Tag is BulletModel b2)
+                {
+                    if (b2.ID == bulletModel.ID)
+                    {
+                        MarkEntityForDestruction(bulletModel);
+                    }
+                }
+
+                if (fixtureA.Body.Tag is EnemyModel e1)
+                {
+                    e1.Hurt(bulletModel.Damage);
+                    if (e1.Dead)
+                    {
+                        PlayerDictionary.TryGetValue(creator.Username, out var playerModel);
+                        if (playerModel != null)
+                        {
+                            playerModel.AddExp(e1.Strength);
+                        }
+                        MarkEntityForDestruction(e1);
+                    }
+                }
+
+                if (fixtureB.Body.Tag is EnemyModel e2)
+                {
+                    e2.Hurt(bulletModel.Damage);
+                    if (e2.Dead)
+                    {
+                        PlayerDictionary.TryGetValue(creator.Username, out var playerModel);
+                        if (playerModel != null)
+                        {
+                            playerModel.AddExp(e2.Strength);
+                        }
+                        MarkEntityForDestruction(e2);
+                    }
+                }
+
+
+
+                return false;
+                };
+            
+            _objectDictionary.TryAdd(bulletModel.ID, bulletModel);
+        }
+
+        
+
+        private void SpawnEnemy(EnemySpawnObject enemySpawn)
         {
             
+            //Define body
+            var enemy = new Body { BodyType = BodyType.Dynamic };
 
-            Vector2 ballPosition = new Vector2(xPos, yPos);
+            var enemyFixture = enemy.CreateCircle(enemySpawn.Radius, 1);
 
-            var pm = _world.CreateCircle(.5f, 1f, ballPosition);
-            pm.BodyType = BodyType.Dynamic;
-            pm.SetRestitution(0.3f);
-            pm.SetFriction(.3f);
-            pm.Mass = .1f;
-            pm.LinearDamping = 1f;
+            enemy.SetRestitution(enemySpawn.InitialRestitution);
+            enemy.SetFriction(enemySpawn.InitialFriction);
+            enemy.Mass = enemySpawn.InitialMass;
+            enemy.LinearDamping = enemySpawn.LinearDamping;
 
+
+
+            var enemyModel = new EnemyModel(enemy);
+            
+            enemyModel.EnemyType = enemySpawn.EnemyType;
+            enemyModel.Damage = enemySpawn.Damage;
+            enemyModel.Speed = enemySpawn.Speed;
+            enemyModel.Health = enemySpawn.InitialHealth;
+            enemyModel.MaxHealth = enemySpawn.InitialHealth;
+            
+
+            enemy.Tag = enemyModel;
+
+
+            _world.Add(enemy);
+            enemy.SetTransform(enemySpawn.InitialPosition, enemySpawn.InitialAngle);
+            enemy.OnCollision += (fixtureA, fixtureB, contact) =>
+            {
+                if (fixtureA.Body.Tag.Equals("worldBounds")||fixtureB.Body.Tag.Equals("worldBounds"))
+                {
+                    return false;
+                }
+
+                if (fixtureA.Body.Tag is PlayerModel p1)
+                {
+                    if (fixtureB.Body.Tag is EnemyModel e && !e.Dead)
+                    {
+                        p1.Hurt(enemyModel.Damage);
+                    }
+                    if (fixtureB.Body.Tag is EnemyModel e2 && e2.Dead)
+                    {
+                        return false;
+                    }
+
+                    if (p1.Dead)
+                    {
+                        MarkEntityForDestruction(p1);
+                        if (fixtureB.Body.Tag is EnemyModel eB)
+                        {
+                            eB.ResetClosestPlayer();
+                        }
+                    }
+                }
+
+                if (fixtureB.Body.Tag is PlayerModel p2)
+                {
+                    if (fixtureA.Body.Tag is EnemyModel e && !e.Dead)
+                    {
+                        p2.Hurt(enemyModel.Damage);
+                    }
+                    if (fixtureA.Body.Tag is EnemyModel e2&& e2.Dead)
+                    {
+                        return false;
+                    }
+                    
+                    if (p2.Dead)
+                    {
+                        MarkEntityForDestruction(p2);
+                        if (fixtureA.Body.Tag is EnemyModel eA)
+                        {
+                            eA.ResetClosestPlayer();
+                        }
+                    }
+                }
+                return true;
+                
+            };
+
+
+            _objectDictionary.TryAdd(enemyModel.ID, enemyModel);
+            aiController.Register(enemyModel,ref _objectDictionary);
+            
+            enemyModel.SearchForClosestPlayer(PlayerDictionary);
         }
 
+
         /// <summary>
-        ///     Despawn a player
+        ///     Deregister a player
         /// </summary>
         /// <param name="username">Username of player to despawn</param>
-        public void AddPlayerToDespawnQueue(string username)
+        public void DespawnPlayer(string username)
         {
-
-            if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
-            //PlayerDictionary.Remove(username);
-            PlayerDespawnQueue.Enqueue(username);
+            PlayerDictionary.TryGetValue(username, out var playerModel);
+            if (playerModel != null)
+            {
+                cleanupQueue.Enqueue(playerModel);
+            }
         }
+
+
+        public void HandleAction(AUserAction action)
+        {
+            var spawned = PlayerDictionary.TryGetValue(action.Username, out var playerModel);
+            if (!spawned) throw new UnspawnedException("Player must be spawned first!");
+            actionQueue.Enqueue(action);
+        }
+
+        private void ProcessActionQueue()
+        {
+            Parallel.For(0, actionQueue.Count, ((i, state) =>
+            {
+                actionQueue.TryDequeue(out var action);
+                if (action != null)
+                {
+                    RunAction(action);
+                }
+            }));
+            //Parallel.ForEach(actionQueue, RunAction);
+            //actionQueue.Clear();
+        }
+
+        private void Cleanup()
+        {
+            while (cleanupQueue.Any())
+            {
+                cleanupQueue.TryDequeue(out var model);
+                if (model is BulletModel b)
+                {
+                    var bulletBody = b.ObjectBody;
+                    if (_world.BodyList.Contains(bulletBody))
+                    {
+                        
+                        _world.Remove(bulletBody);
+                        _objectDictionary.TryRemove(b.ID, out var _);
+                    }
+
+                    
+                }else if (model is EnemyModel e)
+                {
+                    var enemyBody = e.ObjectBody;
+                    if (_world.BodyList.Contains(enemyBody))
+                    {
+                        _world.Remove(enemyBody);
+                        aiController.Deregister(e.ID);
+                        _objectDictionary.TryRemove(e.ID, out var _);
+                    }
+                }else if (model is PlayerModel p)
+                {
+                    var playerBody = p.ObjectBody;
+                    if (_world.BodyList.Contains(playerBody))
+                    {
+                        _world.Remove(playerBody);
+                        PlayerDictionary.TryRemove(p.Username, out var _);
+                        deathCounterDictionary.TryGetValue(p.Username, out var value);
+                        deathCounterDictionary.TryUpdate(p.Username, value+1, value);
+                    }
+
+                    if (PlayerDictionary.IsEmpty)
+                    {
+                        _worldTimer.Dispose();
+                        waveTimer.Dispose();
+                        _aiBrainTimer.Dispose();
+                        _publishTimer.Dispose();
+                        _healthTimer.Dispose();
+                        lock (_world)
+                        {
+                            Reset();
+                            SetupWorld();
+                        }
+                        Start();
+
+                    }
+                }
+                else
+                {
+                    throw new Exception("Trying to cleanup something not supported");
+                }
+            }
+            
+        }
+
+        private void Spawn()
+        {
+            
+            while(spawnQueue.Any())
+            {
+                spawnQueue.TryDequeue(out var spawnObj);
+                if (spawnObj == null) break;
+                if (spawnObj is BulletSpawnObject bulletSpawn)
+                {
+                    SpawnBullet(bulletSpawn);
+                }else if (spawnObj is PlayerSpawnObject playerSpawn)
+                {
+                    SpawnPlayer(playerSpawn);
+                }
+                else if (spawnObj is EnemySpawnObject enemySpawn)
+                {
+                    SpawnEnemy(enemySpawn);
+                }
+                else
+                {
+                    throw new ArgumentException("Tried to parse an unsupported Spawn Object");
+                }
+            }
+        }
+
 
         /// <summary>
-        ///     Will eventually run all user actions and simulate all environmental objects and AI
+        ///     Add action to server action queue
         /// </summary>
-        private void simulateOneServerTick()
+        /// <param name="action">Action to be added</param>
+        public void RunAction(AUserAction action)
         {
-            var somethingChanged = false;
-            while (PlayerDespawnQueue.Count != 0)
+            var spawned = PlayerDictionary.TryGetValue(action.Username, out var playerModel);
+
+            if (!spawned) return;
+            var playerBody = playerModel.ObjectBody;
+            switch (action)
             {
-                var p = PlayerDespawnQueue.Dequeue();
-                PlayerDictionary.Remove(p);
-                somethingChanged = true;
+                case MovementAction m:
+                {
+                    
+                    var impulse = ConvertMovementActionToVector2(m,playerModel);
+                    playerBody.ApplyLinearImpulse(impulse, playerBody.WorldCenter);
+                    break;
+                }
+                case ShootingAction s:
+                {
+                    PlayerDictionary.TryGetValue(s.Username, out var creator);
+                    if (creator==null) throw new Exception("Player not found when spawning bullet");
+                    var bulletSpawn = new BulletSpawnObject(s.Angle,20f,creator,10f,.1f,creator.ObjectBody.Position);
+                    bulletSpawn.InitialMass = .02f;
+                    spawnQueue.Enqueue(bulletSpawn);
+
+                    break;
+                }
+                default:
+                    throw new ArgumentException("Unsupported Action Type");
             }
-
-            while (PlayerSpawnQueue.Count != 0)
-            {
-                var p = PlayerSpawnQueue.Dequeue();
-                //PlayerDictionary.Add(p.Username, p);
-                SpawnPlayer(p.Username,p.XPos,p.YPos);
-                somethingChanged = true;
-            }
-
-            while (ActionQueue.Count != 0)
-            {
-                //Thread t = new Thread(new ParameterizedThreadStart(HandleAction));
-                //t.Start(ActionQueue.Dequeue());
-                HandleAction(ActionQueue.Dequeue());
-                somethingChanged = true;
-            }
-
-            if (somethingChanged) ;
-
-
-            //TODO Handle non-player objects
         }
+
 
         /// <summary>
         ///     Returns the current game state
         /// </summary>
         /// <returns></returns>
-        public (List<GameObjectModel>, Dictionary<string, Body>) GetState()
+        public (ConcurrentDictionary<int, GameObjectModel>, ConcurrentDictionary<string, PlayerModel>) GetState()
         {
-            return (ObjectList, PlayerDictionary);
+            return (_objectDictionary, PlayerDictionary);
         }
 
-        public (List<GameObjectModel>, Dictionary<string, PlayerModel>) GetStatePM()
+        public static (ConcurrentQueue<object>, ConcurrentDictionary<string, PlayerExportModel>) GetStatePM(
+            ConcurrentDictionary<string, PlayerModel> playerDictionary,
+            ConcurrentDictionary<int, GameObjectModel> objectDict)
         {
-            Dictionary<string,PlayerModel> oPD = new Dictionary<string, PlayerModel>();
-            var localDict = PlayerDictionary;
-            foreach (string p in localDict.Keys)
+            var returnDictionary = new ConcurrentDictionary<string, PlayerExportModel>();
+            var gameObjectQueue = new ConcurrentQueue<object>();
+
+            Parallel.ForEach(playerDictionary, pair =>
             {
-                var temp = PlayerDictionary[p];
-                PlayerModel tempPlayerModel = new PlayerModel();
-                tempPlayerModel.Username = p;
-                tempPlayerModel.XPos = temp.GetWorldPoint(Vector2.Zero).X;
-                tempPlayerModel.YPos = temp.GetWorldPoint(Vector2.Zero).Y;
-                oPD[p] = tempPlayerModel;
-            }
-            return (ObjectList, oPD);
+                var (name, playerModel) = pair;
+
+
+                returnDictionary[name] = playerModel.Export();
+            });
+
+            Parallel.ForEach(objectDict, pair =>
+            {
+                var (id, model) = pair;
+
+                if (model is BulletModel b)
+                {
+                    gameObjectQueue.Enqueue(b.Export());
+                }
+                else if (model is EnemyModel e)
+                {
+                    gameObjectQueue.Enqueue(e.Export()); 
+                }
+                else
+                {
+                    throw new Exception("When casting, to exported model the model type was not supported.");
+                }
+            });
+
+            
+
+
+            return (gameObjectQueue, returnDictionary);
         }
 
+        private System.Threading.Timer waveTimer;
+
+        private int waveNum = 1;
+        private void SpawnWave()
+        {
+            switch (waveNum)
+            {
+                case 1:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.Easy, AIController.WaveSize.Large, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                case 2:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.Medium, AIController.WaveSize.Large, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                case 3:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.Medium, AIController.WaveSize.Large, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                case 4:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.Hard, AIController.WaveSize.Medium, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                case 5:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.Hard, AIController.WaveSize.Large, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                case 6:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.VeryHard, AIController.WaveSize.Large, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                default:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.VeryHard, AIController.WaveSize.XtraLarge, PlayerDictionary.Count);
+                    break;
+            }
+            
+        }
+
+        private System.Threading.Timer _aiBrainTimer;
         /// <summary>
         ///     Starts the server tick processing thread
         /// </summary>
         private void Start()
         {
-            var instanceCaller = new Thread(
-                RunServer);
-            instanceCaller.Start();
+
+            waveNum = 1;
+            //Old method:
+            //var instanceCaller = new Thread(RunWorld);
+            //var instanceCaller2 = new Thread(StartPublishing);
+            //instanceCaller.Start();
+            //instanceCaller2.Start();
+
+            //New method (using timers) (more efficient!)
+            //Start world stepping
+            _worldTimer = new System.Threading.Timer(o => StepWorld(), null, 0, (int) TickRate);
+            //Start publishing states
+            _publishTimer = new System.Threading.Timer(o => PublishState(), null, 0, (int) PublishRate);
+
+            _aiBrainTimer = new System.Threading.Timer(o=>StepAiBrain(),null,0,5000);
+
+            waveTimer = new System.Threading.Timer(o=>SpawnWave(),null,0,20*1000);
+
+            _healthTimer = new System.Threading.Timer(o => RestoreHealth(), null, 0, 100);
+
         }
+
+        private void RestoreHealth()
+        {
+            Parallel.ForEach(PlayerDictionary, (pair =>
+            {
+                var (key, value) = pair;
+                value.RegenerateHealth(.01f);
+            }));
+        }
+
+        
+
+        private void StepAiBrain()
+        {
+            aiController.Recalculate(PlayerDictionary, _objectDictionary);
+        }
+
+        private void StepAiMovement()
+        {
+            aiController.Step(_objectDictionary);
+        }
+
 
         /// <summary>
         ///     Keeps looping every {tickRate} milliseconds, simulating a new server tick every time
         /// </summary>
-        private void RunServer()
+        private void StepWorld()
         {
-            var ts = new TimeSpan();
-            while (KeepGoing)
+            
+            var solverIterations = new SolverIterations {PositionIterations = 2, VelocityIterations = 4};
+
+            //lock because sometimes world stepping will take too long
+            lock (_world)
             {
-                    
-                    //lastTick = DateTime.Now;
-                   // Console.WriteLine("GameLogic: " + DateTime.Now.Second);
-                   // Console.WriteLine("ts: " + ts.Milliseconds);
-                    simulateOneServerTick();
-                    for (int i = 0; i < 7; i++)
-                    {
-                        _world.Step(1/60f);
-                        
-                    }
-                    var instanceCaller = new Thread(
-                        PublishState);
-                    instanceCaller.Start();
-                //PublishState();
-                tickCounter++;
-                    ts = DateTime.Now - lastTick;
-                    
-                    Thread.Sleep((int)tickRate);
+                
+                Cleanup();
+                Spawn();
+                if (PlayerDictionary.IsEmpty) return;
+                ProcessActionQueue();
+                StepAiMovement();
+
+                //dt = fraction of steps per second i.e. 50 milliseconds per step has a dt of 50/1000 or 1/20 or every second 20 steps
+                _world.Step((float)TickRate / 1000f, ref solverIterations);
             }
+            
         }
 
 
@@ -313,55 +820,96 @@ namespace ColossalGame.Services
         private void PublishState()
         {
             //Console.WriteLine("Publish: " + DateTime.Now.Second);
-            var (returnedList, returnedDictionary) = GetStatePM();
-            var e = new CustomEventArgs(returnedList, returnedDictionary);
-            OnRaiseCustomEvent(e);
+            //Console.WriteLine("publish");
+            var e = new PublishEvent(_objectDictionary, PlayerDictionary);
+            HandlePublish(e);
         }
 
         /// <summary>
-        ///     Tells RaiseCustomEvent to publish event to all subscribers
+        ///     Tells Publisher to publish event to all subscribers
         /// </summary>
-        /// <param name="e"></param>
-        protected virtual void OnRaiseCustomEvent(CustomEventArgs e)
+        /// <param name="state"></param>
+        protected virtual void HandlePublish(PublishEvent state)
         {
             // Make a temporary copy of the event to avoid possibility of
             // a race condition if the last subscriber unsubscribes
             // immediately after the null check and before the event is raised.
-            RaiseCustomEvent?.Invoke(this, e);
+            Publisher?.Invoke(this, state);
         }
 
-        /// <summary>
-        ///     Add action to server action queue
-        /// </summary>
-        /// <param name="action">Action to be added</param>
-        public void AddActionToQueue(AUserAction action)
-        {
-           ActionQueue.Enqueue(action);
-        }
 
         /// <summary>
         ///     Add a new player to the spawn queue
         /// </summary>
         /// <param name="username">Username to spawn. Must exist in the user database</param>
+        /// <param name="playerClass">The class chosen by the player.</param>
         /// <param name="xPos">X Position to spawn at. Default is 0</param>
         /// <param name="yPos">Y Position to spawn at. Default is 0</param>
-        public void AddPlayerToSpawnQueue(string username, float xPos = 0f, float yPos = 0f)
+        public void HandleSpawnPlayer(string username, string playerClass, float xPos = 0f, float yPos = 0f)
         {
-            
             if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
-            var pm = new PlayerModel();
-            pm.Username = username;
-            pm.XPos = xPos;
-            pm.YPos = yPos;
-            PlayerSpawnQueue.Enqueue(pm);
+            if (!deathCounterDictionary.ContainsKey(username)) deathCounterDictionary.TryAdd(username, 0);
+            deathCounterDictionary.TryGetValue(username, out var deathCount);
+            if (deathCount > 0)
+            {
+                //throw new Exception("");
+                return;
+            }
+            else
+            {
+                //TODO: Get rid of this useless method
+                var playerSpawn = new PlayerSpawnObject();
+                playerSpawn.Username = username;
+                playerSpawn.PlayerClass = playerClass;
+                playerSpawn.InitialPosition = new Vector2(xPos, yPos);
+                playerSpawn.LinearDamping = 4f;
+                playerSpawn.Radius = .4f;
+                
+                
+                if (playerClass == "heavy")
+                {
+                    playerSpawn.FireRate = 120f;
+                    playerSpawn.Speed = 15f;
+                    playerSpawn.InitialHealth = 150f;
+                    playerSpawn.Damage = 5f;
+                }
+                else
+                {
+                    playerSpawn.FireRate = 200f;
+                    playerSpawn.Speed = 20f;
+                    playerSpawn.InitialHealth = 100f;
+                    playerSpawn.Damage = 10f;
+                }
+                
+                playerSpawn.PlayerClass = playerClass;
+                spawnQueue.Enqueue(playerSpawn);
+            }
         }
+
+        public void HandleRespawnPlayer(string username, string playerClass, float xPos = 0f, float yPos = 0f)
+        {
+            if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
+            //TODO: Get rid of this useless method
+            var playerSpawn = new PlayerSpawnObject();
+            playerSpawn.Username = username;
+            playerSpawn.PlayerClass = playerClass;
+            playerSpawn.InitialPosition = new Vector2(xPos, yPos);
+            playerSpawn.LinearDamping = 4f;
+            playerSpawn.Speed = 20f;
+            playerSpawn.Radius = .4f;
+            spawnQueue.Enqueue(playerSpawn);
+        }
+
+
 
         /// <summary>
         ///     Stop the server thread from running new states
         /// </summary>
         public void StopServer()
         {
-            KeepGoing = false;
+            //There's pretty much no reason anyone would ever use this?
+            _worldTimer.Dispose();
+            _publishTimer.Dispose();
         }
 
         /// <summary>
@@ -369,22 +917,24 @@ namespace ColossalGame.Services
         /// </summary>
         public void handleGameObjects()
         {
+            //TODO
         }
     }
 
     /// <summary>
     ///     Custom EventArgs class which helps publish new state to subscribers
     /// </summary>
-    public class CustomEventArgs : EventArgs
+    public class PublishEvent : EventArgs
     {
-        public CustomEventArgs(List<GameObjectModel> objectList, Dictionary<string, PlayerModel> playerDict)
+        public PublishEvent(ConcurrentDictionary<int, GameObjectModel> objectDict,
+            ConcurrentDictionary<string, PlayerModel> playerDict)
         {
-            ObjectList = objectList;
+            ObjectDict = objectDict;
             PlayerDict = playerDict;
         }
 
-        public List<GameObjectModel> ObjectList { get; set; }
+        public ConcurrentDictionary<int, GameObjectModel> ObjectDict { get; set; }
 
-        public Dictionary<string, PlayerModel> PlayerDict { get; set; }
+        public ConcurrentDictionary<string, PlayerModel> PlayerDict { get; set; }
     }
 }

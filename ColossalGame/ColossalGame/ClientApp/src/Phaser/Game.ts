@@ -1,16 +1,27 @@
 ﻿import * as Phaser from 'phaser'
+import { RouteComponentProps } from 'react-router';
 import MainScene from './scenes/MainScene'
+import * as GameDataStore from '../store/GameData';
+
+type GameDataProps =
+    GameDataStore.GameDataState &
+    typeof GameDataStore.actionCreators &
+    RouteComponentProps<{}>;
+
+interface GameDataPassedState {
+    classChosen3: string
+}
 
 class Game extends Phaser.Game {
-    public react: React.PureComponent;
-    constructor(react: React.PureComponent) {
+    public react: React.PureComponent<GameDataProps, GameDataPassedState>;
+    constructor(react: React.PureComponent<GameDataProps, GameDataPassedState>) {
         const config = { //Configuration for the Phaser.Game component.
             type: Phaser.AUTO,
-            width: window.innerWidth,
-            height: window.innerHeight,
             scale: {
-                mode: Phaser.Scale.FIT,
-                autoCenter: Phaser.Scale.CENTER_BOTH,                
+                mode: Phaser.Scale.RESIZE,
+                //autoCenter: Phaser.Scale.CENTER_BOTH,
+                width: '100%',
+                height: '100%'
             },
             physics: {
                 default: "arcade",
