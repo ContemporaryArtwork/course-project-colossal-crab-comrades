@@ -265,6 +265,7 @@ namespace ColossalGame.Services
             pm.Mass = playerSpawn.InitialMass;
             //Friction for moving around in space
             pm.LinearDamping = playerSpawn.LinearDamping;
+            
 
             SpinWait.SpinUntil(() => !_world.IsLocked);
             _world.Add(pm);
@@ -273,6 +274,7 @@ namespace ColossalGame.Services
             playerModel.Username = username;
             playerModel.Health = playerSpawn.InitialHealth;
             playerModel.Damage = playerSpawn.Damage;
+            playerModel.PlayerClass = playerSpawn.PlayerClass;
             pm.Tag = playerModel;
 
             //PlayerDictionary.Add(username, pm);
@@ -806,7 +808,7 @@ namespace ColossalGame.Services
         /// <param name="username">Username to spawn. Must exist in the user database</param>
         /// <param name="xPos">X Position to spawn at. Default is 0</param>
         /// <param name="yPos">Y Position to spawn at. Default is 0</param>
-        public void HandleSpawnPlayer(string username, float xPos = 0f, float yPos = 0f)
+        public void HandleSpawnPlayer(string username,string playerClass="assault", float xPos = 0f, float yPos = 0f)
         {
             if (string.IsNullOrEmpty(username)) throw new Exception("Username is null");
             if (!deathCounterDictionary.ContainsKey(username)) deathCounterDictionary.TryAdd(username, 0);
@@ -827,6 +829,7 @@ namespace ColossalGame.Services
                 playerSpawn.Radius = .4f;
                 playerSpawn.Damage = 10f;
                 playerSpawn.InitialHealth = 100f;
+                playerSpawn.PlayerClass = playerClass;
                 spawnQueue.Enqueue(playerSpawn);
             }
         }
