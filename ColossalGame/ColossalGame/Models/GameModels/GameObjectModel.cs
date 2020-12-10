@@ -127,14 +127,28 @@ namespace ColossalGame.Models.GameModels
             var directionalVector =  playerPos - ourPos;
             directionalVector.Normalize();
             Vector2.Distance(ref playerPos,ref ourPos,out var distance);
-            if (distance > 1f)
+            ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
+            Random rnd = new Random();
+            
+            if (distance <= 512f/64f)
             {
-                ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
+                if (rnd.NextDouble() <= .9)
+                {
+                    var randomVector = new Vector2((float)rnd.NextDouble()-(float)rnd.NextDouble(),(float)rnd.NextDouble()-(float)rnd.NextDouble());
+                    randomVector.Normalize();
+                    ObjectBody.ApplyLinearImpulse(randomVector*Speed,ObjectBody.WorldCenter);
+                }
+                else
+                {
+                    ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
+                }
             }
             else
             {
                 ObjectBody.ApplyLinearImpulse(directionalVector * this.Speed, ObjectBody.WorldCenter);
             }
+            
+
         }
 
         public void ResetClosestPlayer()
