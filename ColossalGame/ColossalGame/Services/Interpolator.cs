@@ -38,10 +38,10 @@ namespace ColossalGame.Services
         {
 
             //Make sure that the user is authenticated
-            if (!_ls.VerifyToken(action.Token, action.Username))
+            /*if (!_ls.VerifyToken(action.Token, action.Username))
             {
                 throw new InvalidLoginException("Either the token or the username is invalid.");
-            }
+            }*/
 
             try
             {
@@ -97,7 +97,7 @@ namespace ColossalGame.Services
                     var ts = DateTime.Now - x;
 
                     //It's been at least {MovementInterval} milliseconds since last action
-                    if (ts.TotalMilliseconds >= ShootingInterval)
+                    if (ts.TotalMilliseconds >= _gl.getFireRate(action.Username))
                     {
                         _shootingTimings[action.Username] = DateTime.Now;
                         //Run relevant method to update game state

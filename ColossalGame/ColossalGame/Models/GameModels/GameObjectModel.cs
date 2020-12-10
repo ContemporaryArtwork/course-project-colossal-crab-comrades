@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
+using ColossalGame.Models.AI;
 using ColossalGame.Services;
 using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Dynamics;
@@ -85,7 +86,8 @@ namespace ColossalGame.Models.GameModels
         public new float Speed { get; set; } = 5f;
 
         public float Health { get; set; } = 100f;
-        
+
+        public float MaxHealth { get; set; } = 100f;
 
         private PlayerModel _closestPlayer;
 
@@ -167,7 +169,7 @@ namespace ColossalGame.Models.GameModels
 
         public EnemyExportModel Export()
         {
-            var retVal = new EnemyExportModel() { XPos = this.XPos, YPos = this.YPos, EnemyType = this.EnemyType, ID = this.ID, Radius = this.Radius, Health = this.Health };
+            var retVal = new EnemyExportModel() { XPos = this.XPos, YPos = this.YPos, EnemyType = this.EnemyType, ID = this.ID, Radius = this.Radius, Health = this.Health, MaxHealth = this.MaxHealth};
             return retVal;
         }
 
@@ -184,7 +186,8 @@ namespace ColossalGame.Models.GameModels
         public EnemyModel(Body b) : base(b)
         {
         }
-
+        
+        public AIController.EnemyStrength Strength { get; set; }
         public bool Dead { get; set; } = false;
     }
 

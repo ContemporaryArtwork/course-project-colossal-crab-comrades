@@ -148,10 +148,10 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
                                     <p> Class Summary: <br />
                                         Pros:<br />
                                         - More Health <br />
+                                        - Faster rate of fire<br />
                                         Cons:<br />
-                                        - shorter firing range<br />
-                                        Abilities: <br />
-                                        - Bulk Up: gains a shield <br />for 5 seconds
+                                        - moves slower<br />
+                                        - deals less damage<br />
                                     </p>
                                     <button className="loadButton" onClick={this.ChooseHeavy}>HEAVY</button>
                                 </div>
@@ -160,11 +160,10 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
                                     <div className="Brawler"></div>
                                     <p> Class Summary: <br />
                                             Pros:<br />
-                                            - faster rate of fire <br />
+                                            - Deals more damage <br />
+                                            - moves faster<br /> 
                                             Cons:<br />
-                                            - No special attributes<br />
-                                            Abilities: <br />
-                                            - Frenzy: gains rate of fire <br /> increase for 5 seconds
+                                            - slower rate of fire<br />
                                     </p>
                                     <button className="loadButton" onClick={this.ChooseBrawler}>BRAWLER</button>
                                 </div>

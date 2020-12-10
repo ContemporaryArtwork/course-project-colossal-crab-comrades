@@ -62,7 +62,7 @@ namespace ColossalGame.Services
 
         private readonly ConcurrentQueue<AUserAction> actionQueue = new ConcurrentQueue<AUserAction>();
 
-        private Mutex worldMutex = new Mutex();
+        private System.Threading.Timer _healthTimer;
 
         private ConcurrentQueue<SpawnObject> spawnQueue = new ConcurrentQueue<SpawnObject>();
 
@@ -149,6 +149,18 @@ namespace ColossalGame.Services
             
         }
 
+        public float getFireRate(string username)
+        {
+            if (PlayerDictionary.TryGetValue(username, out var playerModel))
+            {
+                return playerModel.FireRate;
+            }
+            else
+            {
+                throw new UnspawnedException();
+            }
+        }
+
 
         private Vector2 ConvertMovementActionToVector2(MovementAction action, PlayerModel playerModel)
         {
@@ -204,14 +216,14 @@ namespace ColossalGame.Services
             return impulse;
         }
 
+        
         public void Reset()
         {
             
-            Parallel.ForEach(_objectDictionary, ((pair, state) =>
-            {
-                    var (key, value) = pair;
-                    MarkEntityForDestruction(value);
-            }));
+           
+            cleanupQueue.Clear();
+            spawnQueue.Clear();
+            actionQueue.Clear();
             aiController.Reset();
             PlayerDictionary.Clear();
             deathCounterDictionary.Clear();
@@ -269,7 +281,7 @@ namespace ColossalGame.Services
             pm.LinearDamping = playerSpawn.LinearDamping;
             
 
-            SpinWait.SpinUntil(() => !_world.IsLocked);
+            
             _world.Add(pm);
 
             var playerModel = new PlayerModel(pm);
@@ -277,6 +289,8 @@ namespace ColossalGame.Services
             playerModel.PlayerClass = playerSpawn.PlayerClass;
             playerModel.Health = playerSpawn.InitialHealth;
             playerModel.Damage = playerSpawn.Damage;
+            playerModel.FireRate = playerSpawn.FireRate;
+            playerModel.MaxHealth = playerSpawn.InitialHealth;
             pm.Tag = playerModel;
 
             //PlayerDictionary.Add(username, pm);
@@ -313,7 +327,7 @@ namespace ColossalGame.Services
             var bulletModel = new BulletModel(bullet)
             {
                 BulletType = "small", //TODO: Make this better somehow?
-                Damage = 10f
+                Damage = creator.Damage
             };
 
             bullet.Tag = bulletModel;
@@ -359,13 +373,29 @@ namespace ColossalGame.Services
                 if (fixtureA.Body.Tag is EnemyModel e1)
                 {
                     e1.Hurt(bulletModel.Damage);
-                    if (e1.Dead) MarkEntityForDestruction(e1);
+                    if (e1.Dead)
+                    {
+                        PlayerDictionary.TryGetValue(creator.Username, out var playerModel);
+                        if (playerModel != null)
+                        {
+                            playerModel.AddExp(e1.Strength);
+                        }
+                        MarkEntityForDestruction(e1);
+                    }
                 }
 
                 if (fixtureB.Body.Tag is EnemyModel e2)
                 {
                     e2.Hurt(bulletModel.Damage);
-                    if (e2.Dead) MarkEntityForDestruction(e2);
+                    if (e2.Dead)
+                    {
+                        PlayerDictionary.TryGetValue(creator.Username, out var playerModel);
+                        if (playerModel != null)
+                        {
+                            playerModel.AddExp(e2.Strength);
+                        }
+                        MarkEntityForDestruction(e2);
+                    }
                 }
 
 
@@ -399,6 +429,7 @@ namespace ColossalGame.Services
             enemyModel.Damage = enemySpawn.Damage;
             enemyModel.Speed = enemySpawn.Speed;
             enemyModel.Health = enemySpawn.InitialHealth;
+            enemyModel.MaxHealth = enemySpawn.InitialHealth;
             
 
             enemy.Tag = enemyModel;
@@ -543,13 +574,14 @@ namespace ColossalGame.Services
                         waveTimer.Dispose();
                         _aiBrainTimer.Dispose();
                         _publishTimer.Dispose();
+                        _healthTimer.Dispose();
                         lock (_world)
                         {
                             Reset();
                             SetupWorld();
-                            Restart();
                         }
-                        
+                        Start();
+
                     }
                 }
                 else
@@ -609,7 +641,7 @@ namespace ColossalGame.Services
                 {
                     PlayerDictionary.TryGetValue(s.Username, out var creator);
                     if (creator==null) throw new Exception("Player not found when spawning bullet");
-                    var bulletSpawn = new BulletSpawnObject(s.Angle,20f,creator,10f,.3f,creator.ObjectBody.Position);
+                    var bulletSpawn = new BulletSpawnObject(s.Angle,20f,creator,10f,.1f,creator.ObjectBody.Position);
                     bulletSpawn.InitialMass = .02f;
                     spawnQueue.Enqueue(bulletSpawn);
 
@@ -713,7 +745,8 @@ namespace ColossalGame.Services
         /// </summary>
         private void Start()
         {
-            
+
+            waveNum = 1;
             //Old method:
             //var instanceCaller = new Thread(RunWorld);
             //var instanceCaller2 = new Thread(StartPublishing);
@@ -730,23 +763,20 @@ namespace ColossalGame.Services
 
             waveTimer = new System.Threading.Timer(o=>SpawnWave(),null,0,20*1000);
 
+            _healthTimer = new System.Threading.Timer(o => RestoreHealth(), null, 0, 100);
+
         }
 
-        private void Restart()
+        private void RestoreHealth()
         {
-            waveNum = 1;
-            
-            //New method (using timers) (more efficient!)
-            //Start world stepping
-            _worldTimer = new System.Threading.Timer(o => StepWorld(), null, 0, (int)TickRate);
-            //Start publishing states
-            _publishTimer = new System.Threading.Timer(o => PublishState(), null, 0, (int)PublishRate);
-
-            _aiBrainTimer = new System.Threading.Timer(o => StepAiBrain(), null, 0, 5000);
-
-            waveTimer = new System.Threading.Timer(o => SpawnWave(), null, 0, 20 * 1000);
-
+            Parallel.ForEach(PlayerDictionary, (pair =>
+            {
+                var (key, value) = pair;
+                value.RegenerateHealth(.01f);
+            }));
         }
+
+        
 
         private void StepAiBrain()
         {
@@ -833,10 +863,24 @@ namespace ColossalGame.Services
                 playerSpawn.PlayerClass = playerClass;
                 playerSpawn.InitialPosition = new Vector2(xPos, yPos);
                 playerSpawn.LinearDamping = 4f;
-                playerSpawn.Speed = 20f;
                 playerSpawn.Radius = .4f;
-                playerSpawn.Damage = 10f;
-                playerSpawn.InitialHealth = 100f;
+                
+                
+                if (playerClass == "heavy")
+                {
+                    playerSpawn.FireRate = 120f;
+                    playerSpawn.Speed = 15f;
+                    playerSpawn.InitialHealth = 150f;
+                    playerSpawn.Damage = 5f;
+                }
+                else
+                {
+                    playerSpawn.FireRate = 200f;
+                    playerSpawn.Speed = 20f;
+                    playerSpawn.InitialHealth = 100f;
+                    playerSpawn.Damage = 10f;
+                }
+                
                 playerSpawn.PlayerClass = playerClass;
                 spawnQueue.Enqueue(playerSpawn);
             }
