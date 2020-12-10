@@ -12,7 +12,7 @@ namespace ColossalGame.Services
     {
         private readonly IMongoCollection<User> _users;
 
-        public UserService(string connectionString = "mongodb://localhost:27017/")
+        public UserService(string connectionString = "mongodb://db:27017/")
         {
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase("Colossal");
