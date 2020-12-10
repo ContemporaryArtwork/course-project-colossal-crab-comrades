@@ -429,6 +429,7 @@ namespace ColossalGame.Services
             enemyModel.Damage = enemySpawn.Damage;
             enemyModel.Speed = enemySpawn.Speed;
             enemyModel.Health = enemySpawn.InitialHealth;
+            enemyModel.MaxHealth = enemySpawn.InitialHealth;
             
 
             enemy.Tag = enemyModel;
@@ -863,7 +864,7 @@ namespace ColossalGame.Services
                 playerSpawn.InitialPosition = new Vector2(xPos, yPos);
                 playerSpawn.LinearDamping = 4f;
                 playerSpawn.Radius = .4f;
-
+                
                 
                 if (playerClass == "heavy")
                 {
