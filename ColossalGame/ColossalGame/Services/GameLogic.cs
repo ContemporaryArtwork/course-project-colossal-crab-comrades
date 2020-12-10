@@ -277,7 +277,6 @@ namespace ColossalGame.Services
             playerModel.PlayerClass = playerSpawn.PlayerClass;
             playerModel.Health = playerSpawn.InitialHealth;
             playerModel.Damage = playerSpawn.Damage;
-            playerModel.PlayerClass = playerSpawn.PlayerClass;
             pm.Tag = playerModel;
 
             //PlayerDictionary.Add(username, pm);

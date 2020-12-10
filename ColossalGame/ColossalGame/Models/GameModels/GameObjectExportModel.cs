@@ -18,8 +18,6 @@ namespace ColossalGame.Models.GameModels
         public string Username { get; set; }
         public string PlayerClass { get; set; }
         public float Health { get; set; }
-
-        public string PlayerClass { get; set; }
     }
 
     public class BulletExportModel : GameObjectExportModel

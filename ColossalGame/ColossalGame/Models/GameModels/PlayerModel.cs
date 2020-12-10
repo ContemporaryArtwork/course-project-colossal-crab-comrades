@@ -8,7 +8,6 @@ namespace ColossalGame.Models.GameModels
         public string Username { get; set; }
         public string PlayerClass { get; set; }
 
-        public string PlayerClass { get; set; }
 
         public PlayerModel(Body b) : base(b)
         {
