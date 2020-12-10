@@ -59,7 +59,7 @@ export default class MainScene extends Phaser.Scene {
         //this.load.atlas("tentacleBug", require(testBug).default ,  require(testBugJson).default);
         this.load.spritesheet("testBug", testBug, { frameWidth: 400, frameHeight: 400 });
         this.load.spritesheet("player", require("../../assets/gameAssets/animation/player/HeavySpriteSheet.png").default, { frameWidth: 300, frameHeight: 300 });
-
+        this.load.spritesheet("brawler", require("../../assets/gameAssets/animation/player/BrawlerSpriteSheet.png").default, { frameWidth: 300, frameHeight: 300 });
     }
 
     create() {
@@ -123,7 +123,7 @@ export default class MainScene extends Phaser.Scene {
 
             var curPlayer: any;  //This is of type any since this is how Josh had it. collideWorldBounds and enableBody are not part of Phaser.Physics.Arcade.Sprite, maybe thats why.
             //In future we should probably figure out how to set collideWorldBounds and collideBody.
-            curPlayer = this.physics.add.sprite(0, 0, "player");
+            curPlayer = this.physics.add.sprite(0, 0, value.playerClass == "brawler" ? "brawler" : "player");
             curPlayer.collideWorldBounds = true;
             curPlayer.enableBody = true;
 
