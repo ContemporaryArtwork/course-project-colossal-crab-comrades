@@ -136,7 +136,7 @@ export default class MainScene extends Phaser.Scene {
 
             curText = curText.setName("playerText");
 
-            let healthbar = new HealthBar(this, 0, 0 - (curPlayer.displayHeight / 4), 80);
+            let healthbar = new HealthBar(this, 0, 0 - (curPlayer.displayHeight / 4), 80, value.health, value.maxHealth);
             healthbar.setName("healthbar");
             curPlayerContainer.add(curPlayer);
             curPlayerContainer.add(curText);
@@ -210,7 +210,7 @@ export default class MainScene extends Phaser.Scene {
                 var aiwidth = calculateProportionalWidth(aiBugObj.radius, this.basePlayerSize);
                 aiSprite.setDisplaySize(aiwidth, aiwidth);
 
-                let healthbar = new HealthBar(this, 0, 0 - (aiSprite.displayHeight / 4), 40);
+                let healthbar = new HealthBar(this, 0, 0 - (aiSprite.displayHeight / 4), 40, value.health, value.maxHealth);
                 healthbar.setName("healthbar");
 
                 aiContainer.add(aiSprite);
@@ -409,7 +409,7 @@ export default class MainScene extends Phaser.Scene {
 
                     curText = curText.setName("playerText");
 
-                    let healthbar = new HealthBar(this, 0, 0 - (curPlayer.displayHeight / 4), 80);
+                    let healthbar = new HealthBar(this, 0, 0 - (curPlayer.displayHeight / 4), 80, value.health, value.maxHealth);
                     healthbar.setName("healthbar");
 
                     curPlayerContainer.add(curPlayer);
@@ -493,6 +493,7 @@ export default class MainScene extends Phaser.Scene {
 
                         var healthbar = <HealthBar>playerContainer.getByName("healthbar");
                         healthbar.setHealthBar(value.health);
+                        healthbar.setMaxHealth(value.maxHealth);
                     }
                     
                 }
@@ -560,7 +561,7 @@ export default class MainScene extends Phaser.Scene {
                         var aiwidth = calculateProportionalWidth(aiBugObj.radius, this.basePlayerSize);
                         aiSprite.setDisplaySize(aiwidth, aiwidth);
 
-                        let healthbar = new HealthBar(this, 0, 0 - (aiSprite.displayHeight / 4), 40);
+                        let healthbar = new HealthBar(this, 0, 0 - (aiSprite.displayHeight / 4), 40, value.health, value.maxHealth);
                         healthbar.setName("healthbar");
 
                         aiContainer.add(aiSprite);
