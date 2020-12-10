@@ -684,7 +684,7 @@ namespace ColossalGame.Services
         /// </summary>
         private void Start()
         {
-            waveNum = 1;
+            
             //Old method:
             //var instanceCaller = new Thread(RunWorld);
             //var instanceCaller2 = new Thread(StartPublishing);
@@ -705,7 +705,7 @@ namespace ColossalGame.Services
 
         private void Restart()
         {
-
+            waveNum = 1;
             _worldTimer.DisposeAsync();
             _publishTimer.DisposeAsync();
             _aiBrainTimer.DisposeAsync();
