@@ -641,9 +641,12 @@ namespace ColossalGame.Services
         }
 
         private System.Threading.Timer waveTimer;
+
+        private int waveNum = 1;
         private void SpawnWave()
         {
-            aiController.SpawnWave(AIController.EnemyStrength.Hard,AIController.WaveSize.XtraLarge,PlayerDictionary.Count, 1600f / ConversionFactor, 2000f / ConversionFactor, ref spawnQueue);
+
+            aiController.SpawnWave(ref spawnQueue,AIController.EnemyStrength.Hard,AIController.WaveSize.XtraLarge,PlayerDictionary.Count);
         }
 
         private System.Threading.Timer _aiBrainTimer;
@@ -652,7 +655,7 @@ namespace ColossalGame.Services
         /// </summary>
         private void Start()
         {
-            
+            waveNum = 1;
             //Old method:
             //var instanceCaller = new Thread(RunWorld);
             //var instanceCaller2 = new Thread(StartPublishing);
