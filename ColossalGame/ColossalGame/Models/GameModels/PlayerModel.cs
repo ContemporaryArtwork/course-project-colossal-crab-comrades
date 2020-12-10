@@ -1,4 +1,5 @@
-﻿using ColossalGame.Models.AI;
+﻿using System;
+using ColossalGame.Models.AI;
 using tainicom.Aether.Physics2D.Dynamics;
 
 namespace ColossalGame.Models.GameModels
@@ -74,13 +75,18 @@ namespace ColossalGame.Models.GameModels
             return retVal;
         }
 
+        private DateTime dt = DateTime.Now;
         public void Hurt(float damage)
         {
-            Health -= damage;
-            if (Health <= 0)
+            if (( DateTime.Now-dt).TotalMilliseconds >= 5)
             {
-                Dead = true;
+                Health -= damage;
+                if (Health <= 0)
+                {
+                    Dead = true;
+                }
             }
+            dt = DateTime.Now;
         }
 
         public bool Dead { get; set; }
