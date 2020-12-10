@@ -35,6 +35,7 @@ export default class MainScene extends Phaser.Scene {
 
     private _gameObjectsOnScreen: Map<number, Phaser.GameObjects.Container>;
 
+    private readonly basePlayerSize = 150;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig, gameObj:Game) {
         super(config)
@@ -123,8 +124,8 @@ export default class MainScene extends Phaser.Scene {
             curPlayer.enableBody = true;
 
             curPlayer.setName("playerSprite"); //Set name of entities in container. Perhaps this will be useful later for changing image of sprite.
-            curPlayer.setScale(.5);
-
+            curPlayer.setDisplaySize(this.basePlayerSize, this.basePlayerSize);
+            
             let curText = this.add.text(0, 0 - (curPlayer.height / 4), key, { font: "16px Arial", fill: "#ffffff", backgroundColor: "#808080", align: "center"});
             curText.x = curText.x - (curText.width / 2);
             curText.y = curText.y - 20;
@@ -157,7 +158,7 @@ export default class MainScene extends Phaser.Scene {
                 frames: this.anims.generateFrameNames('player', { start: 1, end: 1 })
 
             });
-            curPlayer.setScale(.5);
+            
 
 
         });
@@ -178,7 +179,8 @@ export default class MainScene extends Phaser.Scene {
 
 
                 bulletSprite.setName("bulletSprite");
-                bulletSprite.setScale(.1);
+                var bullwidth = calculateProportionalWidth(projectileObj.radius, this.basePlayerSize);
+                bulletSprite.setDisplaySize(bullwidth, bullwidth);
                 bulletContainer.add(bulletSprite);
 
                 this._gameObjectsOnScreen.set(projectileObj.id, bulletContainer);
@@ -195,7 +197,11 @@ export default class MainScene extends Phaser.Scene {
 
 
                 aiSprite.setName("aiSprite");
-                //aiSprite.setScale(.5);
+                
+
+                var aiwidth = calculateProportionalWidth(aiBugObj.radius, this.basePlayerSize);
+                aiSprite.setDisplaySize(aiwidth, aiwidth);
+
                 aiContainer.add(aiSprite);
 
                 this._gameObjectsOnScreen.set(aiBugObj.id, aiContainer);
@@ -303,7 +309,8 @@ export default class MainScene extends Phaser.Scene {
 
 
                     curPlayer.setName("playerSprite");
-                    curPlayer.setScale(.5);
+                    
+                    curPlayer.setDisplaySize(this.basePlayerSize, this.basePlayerSize);
                     let curText = this.add.text(0, 0 - (curPlayer.height / 4), key, { font: "16px Arial", fill: "#ffffff", backgroundColor: "#808080", align: "center" });
                     curText.x = curText.x - (curText.width / 2);
                     curText.y = curText.y - 20;
@@ -411,7 +418,10 @@ export default class MainScene extends Phaser.Scene {
                         bulletSprite = this.add.sprite(0, 0, "jesse");
 
                         bulletSprite.setName("bulletSprite");
-                        bulletSprite.setScale(.1);
+                        
+                        var bullwidth = calculateProportionalWidth(projectileObj.radius, this.basePlayerSize);
+                        console.log("BulletWidth is " + bullwidth);
+                        bulletSprite.setDisplaySize(bullwidth, bullwidth);
                         bulletContainer.add(bulletSprite);
 
                         this._gameObjectsOnScreen.set(projectileObj.id, bulletContainer);
@@ -447,7 +457,9 @@ export default class MainScene extends Phaser.Scene {
                         aiSprite = this.add.sprite(0, 0, "testBug", 0);
                         aiSprite.play('fly');
                         aiSprite.setName("aiSprite");
-                        //aiSprite.setScale(.5);
+                        
+                        var aiwidth = calculateProportionalWidth(aiBugObj.radius, this.basePlayerSize);
+                        aiSprite.setDisplaySize(aiwidth, aiwidth);
                         aiContainer.add(aiSprite);
 
                         this._gameObjectsOnScreen.set(aiBugObj.id, aiContainer);
@@ -499,5 +511,10 @@ export default class MainScene extends Phaser.Scene {
 
 function isProjectile(gameObj: AIExportModel | BulletExportModel): gameObj is BulletExportModel {
     return (gameObj as BulletExportModel).bulletType !== undefined;
+}
+
+function calculateProportionalWidth(radius: number, basePlayerSize: number) {
+    console.log("input radius is " + radius + " and input baseplayersize is " + basePlayerSize);
+    return ((basePlayerSize)*.5 * radius) / 25.6;
 }
 
