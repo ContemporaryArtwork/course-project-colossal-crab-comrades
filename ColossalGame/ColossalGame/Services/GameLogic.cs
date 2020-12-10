@@ -645,8 +645,37 @@ namespace ColossalGame.Services
         private int waveNum = 1;
         private void SpawnWave()
         {
-
-            aiController.SpawnWave(ref spawnQueue,AIController.EnemyStrength.Hard,AIController.WaveSize.XtraLarge,PlayerDictionary.Count);
+            switch (waveNum)
+            {
+                case 1:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.Easy, AIController.WaveSize.Large, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                case 2:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.Medium, AIController.WaveSize.Large, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                case 3:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.Medium, AIController.WaveSize.Large, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                case 4:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.Hard, AIController.WaveSize.Medium, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                case 5:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.Hard, AIController.WaveSize.Large, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                case 6:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.VeryHard, AIController.WaveSize.Large, PlayerDictionary.Count);
+                    waveNum++;
+                    break;
+                default:
+                    aiController.SpawnWave(ref spawnQueue, AIController.EnemyStrength.VeryHard, AIController.WaveSize.XtraLarge, PlayerDictionary.Count);
+                    break;
+            }
+            
         }
 
         private System.Threading.Timer _aiBrainTimer;
