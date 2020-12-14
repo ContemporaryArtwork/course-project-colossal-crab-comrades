@@ -62,7 +62,7 @@ namespace ColossalGame.Models.GameModels
 
         public void RegenerateHealth(float percent)
         {
-            Health = Health * (1 + percent);
+            Health = MaxHealth * (1 + percent);
             if (Health > MaxHealth)
             {
                 Health = MaxHealth;
