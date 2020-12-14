@@ -444,60 +444,44 @@ namespace ColossalGame.Services
                     return false;
                 }
 
-                if (fixtureA.Body.Tag is PlayerModel p1)
+                if (fixtureA.Body.Tag is PlayerModel p1 && fixtureB.Body.Tag is EnemyModel eB)
                 {
-                    if (fixtureB.Body.Tag is EnemyModel e && !e.Dead)
-                    {
-                        if (PlayerDictionary.TryGetValue(p1.Username, out var player1))
-                        {
-                            player1.Hurt(e.Damage);
-                            if (player1.Dead)
-                            {
-                                MarkEntityForDestruction(player1);
-                                if (fixtureB.Body.Tag is EnemyModel eB)
-                                {
-                                    eB.ResetClosestPlayer();
-                                }
 
+
+                    if (PlayerDictionary.TryGetValue(p1.Username, out var player2) && contact.IsTouching)
+                    {
+                        player2.Hurt(eB.Damage);
+                        if (player2.Dead)
+                        {
+                            MarkEntityForDestruction(player2);
+                            eB.ResetClosestPlayer();
+                            
+
+                            return false;
+                        }
+                    }
+
+
+                }
+
+                else if (fixtureB.Body.Tag is PlayerModel p2&& fixtureA.Body.Tag is EnemyModel eA)
+                {
+                    
+                    
+                        if (PlayerDictionary.TryGetValue(p2.Username, out var player2)&&contact.IsTouching)
+                        {
+                            player2.Hurt(eA.Damage);
+                            if (player2.Dead)
+                            {
+                                MarkEntityForDestruction(player2);
+                                eA.ResetClosestPlayer();
                                 return false;
                             }
                         }
                         
-                    }
-                    if (fixtureB.Body.Tag is EnemyModel e2 && e2.Dead)
-                    {
-                        return false;
-                    }
-
                     
                 }
 
-                if (fixtureB.Body.Tag is PlayerModel p2)
-                {
-                    if (fixtureA.Body.Tag is EnemyModel e && !e.Dead)
-                    {
-                        if (PlayerDictionary.TryGetValue(p2.Username, out var player2))
-                        {
-                            player2.Hurt(e.Damage);
-                            if (player2.Dead)
-                            {
-                                MarkEntityForDestruction(player2);
-                                if (fixtureA.Body.Tag is EnemyModel eB)
-                                {
-                                    eB.ResetClosestPlayer();
-                                }
-
-                                return false;
-                            }
-                        }
-                    }
-                    if (fixtureA.Body.Tag is EnemyModel e2&& e2.Dead)
-                    {
-                        return false;
-                    }
-                    
-                    
-                }
                 return true;
                 
             };
