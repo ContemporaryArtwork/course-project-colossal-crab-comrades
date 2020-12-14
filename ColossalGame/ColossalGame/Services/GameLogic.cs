@@ -268,7 +268,7 @@ namespace ColossalGame.Services
             var username = playerSpawn.Username;
             
             if (string.IsNullOrEmpty(username)) return;
-            if (!_us.UserExistsByUsername(username)) throw new UserDoesNotExistException();
+            if (!_us.UserExistsByUsername(username)) return;
 
             var playerPosition = playerSpawn.InitialPosition;
 
