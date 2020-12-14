@@ -776,7 +776,7 @@ namespace ColossalGame.Services
 
             waveTimer = new System.Threading.Timer(o=>SpawnWave(),null,0,20*1000);
 
-            _healthTimer = new System.Threading.Timer(o => RestoreHealth(), null, 0, 100);
+            _healthTimer = new System.Threading.Timer(o => RestoreHealth(), null, 0, 500);
 
         }
 
