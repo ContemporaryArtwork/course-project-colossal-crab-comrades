@@ -124,7 +124,7 @@ class MainMenu extends React.PureComponent<GameMainMenuTogglerProps, MenuState> 
                             </div>
                             <div>
                                 <div className="alignButtons">
-                                    <div className="classColor"></div>
+                                    <div className="classColor">BRAWLER</div>
                                     <button className="classSelectButton" onClick={this.OpenLoadout} > Select Class </button>
                                 </div>
                                 <div className="alignButtons">
