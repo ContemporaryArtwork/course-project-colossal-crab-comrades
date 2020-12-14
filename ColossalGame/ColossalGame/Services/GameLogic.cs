@@ -228,7 +228,13 @@ namespace ColossalGame.Services
             PlayerDictionary.Clear();
             deathCounterDictionary.Clear();
             _objectDictionary.Clear();
-            _world = new World(Vector2.Zero);
+            lock (_world)
+            {
+                _world.Clear();
+                _world.ClearForces();
+                _world = new World(Vector2.Zero);
+            }
+            
             
         }
 
