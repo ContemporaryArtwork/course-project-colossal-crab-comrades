@@ -55,9 +55,9 @@ namespace ColossalGame.Models.GameModels
         public void LevelUp()
         {
             Level++;
-            Damage = Damage * 1.01f;
-            MaxHealth = MaxHealth * 1.01f;
-            Speed = Speed * 1.01f;
+            Damage = Damage * 1.02f;
+            MaxHealth = MaxHealth * 1.02f;
+            Speed = Speed * 1.02f;
         }
 
         public void RegenerateHealth(float percent)
@@ -78,15 +78,16 @@ namespace ColossalGame.Models.GameModels
         private DateTime dt = DateTime.Now;
         public void Hurt(float damage)
         {
-            if (( DateTime.Now-dt).TotalMilliseconds >= 25.0)
+            if (( DateTime.Now-dt).TotalMilliseconds >= 100.0)
             {
                 Health -= damage;
                 if (Health <= 0)
                 {
                     Dead = true;
                 }
+                dt = DateTime.Now;
             }
-            dt = DateTime.Now;
+            
         }
 
         public bool Dead { get; set; }
