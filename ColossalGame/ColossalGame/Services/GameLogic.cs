@@ -230,8 +230,19 @@ namespace ColossalGame.Services
             _objectDictionary.Clear();
             lock (_world)
             {
+                var bodyListCopy = _world.BodyList.ToArray();
+                foreach (var body in bodyListCopy )
+                {
+                    var fixtureListCopy = body.FixtureList.ToArray();
+                    foreach (var fixture in fixtureListCopy)
+                    {
+                        body.Remove(fixture);
+                    }
+                    _world.Remove(body);
+                }
                 _world.Clear();
                 _world.ClearForces();
+                
                 _world = new World(Vector2.Zero);
             }
             
@@ -453,10 +464,17 @@ namespace ColossalGame.Services
                 if (fixtureA.Body.Tag is PlayerModel p1 && fixtureB.Body.Tag is EnemyModel eB)
                 {
 
-
-                    if (PlayerDictionary.TryGetValue(p1.Username, out var player2) && contact.IsTouching)
+                    
+                    if (!p1.Dead&&PlayerDictionary.TryGetValue(p1.Username, out var player2) && contact.IsTouching)
                     {
-                        player2.Hurt(eB.Damage);
+                        var body1ref = player2.ObjectBody.WorldCenter;
+                        var body2ref = eB.ObjectBody.WorldCenter;
+                        Vector2.Distance(ref body1ref, ref body2ref, out var result);
+                        Console.WriteLine(result);
+                        if (result < 1f)
+                        {
+                            player2.Hurt(eB.Damage);
+                        }
                         if (player2.Dead)
                         {
                             MarkEntityForDestruction(player2);
@@ -474,9 +492,17 @@ namespace ColossalGame.Services
                 {
                     
                     
-                        if (PlayerDictionary.TryGetValue(p2.Username, out var player2)&&contact.IsTouching)
+                        if (!p2.Dead&&PlayerDictionary.TryGetValue(p2.Username, out var player2)&&contact.IsTouching)
                         {
-                            player2.Hurt(eA.Damage);
+                            var body1ref = player2.ObjectBody.WorldCenter;
+                            var body2ref = eA.ObjectBody.WorldCenter;
+                            Vector2.Distance(ref body1ref, ref body2ref, out var result);
+                            Console.WriteLine(result);
+                            if (result < 1f)
+                            {
+                                player2.Hurt(eA.Damage);
+                            }
+
                             if (player2.Dead)
                             {
                                 MarkEntityForDestruction(player2);
@@ -565,6 +591,7 @@ namespace ColossalGame.Services
                     var playerBody = p.ObjectBody;
                     if (_world.BodyList.Contains(playerBody))
                     {
+                        
                         _world.Remove(playerBody);
                         PlayerDictionary.TryRemove(p.Username, out var _);
                         deathCounterDictionary.TryGetValue(p.Username, out var value);
@@ -584,6 +611,10 @@ namespace ColossalGame.Services
                             SetupWorld();
                         }
                         Start();
+                        foreach (var body in _world.BodyList)
+                        {
+                            Console.WriteLine(body.Tag);
+                        }
 
                     }
                 }
@@ -766,7 +797,7 @@ namespace ColossalGame.Services
 
             waveTimer = new System.Threading.Timer(o=>SpawnWave(),null,0,20*1000);
 
-            _healthTimer = new System.Threading.Timer(o => RestoreHealth(), null, 0, 500);
+            _healthTimer = new System.Threading.Timer(o => RestoreHealth(), null, 0, 100);
 
         }
 
@@ -798,7 +829,7 @@ namespace ColossalGame.Services
         private void StepWorld()
         {
             
-            var solverIterations = new SolverIterations {PositionIterations = 2, VelocityIterations = 4};
+            var solverIterations = new SolverIterations {PositionIterations = 3, VelocityIterations = 8};
 
             //lock because sometimes world stepping will take too long
             lock (_world)
