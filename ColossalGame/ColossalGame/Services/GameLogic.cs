@@ -11,6 +11,7 @@ using tainicom.Aether.Physics2D.Collision.Shapes;
 using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Common.PhysicsLogic;
 using tainicom.Aether.Physics2D.Dynamics;
+using tainicom.Aether.Physics2D.Dynamics.Contacts;
 
 namespace ColossalGame.Services
 {
@@ -145,8 +146,10 @@ namespace ColossalGame.Services
             edge.CreateEdge(upperRightCorner, upperLeftCorner);
             edge.CreateEdge(upperLeftCorner, lowerLeftCorner);
 
-            //TODO: Remove this, debugging only
             
+
+            //TODO: Remove this, debugging only
+
         }
 
         public float getFireRate(string username)
@@ -242,7 +245,7 @@ namespace ColossalGame.Services
                 }
                 _world.Clear();
                 _world.ClearForces();
-                
+                _world = null;
                 _world = new World(Vector2.Zero);
             }
             
@@ -322,6 +325,8 @@ namespace ColossalGame.Services
             cleanupQueue.Enqueue(b);
         }
 
+        private ConcurrentDictionary<int,OnCollisionEventHandler> lambdaDictionary = new ConcurrentDictionary<int, OnCollisionEventHandler>();
+
         private void SpawnBullet(BulletSpawnObject bulletSpawn)
         {
             //Load initial values
@@ -352,7 +357,7 @@ namespace ColossalGame.Services
             
             _world.Add(bullet);
             bullet.SetTransform(ballPosition, bulletSpawn.InitialAngle);
-            bulletFixture.OnCollision += (fixtureA, fixtureB, contact) =>
+            var lambdaF = new Func<Fixture, Fixture, Contact, bool>((fixtureA, fixtureB, contact) =>
             {
                 if (fixtureA.Body.Tag is PlayerModel playerA)
                 {
@@ -418,8 +423,10 @@ namespace ColossalGame.Services
 
 
                 return false;
-                };
+            });
             
+            bulletFixture.OnCollision += new OnCollisionEventHandler(lambdaF);
+            lambdaDictionary.TryAdd(bulletModel.ID, new OnCollisionEventHandler(lambdaF));
             _objectDictionary.TryAdd(bulletModel.ID, bulletModel);
         }
 
@@ -454,9 +461,9 @@ namespace ColossalGame.Services
 
             _world.Add(enemy);
             enemy.SetTransform(enemySpawn.InitialPosition, enemySpawn.InitialAngle);
-            enemy.OnCollision += (fixtureA, fixtureB, contact) =>
+            var lambdaF = new Func<Fixture,Fixture,Contact, bool>((fixtureA, fixtureB, contact) =>
             {
-                if (fixtureA.Body.Tag.Equals("worldBounds")||fixtureB.Body.Tag.Equals("worldBounds"))
+                if (fixtureA.Body.Tag.Equals("worldBounds") || fixtureB.Body.Tag.Equals("worldBounds"))
                 {
                     return false;
                 }
@@ -464,13 +471,13 @@ namespace ColossalGame.Services
                 if (fixtureA.Body.Tag is PlayerModel p1 && fixtureB.Body.Tag is EnemyModel eB)
                 {
 
-                    
-                    if (!p1.Dead&&PlayerDictionary.TryGetValue(p1.Username, out var player2) && contact.IsTouching)
+
+                    if (!p1.Dead && PlayerDictionary.TryGetValue(p1.Username, out var player2) && contact.IsTouching)
                     {
                         var body1ref = player2.ObjectBody.WorldCenter;
                         var body2ref = eB.ObjectBody.WorldCenter;
                         Vector2.Distance(ref body1ref, ref body2ref, out var result);
-                        Console.WriteLine(result);
+                        //Console.WriteLine(result);
                         if (result < 1f)
                         {
                             player2.Hurt(eB.Damage);
@@ -479,7 +486,7 @@ namespace ColossalGame.Services
                         {
                             MarkEntityForDestruction(player2);
                             eB.ResetClosestPlayer();
-                            
+
 
                             return false;
                         }
@@ -488,36 +495,37 @@ namespace ColossalGame.Services
 
                 }
 
-                else if (fixtureB.Body.Tag is PlayerModel p2&& fixtureA.Body.Tag is EnemyModel eA)
+                else if (fixtureB.Body.Tag is PlayerModel p2 && fixtureA.Body.Tag is EnemyModel eA)
                 {
-                    
-                    
-                        if (!p2.Dead&&PlayerDictionary.TryGetValue(p2.Username, out var player2)&&contact.IsTouching)
-                        {
-                            var body1ref = player2.ObjectBody.WorldCenter;
-                            var body2ref = eA.ObjectBody.WorldCenter;
-                            Vector2.Distance(ref body1ref, ref body2ref, out var result);
-                            //Console.WriteLine(result);
-                            if (result < 1f)
-                            {
-                                player2.Hurt(eA.Damage);
-                            }
 
-                            if (player2.Dead)
-                            {
-                                MarkEntityForDestruction(player2);
-                                eA.ResetClosestPlayer();
-                                return false;
-                            }
+
+                    if (!p2.Dead && PlayerDictionary.TryGetValue(p2.Username, out var player2) && contact.IsTouching)
+                    {
+                        var body1ref = player2.ObjectBody.WorldCenter;
+                        var body2ref = eA.ObjectBody.WorldCenter;
+                        Vector2.Distance(ref body1ref, ref body2ref, out var result);
+                        //Console.WriteLine(result);
+                        if (result < 1f)
+                        {
+                            player2.Hurt(eA.Damage);
                         }
-                        
-                    
+
+                        if (player2.Dead)
+                        {
+                            MarkEntityForDestruction(player2);
+                            eA.ResetClosestPlayer();
+                            return false;
+                        }
+                    }
+
+
                 }
 
                 return true;
-                
-            };
 
+            });
+            enemy.OnCollision += new OnCollisionEventHandler(lambdaF);
+            lambdaDictionary.TryAdd(enemyModel.ID, new OnCollisionEventHandler(lambdaF));
 
             _objectDictionary.TryAdd(enemyModel.ID, enemyModel);
             aiController.Register(enemyModel,ref _objectDictionary);
@@ -569,6 +577,9 @@ namespace ColossalGame.Services
                 if (model is BulletModel b)
                 {
                     var bulletBody = b.ObjectBody;
+                    lambdaDictionary.TryGetValue(b.ID, out var val);
+                    bulletBody.OnCollision -= val;
+                    lambdaDictionary.TryRemove(b.ID, out var _);
                     if (_world.BodyList.Contains(bulletBody))
                     {
                         
@@ -580,8 +591,12 @@ namespace ColossalGame.Services
                 }else if (model is EnemyModel e)
                 {
                     var enemyBody = e.ObjectBody;
+                    lambdaDictionary.TryGetValue(e.ID, out var val);
+                    enemyBody.OnCollision -= val;
+                    lambdaDictionary.TryRemove(e.ID, out var _);
                     if (_world.BodyList.Contains(enemyBody))
                     {
+                        
                         _world.Remove(enemyBody);
                         aiController.Deregister(e.ID);
                         _objectDictionary.TryRemove(e.ID, out var _);
