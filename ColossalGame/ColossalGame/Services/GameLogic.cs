@@ -707,9 +707,9 @@ namespace ColossalGame.Services
             return (_objectDictionary, PlayerDictionary);
         }
 
-        public static (ConcurrentQueue<object>, ConcurrentDictionary<string, PlayerExportModel>) GetStatePM(
+        public (ConcurrentQueue<object>, ConcurrentDictionary<string, PlayerExportModel>) GetStatePM(
             ConcurrentDictionary<string, PlayerModel> playerDictionary,
-            ConcurrentDictionary<int, GameObjectModel> objectDict)
+            ConcurrentDictionary<int, GameObjectModel> objectDictLocal)
         {
             var returnDictionary = new ConcurrentDictionary<string, PlayerExportModel>();
             var gameObjectQueue = new ConcurrentQueue<object>();
@@ -722,17 +722,24 @@ namespace ColossalGame.Services
                 returnDictionary[name] = playerModel.Export();
             });
 
-            Parallel.ForEach(objectDict, pair =>
+            Parallel.ForEach(objectDictLocal, pair =>
             {
                 var (id, model) = pair;
 
                 if (model is BulletModel b)
                 {
-                    gameObjectQueue.Enqueue(b.Export());
+                    
+                    if (_objectDictionary.ContainsKey(b.ID))
+                    {
+                        gameObjectQueue.Enqueue(b.Export());
+                    }
                 }
                 else if (model is EnemyModel e)
                 {
-                    gameObjectQueue.Enqueue(e.Export()); 
+                    if (_objectDictionary.ContainsKey(e.ID))
+                    {
+                        gameObjectQueue.Enqueue(e.Export());
+                    }
                 }
                 else
                 {

@@ -34,7 +34,7 @@ namespace ColossalGame.Hubs.GameData
         private DateTime lastUpdate = DateTime.Now;
          public async void HandleCustomEvent(object sender, PublishEvent e)
          {
-             var (ol, pd) = GameLogic.GetStatePM(e.PlayerDict, e.ObjectDict);
+             var (ol, pd) = _gameLogic.GetStatePM(e.PlayerDict, e.ObjectDict);
                  
                  PositionUpdateDTO positionUpdateDTO = new PositionUpdateDTO
                  {
