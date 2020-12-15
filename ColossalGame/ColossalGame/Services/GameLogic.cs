@@ -497,7 +497,7 @@ namespace ColossalGame.Services
                             var body1ref = player2.ObjectBody.WorldCenter;
                             var body2ref = eA.ObjectBody.WorldCenter;
                             Vector2.Distance(ref body1ref, ref body2ref, out var result);
-                            Console.WriteLine(result);
+                            //Console.WriteLine(result);
                             if (result < 1f)
                             {
                                 player2.Hurt(eA.Damage);
@@ -611,10 +611,6 @@ namespace ColossalGame.Services
                             SetupWorld();
                         }
                         Start();
-                        foreach (var body in _world.BodyList)
-                        {
-                            Console.WriteLine(body.Tag);
-                        }
 
                     }
                 }
