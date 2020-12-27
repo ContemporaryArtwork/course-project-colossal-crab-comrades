@@ -1,2 +1,2 @@
-# Colossal Crab Comrades
-Walk like crab, talk like people
+# Crawl.io
+Hi, this is the repository for our game, Crawl.io. 
